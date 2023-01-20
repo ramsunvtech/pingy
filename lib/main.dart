@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(
@@ -11,16 +10,27 @@ class PingyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-              title: const Text('Pingy App')
-          ),
-          body: Center(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Pingy App')),
+        body: const Center(
             child: Image(
-              image: AssetImage('assets/cute.webp'),
-            )
-          )
-        )
+          image: AssetImage('assets/cute.webp'),
+        )),
+        bottomNavigationBar: const BottomNavigationBar(items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Task Types',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Rewards',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Task',
+          ),
+        ]),
+      ),
     );
   }
 }
