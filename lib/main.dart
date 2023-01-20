@@ -15,6 +15,11 @@ class PingyApp extends StatelessWidget {
           appBar: AppBar(
               title: const Text('Pingy App')
           ),
+          body: Center(
+            child: Image(
+              image: AssetImage('assets/cute.webp'),
+            )
+          )
         )
     );
   }
