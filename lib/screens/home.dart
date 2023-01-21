@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
-  // int _selectedIndex = 0;
-  //
-  // @override
-  // void _onItemTapped(int index) {
-  // setState(() {
-  //   _selectedIndex = index;
-  // });
-  // }
+  int _selectedIndex = 0;
+  // int currentScore = 50;
+  // int targetScore = 90;
+
+  @override
+  void _onItemTapped(int index) {}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Pingy')),
       body: const Center(
-        child: Image(
-          image: AssetImage('assets/cute.webp'),
-        ),
+          child: Image(
+            image: AssetImage('assets/cute.webp'),
+          ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
@@ -34,8 +32,8 @@ class HomeScreen extends StatelessWidget {
             label: 'Task',
           ),
         ],
-        // currentIndex: _selectedIndex,
-        // onTap: _onItemTapped,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }
