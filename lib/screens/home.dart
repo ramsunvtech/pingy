@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pingy/screens/update_task.dart';
 import 'settings.dart';
 import 'task_type.dart';
 
@@ -96,36 +97,13 @@ class HomeScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (builder) => TaskTypeScreen(),
+              builder: (builder) => UpdateTaskScreen(),
             ),
           );
         },
         child: const Icon(Icons.add),
         backgroundColor: Colors.green,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: 'Task Types',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: 'Rewards',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: 'Task',
-            ),
-          ],
-          // currentIndex: _selectedIndex,
-          // onTap: _onItemTapped,
-          onTap: (int index) => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (builder) => TaskTypeScreen(),
-                ),
-              )),
     );
   }
 }
