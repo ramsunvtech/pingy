@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'taskType.dart';
 
 class HomeScreen extends StatelessWidget {
-  static const String _todayMarks = "350";
+  static const String _todayMarks = "340";
   static const String _todayScore = "70";
   static const String _totalScore = "90";
 
@@ -54,7 +54,14 @@ class HomeScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
-              // print("tapped");
+              if (index == 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (builder) => TaskTypeScreen(),
+                  ),
+                );
+              }
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
