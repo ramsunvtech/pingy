@@ -1,6 +1,7 @@
-class TaskModel {
-  String taskType;
-  int score;
+class TaskTypeModel {
+  String taskName;
+  int mark;
+  bool isSelected;
 
-  TaskModel(this.taskType, this.score);
+  TaskTypeModel(this.taskName, this.mark, this.isSelected);
 }
