@@ -2,15 +2,9 @@ import 'package:flutter/material.dart';
 import 'taskType.dart';
 
 class HomeScreen extends StatelessWidget {
-  // int _selectedIndex = 0;
-  // int currentScore = 50;
-  // String targetScore = '95';
-
-  // @override
-  // void _onItemTapped(int index, BuildContext context) {
-  //   Navigator.push(context,
-  //       MaterialPageRoute(builder: (builder) => TaskTypeScreen()));
-  // }
+  static const String _todayMarks = "350";
+  static const String _todayScore = "70";
+  static const String _totalScore = "90";
 
   final List<Widget> homePanes = [
     const Center(
@@ -20,7 +14,7 @@ class HomeScreen extends StatelessWidget {
     ),
     const Center(
       child: Text(
-        'Current Score: 50%',
+        'Today Marks: $_todayMarks',
         style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 25,
@@ -29,7 +23,18 @@ class HomeScreen extends StatelessWidget {
     ),
     const Center(
       child: Text(
-        'Target Score: 90%',
+        'Today Score: $_todayScore%',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+          fontStyle: FontStyle.italic,
+          color: Colors.blue,
+        ),
+      ),
+    ),
+    const Center(
+      child: Text(
+        'Total Score: $_totalScore%',
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 34,
@@ -77,8 +82,12 @@ class HomeScreen extends StatelessWidget {
         ],
         // currentIndex: _selectedIndex,
         // onTap: _onItemTapped,
-        onTap: (int index) => Navigator.push(context,
-    MaterialPageRoute(builder: (builder) => TaskTypeScreen())),
+        onTap: (int index) => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => TaskTypeScreen(),
+          ),
+        )
       ),
     );
   }
