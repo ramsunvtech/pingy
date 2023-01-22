@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class TaskTypeScreen extends StatelessWidget {
+class SettingsScreen extends StatelessWidget {
 
   // @override
   void _onItemTapped(int index) {
@@ -10,9 +10,9 @@ class TaskTypeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pingy (Task Type)')),
+      appBar: AppBar(title: const Text('Pingy (Settings)')),
       body: const Center(
-        child: Text('Task Type Form'),
+        child: Text('Settings Screen'),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
