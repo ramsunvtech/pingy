@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
+import 'task_type.dart';
 
 class SettingsScreen extends StatelessWidget {
-
-  // @override
-  void _onItemTapped(int index) {
-    // print(index);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +25,12 @@ class SettingsScreen extends StatelessWidget {
             label: 'Task',
           ),
         ],
-        // currentIndex: _selectedIndex,
-        onTap: _onItemTapped
+        onTap: (int index) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (builder) => TaskTypeScreen(),
+            ),
+          ),
       ),
     );
   }
