@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pingy/screens/update_task.dart';
+import 'package:pingy/screens/task/update_task.dart';
 import 'settings.dart';
-import 'task_type.dart';
+import 'task/task_type.dart';
 
 class HomeScreen extends StatelessWidget {
   static const String _todayMarks = "430";

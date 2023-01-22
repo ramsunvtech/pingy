@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'task_type.dart';
+import 'task/task_type.dart';
 
 class SettingsScreen extends StatelessWidget {
 
