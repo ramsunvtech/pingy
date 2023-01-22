@@ -1,16 +1,18 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
+import 'taskType.dart';
 
 class HomeScreen extends StatelessWidget {
   // int _selectedIndex = 0;
   // int currentScore = 50;
-  // int targetScore = 90;
+  // String targetScore = '95';
 
   // @override
-  void _onItemTapped(int index) {}
+  // void _onItemTapped(int index, BuildContext context) {
+  //   Navigator.push(context,
+  //       MaterialPageRoute(builder: (builder) => TaskTypeScreen()));
+  // }
 
-  List<Widget> homePanes = [
+  final List<Widget> homePanes = [
     const Center(
       child: Image(
         image: AssetImage('assets/cute.webp'),
@@ -47,11 +49,11 @@ class HomeScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
-              print("tapped");
+              // print("tapped");
             },
-            child: new Padding(
+            child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: new Container(
+              child: Container(
                 child: homePanes[index],
               ),
             ),
@@ -74,7 +76,9 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
         // currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        // onTap: _onItemTapped,
+        onTap: (int index) => Navigator.push(context,
+    MaterialPageRoute(builder: (builder) => TaskTypeScreen())),
       ),
     );
   }
