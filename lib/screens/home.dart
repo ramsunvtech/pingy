@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'taskType.dart';
+import 'settings.dart';
+import 'task_type.dart';
 
 class HomeScreen extends StatelessWidget {
-  static const String _todayMarks = "340";
+  static const String _todayMarks = "430";
   static const String _todayScore = "70";
   static const String _totalScore = "90";
 
@@ -48,7 +49,25 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pingy')),
+      appBar: AppBar(
+        title: const Text('Pingy'),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (builder) => SettingsScreen(),
+                ),
+              );
+            },
+          )
+        ],
+      ),
       body: ListView.builder(
         itemCount: homePanes.length,
         itemBuilder: (context, index) {
@@ -81,33 +100,32 @@ class HomeScreen extends StatelessWidget {
             ),
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         backgroundColor: Colors.green,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Task Types',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Rewards',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Task',
-          ),
-        ],
-        // currentIndex: _selectedIndex,
-        // onTap: _onItemTapped,
-        onTap: (int index) => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => TaskTypeScreen(),
-          ),
-        )
-      ),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add),
+              label: 'Task Types',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add),
+              label: 'Rewards',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add),
+              label: 'Task',
+            ),
+          ],
+          // currentIndex: _selectedIndex,
+          // onTap: _onItemTapped,
+          onTap: (int index) => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (builder) => TaskTypeScreen(),
+                ),
+              )),
     );
   }
 }
