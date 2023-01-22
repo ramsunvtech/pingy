@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 class TaskTypeScreen extends StatelessWidget {
-  void _onItemTapped(int index) {}
+
+  // @override
+  void _onItemTapped(int index) {
+    // print(index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,7 @@ class TaskTypeScreen extends StatelessWidget {
           ),
         ],
         // currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        onTap: _onItemTapped
       ),
     );
   }
