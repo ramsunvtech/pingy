@@ -7,6 +7,7 @@ class UpdateTaskScreen extends StatefulWidget {
 }
 
 class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
+
   List<TaskTypeModel> taskTypes = [
     TaskTypeModel('Breakfast', 250, false),
     TaskTypeModel('Lunch', 150, false),
@@ -25,6 +26,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var todayDate = DateTime.now();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Pingy (Update Task)')),
       body: SafeArea(
@@ -32,7 +35,16 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         children: [
           Center(
             child: Text(
-              'Today Marks: ${selectedTaskType.taskName}',
+              'Date: ${todayDate.year}${todayDate.month}${todayDate.day}',
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                  fontStyle: FontStyle.italic),
+            ),
+          ),
+          Center(
+            child: Text(
+              'Selected Task: ${selectedTaskType.taskName}',
               style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 25,
