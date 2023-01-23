@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 
 // Screen Imports.
 import 'screens/home.dart';
 
-void main() {
+void main() async {
+  // Initialize hive.
+  await Hive.initFlutter();
+
+  // Open Box.
+  var box = await Hive.openBox('Task');
+
   runApp(
     PingyApp(),
   );
