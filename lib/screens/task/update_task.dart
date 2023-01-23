@@ -121,11 +121,13 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             ),
       onTap: () {
         setState(() {
+          taskTypes[0].isSelected = false;
+          taskTypes[1].isSelected = false;
+          taskTypes[2].isSelected = false;
           taskTypes[index].isSelected = !taskTypes[index].isSelected;
           if (taskTypes[index].isSelected == true) {
             selectedTaskType = TaskTypeModel(taskName, 160, true);
           }
-          taskTypes[index].isSelected = false;
         });
       },
     );
