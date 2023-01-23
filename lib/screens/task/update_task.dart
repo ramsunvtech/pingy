@@ -30,6 +30,15 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       body: SafeArea(
           child: Column(
         children: [
+          Center(
+            child: Text(
+              'Today Marks: ${selectedTaskType.taskName}',
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                  fontStyle: FontStyle.italic),
+            ),
+          ),
           Expanded(
               child: ListView.builder(
                 itemCount: taskTypes.length,
@@ -42,38 +51,32 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                   );
                 },
           )),
-          TextField(
-            onChanged: (value) {
-              //Do something with the user input.
-            },
+          TextFormField(
+            cursorColor: Theme.of(context).cursorColor,
+            initialValue: '0',
+            maxLength: 3,
             decoration: InputDecoration(
-              hintText: 'Enter Score',
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
+              icon: Icon(Icons.favorite),
+              labelText: 'Task Score',
+              labelStyle: TextStyle(
+                color: Color(0xFF6200EE),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: Colors.lightBlueAccent, width: 1.0),
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
+              helperText: 'Enter your score',
+              suffixIcon: Icon(
+                Icons.check_circle,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: Colors.lightBlueAccent, width: 2.0),
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFF6200EE)),
               ),
             ),
           ),
-          Center(
-            child: Text(
-              'Today Marks: ${selectedTaskType.taskName}',
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
-                  fontStyle: FontStyle.italic),
-            ),
-          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              // Respond to button press
+            },
+            icon: Icon(Icons.add, size: 18),
+            label: Text("Update Task"),
+          )
         ],
       )),
     );
@@ -110,6 +113,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           if (taskTypes[index].isSelected == true) {
             selectedTaskType = TaskTypeModel(taskName, 160, true);
           }
+          taskTypes[index].isSelected = false;
         });
       },
     );
