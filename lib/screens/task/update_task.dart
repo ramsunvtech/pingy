@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pingy/models/TaskType.dart';
+import 'package:pingy/models/task_type.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
   @override
@@ -27,6 +27,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   @override
   Widget build(BuildContext context) {
     var todayDate = DateTime.now();
+    var activityKey = '${todayDate.year}${todayDate.month}${todayDate.day}';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pingy (Update Task)')),
@@ -35,7 +36,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         children: [
           Center(
             child: Text(
-              'Date: ${todayDate.year}${todayDate.month}${todayDate.day}',
+              'Date: #$activityKey',
               style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 25,
@@ -64,10 +65,10 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 },
           )),
           TextFormField(
-            cursorColor: Theme.of(context).cursorColor,
+            cursorColor: Theme.of(context).backgroundColor,
             initialValue: '0',
             maxLength: 3,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               icon: Icon(Icons.favorite),
               labelText: 'Task Score',
               labelStyle: TextStyle(
@@ -86,8 +87,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             onPressed: () {
               // Respond to button press
             },
-            icon: Icon(Icons.add, size: 18),
-            label: Text("Update Task"),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text("Update Task"),
           )
         ],
       )),
@@ -108,8 +109,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   }
   Widget taskItem(String taskName, int mark, bool isSelected, int index) {
     var enabled = true;
-    var trailingIcon = Icons.check_circle_outline;
-    var trailingIconColor = Colors.grey;
+    // var trailingIcon = Icons.check_circle_outline;
+    // var trailingIconColor = Colors.grey;
     // Colors trailingIconColor2 = const Colors.grey;
 
     return ListTile(
