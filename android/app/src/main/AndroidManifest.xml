@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pingy.pingy">
+    <uses-permission android:name="android.pemission.USE.FINGERPRINT"></uses-permission>
    <application
         android:label="pingy"
         android:name="${applicationName}"
