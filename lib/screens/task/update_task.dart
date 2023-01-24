@@ -94,10 +94,28 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
+  Widget getTrailingIcon(bool isSelected) {
+    if (isSelected) {
+      return const Icon(
+        Icons.check_circle,
+        color: Colors.green,
+      );
+    }
+    return const Icon(
+      Icons.check_circle_outline,
+      color: Colors.grey,
+    );
+  }
   Widget taskItem(String taskName, int mark, bool isSelected, int index) {
+    var enabled = true;
+    var trailingIcon = Icons.check_circle_outline;
+    var trailingIconColor = Colors.grey;
+    // Colors trailingIconColor2 = const Colors.grey;
+
     return ListTile(
+      enabled: enabled,
       leading: CircleAvatar(
-        backgroundColor: Colors.green[700],
+        backgroundColor: isSelected ? Colors.green[700] : Colors.grey,
         child: const Icon(
           Icons.person_outline_outlined,
           color: Colors.white,
@@ -110,15 +128,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         ),
       ),
       subtitle: const Text('Task Type description'),
-      trailing: isSelected
-          ? const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-            )
-          : const Icon(
-              Icons.check_circle_outline,
-              color: Colors.grey,
-            ),
+      trailing: getTrailingIcon(isSelected),
       onTap: () {
         setState(() {
           taskTypes[0].isSelected = false;
