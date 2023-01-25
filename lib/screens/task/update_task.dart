@@ -11,6 +11,8 @@ class UpdateTaskScreen extends StatefulWidget {
 }
 
 class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
+  TextEditingController _scoreController = TextEditingController();
+
   late final Box activityBox;
 
   @override
@@ -85,8 +87,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 },
           )),
           TextFormField(
+            controller: _scoreController,
             cursorColor: Theme.of(context).backgroundColor,
-            initialValue: '0',
             keyboardType: TextInputType.number,
             maxLength: 3,
             decoration: const InputDecoration(
@@ -106,11 +108,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           ),
           ElevatedButton.icon(
             onPressed: () {
-              // var activityBox = Boxes.getActivities();
-
               var todayDate = DateTime.now();
               var activityId = '${todayDate.year}${todayDate.month}${todayDate.day}';
-              Activity newActivity = Activity(activityId, 'Have Breakfast', '150');
+              Activity newActivity = Activity(activityId, selectedTaskType.taskName, _scoreController.text);
               activityBox.add(newActivity);
 
               Navigator.push(
