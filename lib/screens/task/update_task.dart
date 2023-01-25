@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+// import 'package:pingy/boxes.dart';
+import 'package:pingy/models/activity.dart';
 import 'package:pingy/models/task_type.dart';
+import 'package:pingy/screens/home.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
   @override
@@ -7,6 +11,22 @@ class UpdateTaskScreen extends StatefulWidget {
 }
 
 class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
+  late final Box activityBox;
+
+  @override
+  void initState() {
+    super.initState();
+    // Get reference to an already opened box
+    activityBox = Hive.box('activity');
+  }
+
+  @override
+  void dispose() {
+    // Close Hive Connection.
+    // Hive.close();
+
+    super.dispose();
+  }
 
   List<TaskTypeModel> taskTypes = [
     TaskTypeModel('Breakfast', 250, false),
@@ -67,6 +87,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           TextFormField(
             cursorColor: Theme.of(context).backgroundColor,
             initialValue: '0',
+            keyboardType: TextInputType.number,
             maxLength: 3,
             decoration: const InputDecoration(
               icon: Icon(Icons.favorite),
@@ -85,7 +106,19 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           ),
           ElevatedButton.icon(
             onPressed: () {
-              // Respond to button press
+              // var activityBox = Boxes.getActivities();
+
+              var todayDate = DateTime.now();
+              var activityId = '${todayDate.year}${todayDate.month}${todayDate.day}';
+              Activity newActivity = Activity(activityId, 'Have Breakfast', '150');
+              activityBox.add(newActivity);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (builder) => HomeScreen(),
+                ),
+              );
             },
             icon: const Icon(Icons.add, size: 18),
             label: const Text("Update Task"),
