@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pingy/models/activity.dart';
 
 // Screen Imports.
 import 'screens/home.dart';
@@ -11,21 +11,30 @@ void main() async {
   // Initialize hive.
   await Hive.initFlutter();
 
-  // Open Box.
-  var activityBox = await Hive.openBox('activity');
-  var todayDate = DateTime.now();
-  var activityKey = '${todayDate.year}${todayDate.month}${todayDate.day}';
-// print (activityKey);
-  activityBox.put(activityKey, 'Good');
+  // Register.
+  Hive.registerAdapter(ActivityAdapter());
 
-  // print('$activityKey: ${activityBox.get(activityKey)}');
+  // Open Activities Box.
+  await Hive.openBox('activity');
 
   runApp(
     PingyApp(),
   );
 }
 
-class PingyApp extends StatelessWidget {
+class PingyApp extends StatefulWidget {
+  @override
+  _PingyAppState createState() => _PingyAppState();
+}
+
+class _PingyAppState extends State<PingyApp> {
+  @override
+  void dispose() {
+    // Closes all Hive boxes
+    Hive.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
