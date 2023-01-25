@@ -14,8 +14,9 @@ void main() async {
   // Register.
   Hive.registerAdapter(ActivityAdapter());
 
-  // Open Activities Box.
+  // Open Activity, Activity Type Box.
   await Hive.openBox('activity');
+  await Hive.openBox('activity_type');
 
   runApp(
     PingyApp(),
