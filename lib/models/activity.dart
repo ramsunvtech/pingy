@@ -4,13 +4,14 @@ part 'activity.g.dart';
 
 @HiveType(typeId: 0)
 class Activity extends HiveObject {
-
   @HiveField(0)
-  late String activityId;
+  final String activityId;
 
   @HiveField(1)
-  late String name;
+  final String name;
 
   @HiveField(2)
-  late int score;
+  final String score;
+
+  Activity(this.activityId, this.name, this.score);
 }
