@@ -13,8 +13,8 @@ class SettingsScreen extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Task Types',
+            icon: Icon(Icons.add_task_sharp),
+            label: 'Activity Types',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add),
@@ -25,12 +25,16 @@ class SettingsScreen extends StatelessWidget {
             label: 'Task',
           ),
         ],
-        onTap: (int index) => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => TaskTypeScreen(),
-            ),
-          ),
+        onTap: (int index) {
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (builder) => TaskTypeScreen(),
+              ),
+            );
+          }
+        }
       ),
     );
   }
