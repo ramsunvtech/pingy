@@ -1,9 +1,23 @@
+// import 'dart:developer';
+
 import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+// import 'package:pingy/models/activity.dart';
+// import 'package:pingy/boxes.dart';
+// import 'package:pingy/models/activity.dart';
 import 'package:pingy/screens/task/update_task.dart';
 import 'settings.dart';
-import 'task/task_type.dart';
+// import 'task/task_type.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late final Box activityBox;
+
   static const String _todayMarks = "430";
   static const String _todayScore = "70";
   static const String _totalScore = "90";
@@ -48,6 +62,21 @@ class HomeScreen extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Get reference to an already opened box
+    activityBox = Hive.box('activity');
+  }
+
+  @override
+  void dispose() {
+    // Close Hive Connection.
+    Hive.close();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -69,27 +98,37 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
-      body: ListView.builder(
-        itemCount: homePanes.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              if (index == 1) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => TaskTypeScreen(),
+      body: ValueListenableBuilder(
+        valueListenable: activityBox.listenable(),
+        builder: (context, Box box, widget) {
+          if (box.isEmpty) {
+            return const Center(
+              child: Text('No Activities are available. its Empty'),
+            );
+          } else {
+            return ListView.builder(
+              itemCount: activityBox.length,
+              itemBuilder: (context, index) {
+                var currentBox = activityBox;
+                var activityData = currentBox.getAt(index)!;
+                // inspect(activityData);
+                return InkWell(
+                  onTap: () => {},
+                  child: ListTile(
+                    title: Text(activityData.name),
+                    subtitle: Text(activityData.score),
+                    trailing: IconButton(
+                      onPressed: () => {},
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                    ),
                   ),
                 );
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                child: homePanes[index],
-              ),
-            ),
-          );
+              },
+            );
+          }
         },
       ),
       floatingActionButton: FloatingActionButton(
