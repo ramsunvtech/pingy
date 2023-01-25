@@ -11,7 +11,7 @@ class UpdateTaskScreen extends StatefulWidget {
 }
 
 class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
-  TextEditingController _scoreController = TextEditingController();
+  final TextEditingController _scoreController = TextEditingController();
 
   late final Box activityBox;
 
