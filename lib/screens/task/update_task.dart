@@ -141,9 +141,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   }
   Widget taskItem(String taskName, int mark, bool isSelected, int index) {
     var enabled = true;
-    // var trailingIcon = Icons.check_circle_outline;
-    // var trailingIconColor = Colors.grey;
-    // Colors trailingIconColor2 = const Colors.grey;
 
     return ListTile(
       enabled: enabled,
@@ -160,7 +157,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           fontWeight: FontWeight.w500,
         ),
       ),
-      subtitle: const Text('Task Type description'),
+      subtitle: Text(mark.toString()),
       trailing: getTrailingIcon(isSelected),
       onTap: () {
         setState(() {
@@ -169,6 +166,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           taskTypes[2].isSelected = false;
           taskTypes[index].isSelected = !taskTypes[index].isSelected;
           if (taskTypes[index].isSelected == true) {
+            _scoreController.text = taskTypes[index].mark.toString();
             selectedTaskType = TaskTypeModel(taskName, 160, true);
           }
         });
