@@ -1,14 +1,7 @@
-// import 'dart:developer';
-
 import 'package:flutter/material.dart';
-// import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-// import 'package:pingy/models/activity.dart';
-// import 'package:pingy/boxes.dart';
-// import 'package:pingy/models/activity.dart';
 import 'package:pingy/screens/task/update_task.dart';
 import 'settings.dart';
-// import 'task/task_type.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

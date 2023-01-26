@@ -14,6 +14,7 @@ void main() async {
   // Initialize hive.
   await Hive.initFlutter();
 
+  // Register Adapters.
   Hive
     ..init(appDocDir.path)
     ..registerAdapter(ActivityAdapter())
