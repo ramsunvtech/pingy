@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pingy/screens/task/list_activity_type.dart';
-import 'task/task_type.dart';
 
 class SettingsScreen extends StatelessWidget {
 
