@@ -44,7 +44,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                 },
                 // Pull from top to show refresh indicator.
                 child: ListView.builder(
-                  itemCount: 2,
+                  itemCount: activityTypeBox.length,
                   physics: const AlwaysScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     var currentBox = activityTypeBox;
