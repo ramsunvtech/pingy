@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'activity_type.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class ActivityTypeModel extends HiveObject {
   @HiveField(0)
   final String activityName;
