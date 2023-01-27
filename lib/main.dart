@@ -3,20 +3,26 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pingy/models/activity.dart';
 import 'package:pingy/models/activity_type.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 // Screen Imports.
 import 'screens/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final appDocDir = await getApplicationDocumentsDirectory();
+
+  var path = "/assets/db";
+  if (!kIsWeb) {
+    var appDocDir = await getApplicationDocumentsDirectory();
+    path = appDocDir.path;
+  }
 
   // Initialize hive.
   await Hive.initFlutter();
 
   // Register Adapters.
   Hive
-    ..init(appDocDir.path)
+    ..init(path)
     ..registerAdapter(ActivityAdapter())
     ..registerAdapter(ActivityTypeModelAdapter());
 
