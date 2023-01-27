@@ -83,6 +83,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 label: const Text("Fingerprint Auth"),
               ),
             ),
+            Center(
+              child: Text(authorized),
+            )
           ],
         ),
       ),
