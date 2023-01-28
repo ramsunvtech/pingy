@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
@@ -17,19 +18,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _authenticate() async {
     bool authenticated = false;
 
-    try {
-      authenticated = await auth
-          .authenticate(
+    if (kIsWeb) {
+      try {
+        authenticated = await auth
+            .authenticate(
             localizedReason: "Scan your finger to authenticate"
-          );
-    } on PlatformException catch (e) {
-      print(e);
+        );
+      } on PlatformException catch (e) {
+        print(e);
+      }
     }
 
     setState(() {
       authorized =
           authenticated ? "Authorized success" : "Failed to authenticate";
-      print(authorized);
     });
   }
 
