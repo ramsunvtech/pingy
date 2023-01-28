@@ -31,7 +31,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pingy (Task Type)')),
+      appBar: AppBar(title: const Text('Pingy (Add Activity Type)')),
       body: Container(
         alignment: Alignment.center,
         child: Column(
