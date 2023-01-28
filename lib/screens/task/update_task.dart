@@ -13,12 +13,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   final TextEditingController _scoreController = TextEditingController();
 
   late final Box activityBox;
+  late final Box activityTypeBox;
 
   @override
   void initState() {
     super.initState();
     // Get reference to an already opened box
     activityBox = Hive.box('activity');
+    activityTypeBox = Hive.box('activity_type');
   }
 
   @override
@@ -75,12 +77,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           ),
           Expanded(
               child: ListView.builder(
-                itemCount: taskTypes.length,
+                itemCount: activityTypeBox.length,
                 itemBuilder: (BuildContext context, int index) {
+                  var activityType = activityTypeBox.getAt(index)!;
+                  bool isSelected = true;
                   return taskItem(
-                    taskTypes[index].taskName,
-                    taskTypes[index].mark,
-                    taskTypes[index].isSelected,
+                    activityType.activityName,
+                    activityType.mark,
+                    isSelected,
                     index,
                   );
                 },
@@ -139,7 +143,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       color: Colors.grey,
     );
   }
-  Widget taskItem(String taskName, int mark, bool isSelected, int index) {
+  Widget taskItem(String taskName, String mark, bool isSelected, int index) {
     var enabled = true;
 
     return ListTile(
@@ -157,7 +161,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           fontWeight: FontWeight.w500,
         ),
       ),
-      subtitle: Text(mark.toString()),
+      subtitle: Text(mark),
       trailing: getTrailingIcon(isSelected),
       onTap: () {
         setState(() {
