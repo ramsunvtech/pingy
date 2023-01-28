@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:pingy/screens/task/update_task.dart';
+import 'package:pingy/screens/activity/update_activity.dart';
 import 'settings.dart';
 
 class HomeScreen extends StatefulWidget {

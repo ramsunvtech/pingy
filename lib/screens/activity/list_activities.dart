@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:pingy/screens/task/task_type.dart';
+import 'package:pingy/screens/activity/activity_type.dart';
 
 class ActivitiesListScreen extends StatefulWidget {
   @override

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:pingy/screens/rewards/rewards.dart';
-import 'package:pingy/screens/task/list_activities.dart';
-import 'package:pingy/screens/task/list_activity_type.dart';
+import 'package:pingy/screens/activity/list_activities.dart';
+import 'package:pingy/screens/activity/list_activity_type.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
