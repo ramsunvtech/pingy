@@ -29,7 +29,7 @@ class ActivityTypeModelAdapter extends TypeAdapter<ActivityTypeModel> {
       ..writeByte(0)
       ..write(obj.activityName)
       ..writeByte(1)
-      ..write(obj.mark);
+      ..write(obj.fullScore);
   }
 
   @override

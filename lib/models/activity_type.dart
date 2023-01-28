@@ -8,7 +8,7 @@ class ActivityTypeModel extends HiveObject {
   final String activityName;
 
   @HiveField(1)
-  final String mark;
+  final String fullScore;
 
-  ActivityTypeModel(this.activityName, this.mark);
+  ActivityTypeModel(this.activityName, this.fullScore);
 }
