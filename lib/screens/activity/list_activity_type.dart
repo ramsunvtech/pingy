@@ -53,7 +53,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                       onTap: () => {},
                       child: ListTile(
                         title: Text(activityTypeData.activityName),
-                        subtitle: Text(activityTypeData.mark),
+                        subtitle: Text(activityTypeData.fullScore),
                         trailing: IconButton(
                           onPressed: () => {},
                           icon: const Icon(

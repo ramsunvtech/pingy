@@ -9,7 +9,7 @@ class TaskTypeScreen extends StatefulWidget {
 }
 class _TaskTypeScreenState extends State<TaskTypeScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _markController = TextEditingController();
+  final TextEditingController _fullScoreController = TextEditingController();
 
   late final Box activityTypeBox;
 
@@ -56,17 +56,17 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
               ),
             ),
             TextFormField(
-              controller: _markController,
+              controller: _fullScoreController,
               cursorColor: Theme.of(context).backgroundColor,
               keyboardType: TextInputType.number,
               maxLength: 3,
               decoration: const InputDecoration(
                 icon: Icon(Icons.numbers),
-                labelText: 'Activity Mark',
+                labelText: 'Activity Score',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
                 ),
-                helperText: 'Enter the maximum mark',
+                helperText: 'Enter the activity score',
                 suffixIcon: Icon(
                   Icons.check_circle,
                 ),
@@ -77,7 +77,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                ActivityTypeModel newActivityType = ActivityTypeModel(_nameController.text, _markController.text);
+                ActivityTypeModel newActivityType = ActivityTypeModel(_nameController.text, _fullScoreController.text);
                 activityTypeBox.add(newActivityType);
 
                 Navigator.push(
