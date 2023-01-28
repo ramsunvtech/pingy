@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pingy/models/activity.dart';
 import 'package:pingy/models/activity_type.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:pingy/models/rewards.dart';
 
 // Screen Imports.
 import 'screens/home.dart';
@@ -24,11 +25,13 @@ void main() async {
   Hive
     ..init(path)
     ..registerAdapter(ActivityAdapter())
-    ..registerAdapter(ActivityTypeModelAdapter());
+    ..registerAdapter(ActivityTypeModelAdapter())
+    ..registerAdapter(RewardsModelAdapter());
 
-  // Open Activity, Activity Type Box.
-  await Hive.openBox('activity');
+  // Open Activity Type, Rewards and Activity Box.
   await Hive.openBox('activity_type');
+  await Hive.openBox('rewards');
+  await Hive.openBox('activity');
 
   runApp(
     PingyApp(),
