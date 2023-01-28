@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:pingy/screens/rewards/rewards.dart';
 import 'package:pingy/screens/task/list_activity_type.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -20,10 +21,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (kIsWeb) {
       try {
-        authenticated = await auth
-            .authenticate(
-            localizedReason: "Scan your finger to authenticate"
-        );
+        authenticated = await auth.authenticate(
+            localizedReason: "Scan your finger to authenticate");
       } on PlatformException catch (e) {
         print(e);
       }
@@ -109,13 +108,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
           onTap: (int index) {
-            if (index == 0) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (builder) => ActivityTypeListScreen(),
-                ),
-              );
+            switch (index) {
+              case 0:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (builder) => ActivityTypeListScreen(),
+                  ),
+                );
+                break;
+              case 1:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (builder) => RewardsListScreen(),
+                  ),
+                );
+                break;
             }
           }),
     );
