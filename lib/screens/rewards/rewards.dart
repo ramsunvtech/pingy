@@ -112,7 +112,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 ),
                 helperText: 'Enter First Prize',
                 suffixIcon: Icon(
-                  Icons.calendar_month,
+                  Icons.check_circle,
                 ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
@@ -130,7 +130,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 ),
                 helperText: 'Enter Second Prize',
                 suffixIcon: Icon(
-                  Icons.calendar_month,
+                  Icons.check_circle,
                 ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
@@ -148,7 +148,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 ),
                 helperText: 'Enter Third Prize',
                 suffixIcon: Icon(
-                  Icons.calendar_month,
+                  Icons.check_circle,
                 ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
