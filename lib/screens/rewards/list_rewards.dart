@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:pingy/screens/activity/activity_type.dart';
+import 'package:pingy/screens/rewards/rewards.dart';
 
 class RewardsListScreen extends StatefulWidget {
   @override
@@ -9,13 +9,13 @@ class RewardsListScreen extends StatefulWidget {
 
 class _RewardsListScreenState extends State<RewardsListScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  late final Box activityTypeBox;
+  late final Box rewardsBox;
 
   @override
   void initState() {
     super.initState();
     // Get reference to an already opened box
-    activityTypeBox = Hive.box('activity_type');
+    rewardsBox = Hive.box('rewards');
   }
 
   @override
@@ -25,11 +25,11 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
         title: const Text('Pingy (Rewards)'),
       ),
       body: ValueListenableBuilder(
-        valueListenable: activityTypeBox.listenable(),
+        valueListenable: rewardsBox.listenable(),
         builder: (context, Box box, widget) {
           if (box.isEmpty) {
             return const Center(
-              child: Text('No Activities Types are available.'),
+              child: Text('No Rewards are available.'),
             );
           } else {
             return RefreshIndicator(
@@ -44,16 +44,16 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
               },
               // Pull from top to show refresh indicator.
               child: ListView.builder(
-                itemCount: activityTypeBox.length,
+                itemCount: rewardsBox.length,
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
-                  var currentBox = activityTypeBox;
-                  var activityTypeData = currentBox.getAt(index)!;
+                  var currentBox = rewardsBox;
+                  var rewardsData = currentBox.getAt(index)!;
                   return InkWell(
                     onTap: () => {},
                     child: ListTile(
-                      title: Text(activityTypeData.activityName),
-                      subtitle: Text(activityTypeData.mark),
+                      title: Text(rewardsData.title),
+                      subtitle: Text('${rewardsData.startPeriod} to ${rewardsData.endPeriod}'),
                       trailing: IconButton(
                         onPressed: () => {},
                         icon: const Icon(
@@ -74,11 +74,11 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (builder) => TaskTypeScreen(),
+              builder: (builder) => RewardsScreen(),
             ),
           );
         },
-        child: const Icon(Icons.task),
+        child: const Icon(Icons.gif_box),
         backgroundColor: Colors.green,
       ),
     );
