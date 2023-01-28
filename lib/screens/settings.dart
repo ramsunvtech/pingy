@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:pingy/screens/rewards/rewards.dart';
+import 'package:pingy/screens/rewards/list_rewards.dart';
 import 'package:pingy/screens/activity/list_activities.dart';
 import 'package:pingy/screens/activity/list_activity_type.dart';
 
