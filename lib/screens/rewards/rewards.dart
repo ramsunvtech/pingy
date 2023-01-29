@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:pingy/models/rewards.dart';
 import 'package:pingy/screens/rewards/list_rewards.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class RewardsScreen extends StatefulWidget {
   @override
@@ -11,7 +12,6 @@ class RewardsScreen extends StatefulWidget {
 
 class _RewardsScreenState extends State<RewardsScreen> {
   final TextEditingController _titleController = TextEditingController();
-  // DateTime _startPeriodController = DateTime.now();
   final TextEditingController _startPeriodController = TextEditingController();
   final TextEditingController _endPeriodController = TextEditingController();
   final TextEditingController _firstPrizeController = TextEditingController();
@@ -35,17 +35,26 @@ class _RewardsScreenState extends State<RewardsScreen> {
     super.dispose();
   }
 
-  // Future<void> _selectDate(BuildContext context) async {
-  //   final DateTime picked = await showDatePicker(
-  //       context: context,
-  //       initialDate: selectedDate,
-  //       firstDate: DateTime(2015, 8),
-  //       lastDate: DateTime(2101));
-  //   if (picked != null && picked != selectedDate)
-  //     setState(() {
-  //       selectedDate = picked;
-  //     });
-  // }
+  String _selectedDate = '';
+  String _dateCount = '';
+  String _range = '';
+  String _rangeCount = '';
+
+  void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
+    setState(() {
+      if (args.value is PickerDateRange) {
+        _range = '${DateFormat('dd/MM/yyyy').format(args.value.startDate)} -'
+        // ignore: lines_longer_than_80_chars
+            ' ${DateFormat('dd/MM/yyyy').format(args.value.endDate ?? args.value.startDate)}';
+      } else if (args.value is DateTime) {
+        _selectedDate = args.value.toString();
+      } else if (args.value is List<DateTime>) {
+        _dateCount = args.value.length.toString();
+      } else {
+        _rangeCount = args.value.length.toString();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,11 +89,11 @@ class _RewardsScreenState extends State<RewardsScreen> {
               readOnly: true,
               decoration: const InputDecoration(
                 icon: Icon(Icons.calendar_today),
-                labelText: 'Start Period',
+                labelText: 'Start Date',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
                 ),
-                helperText: const (_startPeriodController.text != '') ? 'Choose starting period' : '',
+                helperText: 'Choose starting period',
                 suffixIcon: Icon(
                   Icons.calendar_month,
                 ),
@@ -93,22 +102,38 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 ),
               ),
                 onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(), //get today's date
-                      firstDate:DateTime(2000), //DateTime.now() - not to allow to choose before today.
-                      lastDate: DateTime(2101)
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return Wrap(
+                        children: [
+                          SfDateRangePicker(
+                            onSelectionChanged: _onSelectionChanged,
+                            selectionMode: DateRangePickerSelectionMode.range,
+                            initialSelectedRange: PickerDateRange(
+                                DateTime.now().subtract(const Duration(days: 4)),
+                                DateTime.now().add(const Duration(days: 3))),
+                          ),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                              // color: Colors.pink,
+                              child: const Text(
+                                'Done',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.6),
+                              ),
+                            )
+                          ),
+                        ],
+                      );
+                    },
                   );
-                  if(pickedDate != null ){
-                    print(pickedDate);  //get the picked date in the format => 2022-07-04 00:00:00.000
-                    String formattedDate = DateFormat('dd-MM-yyyy').format(pickedDate); // format date in required form here we use yyyy-MM-dd that means time is removed
-
-                    setState(() {
-                      _startPeriodController.text = formattedDate; //set foratted date to TextField value.
-                    });
-                  }else{
-                    print("Date is not selected");
-                  }
                 },
             ),
             TextFormField(
