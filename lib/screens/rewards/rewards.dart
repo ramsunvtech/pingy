@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 import 'package:pingy/models/rewards.dart';
 import 'package:pingy/screens/rewards/list_rewards.dart';
 
@@ -10,6 +11,7 @@ class RewardsScreen extends StatefulWidget {
 
 class _RewardsScreenState extends State<RewardsScreen> {
   final TextEditingController _titleController = TextEditingController();
+  // DateTime _startPeriodController = DateTime.now();
   final TextEditingController _startPeriodController = TextEditingController();
   final TextEditingController _endPeriodController = TextEditingController();
   final TextEditingController _firstPrizeController = TextEditingController();
@@ -32,6 +34,18 @@ class _RewardsScreenState extends State<RewardsScreen> {
 
     super.dispose();
   }
+
+  // Future<void> _selectDate(BuildContext context) async {
+  //   final DateTime picked = await showDatePicker(
+  //       context: context,
+  //       initialDate: selectedDate,
+  //       firstDate: DateTime(2015, 8),
+  //       lastDate: DateTime(2101));
+  //   if (picked != null && picked != selectedDate)
+  //     setState(() {
+  //       selectedDate = picked;
+  //     });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -63,15 +77,14 @@ class _RewardsScreenState extends State<RewardsScreen> {
             TextFormField(
               controller: _startPeriodController,
               cursorColor: Theme.of(context).backgroundColor,
-              keyboardType: TextInputType.number,
-              maxLength: 10,
+              readOnly: true,
               decoration: const InputDecoration(
-                icon: Icon(Icons.numbers),
+                icon: Icon(Icons.calendar_today),
                 labelText: 'Start Period',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
                 ),
-                helperText: 'Choose starting period',
+                helperText: const (_startPeriodController.text != '') ? 'Choose starting period' : '',
                 suffixIcon: Icon(
                   Icons.calendar_month,
                 ),
@@ -79,6 +92,24 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
                 ),
               ),
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(), //get today's date
+                      firstDate:DateTime(2000), //DateTime.now() - not to allow to choose before today.
+                      lastDate: DateTime(2101)
+                  );
+                  if(pickedDate != null ){
+                    print(pickedDate);  //get the picked date in the format => 2022-07-04 00:00:00.000
+                    String formattedDate = DateFormat('dd-MM-yyyy').format(pickedDate); // format date in required form here we use yyyy-MM-dd that means time is removed
+
+                    setState(() {
+                      _startPeriodController.text = formattedDate; //set foratted date to TextField value.
+                    });
+                  }else{
+                    print("Date is not selected");
+                  }
+                },
             ),
             TextFormField(
               controller: _endPeriodController,
