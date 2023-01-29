@@ -39,7 +39,6 @@ class _RewardsScreenState extends State<RewardsScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(title: const Text('Pingy (Add Rewards)')),
       body: Container(
-        alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
