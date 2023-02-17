@@ -20,11 +20,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _authenticate() async {
     bool authenticated = false;
 
-    if (kIsWeb) {
+    if (!kIsWeb) {
       try {
         authenticated = await auth.authenticate(
             localizedReason: "Scan your finger to authenticate");
       } on PlatformException catch (e) {
+        print('platform exception');
         print(e);
       }
     }
