@@ -39,12 +39,14 @@ void main() async {
   // Add Today Activity if not exist.
   var today = DateTime.now();
   var activityId = 'activity_${today.year}${today.month}${today.day}';
-  bool canCreateNewActivity = false;
+  bool canCreateNewActivity = true;
 
   if (activityBox.containsKey(activityId)) {
+    print('Log: Today Activity is exist');
     Activity todayActivity = activityBox.get(activityId);
-    if (todayActivity.activityItems.isEmpty) {
-      canCreateNewActivity = true;
+    if (todayActivity.activityItems.isNotEmpty) {
+      print('Log: Today Activity Type is not empty');
+      canCreateNewActivity = false;
     }
   }
 
