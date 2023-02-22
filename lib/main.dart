@@ -39,9 +39,16 @@ void main() async {
   // Add Today Activity if not exist.
   var today = DateTime.now();
   var activityId = 'activity_${today.year}${today.month}${today.day}';
+  bool canCreateNewActivity = false;
+
   if (activityBox.containsKey(activityId)) {
     Activity todayActivity = activityBox.get(activityId);
-  } else {
+    if (todayActivity.activityItems.isEmpty) {
+      canCreateNewActivity = true;
+    }
+  }
+
+  if(canCreateNewActivity) {
     final activityTypeKeys = await activityTypeBox.keys;
     final List<ActivityItem> activityItems = [];
     for (var activityTypeKey in activityTypeKeys) {
