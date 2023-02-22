@@ -83,7 +83,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                 var activityTypeId = 'type_${todayDate}${todayTime}';
 
                 ActivityTypeModel newActivityType = ActivityTypeModel(activityTypeId, _nameController.text, _fullScoreController.text);
-                activityTypeBox.add(newActivityType);
+                activityTypeBox.put(activityTypeId, newActivityType);
 
                 Navigator.push(
                   context,
