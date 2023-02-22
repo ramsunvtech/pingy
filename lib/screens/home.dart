@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return InkWell(
                   onTap: () => {},
                   child: ListTile(
-                    title: Text(activityData.name),
+                    title: Text('activityData.name'),
                     subtitle: Text(activityData.score),
                     trailing: IconButton(
                       onPressed: () => {},
