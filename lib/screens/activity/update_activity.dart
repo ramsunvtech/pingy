@@ -11,6 +11,7 @@ class UpdateTaskScreen extends StatefulWidget {
 
 class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   final TextEditingController _scoreController = TextEditingController();
+  final TextEditingController _fullScoreController = TextEditingController();
 
   late final Box activityBox;
   late final Box activityTypeBox;
@@ -56,13 +57,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
     return DefaultTabController(
       length: 3,
+      initialIndex: 1,
       child: Scaffold(
         appBar: AppBar(
             bottom: const TabBar(
               tabs: [
-                Tab(icon: Icon(Icons.work_off)),
-                Tab(icon: Icon(Icons.work)),
-                Tab(icon: Icon(Icons.done)),
+                Tab(text: 'Missed'),
+                Tab(text: 'To do'),
+                Tab(text: 'Done'),
               ],
             ),
             title: const Text('Update Activity')),
@@ -91,17 +93,93 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                       index,
                     ),
                     confirmDismiss: (direction) async {
-                      return (direction == DismissDirection.endToStart);
+                      if (direction == DismissDirection.startToEnd) {
+                        // Update Box with 0 as score.
+                        // return true;
+                        return await showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (BuildContext context) {
+                            return Padding(
+                              padding: MediaQuery.of(context).viewInsets,
+                              child: Wrap(
+                                children: [
+                                  Center(child: Text('Update')),
+                                  Center(
+                                    child: TextFormField(
+                                      controller: _fullScoreController,
+                                      cursorColor:
+                                      Theme.of(context).backgroundColor,
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 3,
+                                      decoration: const InputDecoration(
+                                        icon: Icon(Icons.numbers),
+                                        labelText: 'Activity Score',
+                                        labelStyle: TextStyle(
+                                          color: Color(0xFF6200EE),
+                                        ),
+                                        helperText: 'Enter the activity score',
+                                        suffixIcon: Icon(
+                                          Icons.check_circle,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Color(0xFF6200EE)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Center(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(false);
+                                      },
+                                      // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                                      // color: Colors.pink,
+                                      child: const Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.6),
+                                      ),
+                                    ),
+                                  ),
+                                  Center(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                                      // color: Colors.pink,
+                                      child: const Text(
+                                        'Completed',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.6),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      } else if (direction == DismissDirection.endToStart) {
+                        // Update Box with score.
+                        return true;
+                      }
                     },
                     onDismissed: (direction) {
                       var textMessage = 'not set';
 
                       switch (direction) {
                         case DismissDirection.startToEnd:
-                          textMessage = "right";
+                          textMessage = "left";
                           break;
                         case DismissDirection.endToStart:
-                          textMessage = "left";
+                          textMessage = "right";
                           break;
                       }
                       if (textMessage != '') {
@@ -162,49 +240,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       subtitle: Text(mark),
       trailing: getTrailingIcon(isSelected),
       onTap: () async {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) {
-            return Wrap(
-              children: [
-                Center(child: Text('Update')),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                    // color: Colors.pink,
-                    child: const Text(
-                      'Mark as Missed',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.6),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                    // color: Colors.pink,
-                    child: const Text(
-                      'Completed',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.6),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-
         setState(() {
           taskTypes[0].isSelected = false;
           taskTypes[1].isSelected = false;
