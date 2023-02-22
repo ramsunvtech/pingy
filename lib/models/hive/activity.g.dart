@@ -6,7 +6,7 @@ part of 'activity.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class ActivityAdapter extends TypeAdapter<Activity> {
+class Activity extends TypeAdapter<Activity> {
   @override
   final int typeId = 3;
 
@@ -41,7 +41,7 @@ class ActivityAdapter extends TypeAdapter<Activity> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ActivityAdapter &&
+      other is Activity &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

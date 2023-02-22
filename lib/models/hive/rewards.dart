@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'rewards.g.dart';
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 2, adapterName: 'Rewards')
 class RewardsModel extends HiveObject {
   @HiveField(0)
   final String title;
