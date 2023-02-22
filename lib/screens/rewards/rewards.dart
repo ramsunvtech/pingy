@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:pingy/models/rewards.dart';
+import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/rewards/list_rewards.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 

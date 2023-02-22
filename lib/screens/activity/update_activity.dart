@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:pingy/models/activity.dart';
+import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/task_type.dart';
 import 'package:pingy/screens/home.dart';
 

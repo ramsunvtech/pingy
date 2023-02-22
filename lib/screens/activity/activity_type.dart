@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:pingy/models/activity_type.dart';
+import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/screens/activity/list_activity_type.dart';
 
 class TaskTypeScreen extends StatefulWidget {

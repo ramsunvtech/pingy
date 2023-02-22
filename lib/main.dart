@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pingy/models/activity.dart';
-import 'package:pingy/models/activity_type.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:pingy/models/rewards.dart';
+
+import 'package:pingy/models/hive/activity.dart';
+import 'package:pingy/models/hive/activity_type.dart';
+import 'package:pingy/models/hive/rewards.dart';
 
 // Screen Imports.
 import 'screens/home.dart';
