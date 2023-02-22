@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/activity.dart';
+import 'package:pingy/models/hive/activity_item.dart';
+import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/task_type.dart';
 import 'package:pingy/screens/home.dart';
 
@@ -50,7 +52,16 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var todayDate = DateTime.now();
+    var today = DateTime.now();
+    var activityId = 'activity_${today.year}${today.month}${today.day}';
+    Activity todayActivity = activityBox.get(activityId);
+
+    Iterable<ActivityItem> missedActivities =
+        todayActivity.activityItems.where((element) => element.score == "0");
+    Iterable<ActivityItem> todoActivities =
+        todayActivity.activityItems.where((element) => element.score == "");
+    Iterable<ActivityItem> completedActivities =
+        todayActivity.activityItems.where((element) => element.score != "" && element.score != "0");
 
     return DefaultTabController(
       length: 3,
@@ -67,25 +78,35 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             title: const Text('Update Activity')),
         body: TabBarView(
           children: [
-            ListView.builder(
-              itemCount: 3,
+            (missedActivities.length == 0) ? const Center(
+              child: Text('No missed Activities are available. its Empty'),
+            ) : ListView.builder(
+              itemCount: missedActivities.length,
               itemBuilder: (BuildContext context, int index) {
+                var missedActivity = missedActivities.elementAt(index);
+                ActivityTypeModel missedActivityItemDetail = activityTypeBox.get(missedActivity.activityItemId);
+
                 return taskItem(
-                  'Missed Activity ${index + 1}',
-                  '160',
+                  missedActivityItemDetail.activityName,
+                  missedActivity.score ?? '0',
                   false,
                   index,
                 );
               },
             ),
-            ListView.builder(
-              itemCount: 3,
+            (todoActivities.length == 0) ? const Center(
+              child: Text('No Activities are available. its Empty'),
+            ) : ListView.builder(
+              itemCount: todoActivities.length,
               itemBuilder: (BuildContext context, int index) {
+                var todoActivity = todoActivities.elementAt(index);
+                ActivityTypeModel todayActivityItemDetail = activityTypeBox.get(todoActivity.activityItemId);
+
                 return Dismissible(
                     key: Key('item_${index + 1}'),
                     child: taskItem(
-                      'Activity ${index + 1} To do',
-                      '160',
+                      todayActivityItemDetail.activityName,
+                      'Swipe right to add score',
                       false,
                       index,
                     ),
@@ -106,7 +127,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                     child: TextFormField(
                                       controller: _fullScoreController,
                                       cursorColor:
-                                      Theme.of(context).backgroundColor,
+                                          Theme.of(context).backgroundColor,
                                       keyboardType: TextInputType.number,
                                       maxLength: 3,
                                       decoration: const InputDecoration(
@@ -145,6 +166,13 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                   Center(
                                     child: ElevatedButton(
                                       onPressed: () {
+                                        var updatedMissedActivity = ActivityItem(todoActivity.activityItemId, _fullScoreController.text);
+                                        var activityItemIndex = todayActivity.activityItems.indexWhere((element) => element.activityItemId == todoActivity.activityItemId);
+                                        if (todayActivity.isInBox) {
+                                          todayActivity.activityItems.setAll(activityItemIndex, [updatedMissedActivity]);
+                                        }
+                                        todayActivity.save();
+
                                         Navigator.of(context).pop(true);
                                       },
                                       // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
@@ -164,6 +192,15 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                           },
                         );
                       } else if (direction == DismissDirection.endToStart) {
+                        var updatedMissedActivity = ActivityItem(todoActivity.activityItemId, '0');
+                        var activityItemIndex = todayActivity.activityItems.indexWhere((element) => element.activityItemId == todoActivity.activityItemId);
+
+                        if (todayActivity.isInBox) {
+                          todayActivity.activityItems.setAll(activityItemIndex, [updatedMissedActivity]);
+                        }
+
+                        todayActivity.save();
+
                         // Update Box with score.
                         return true;
                       }
@@ -186,12 +223,17 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                     });
               },
             ),
-            ListView.builder(
-              itemCount: 3,
+            (completedActivities.length == 0) ? const Center(
+              child: Text('No Completed Activities are available. its Empty'),
+            ) : ListView.builder(
+              itemCount: completedActivities.length,
               itemBuilder: (BuildContext context, int index) {
+                var completedActivity = completedActivities.elementAt(index);
+                ActivityTypeModel completedActivityItemDetail = activityTypeBox.get(completedActivity.activityItemId);
+
                 return taskItem(
-                  'Completed Activity ${index + 1}',
-                  '160',
+                  completedActivityItemDetail.activityName,
+                  completedActivity.score,
                   false,
                   index,
                 );
@@ -216,7 +258,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
-  Widget taskItem(String taskName, String mark, bool isSelected, int index) {
+  Widget taskItem(String taskName, String? mark, bool isSelected, int index) {
     var enabled = true;
 
     return ListTile(
@@ -234,7 +276,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           fontWeight: FontWeight.w500,
         ),
       ),
-      subtitle: Text(mark),
+      subtitle: Text(mark ?? '0'),
       trailing: getTrailingIcon(isSelected),
       onTap: () async {
         setState(() {
