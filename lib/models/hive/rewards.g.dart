@@ -6,7 +6,7 @@ part of 'rewards.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class Rewards extends TypeAdapter<RewardsModel> {
+class RewardsModelAdapter extends TypeAdapter<RewardsModel> {
   @override
   final int typeId = 2;
 
@@ -50,7 +50,7 @@ class Rewards extends TypeAdapter<RewardsModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Rewards &&
+      other is RewardsModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
