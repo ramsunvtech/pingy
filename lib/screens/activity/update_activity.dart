@@ -4,7 +4,6 @@ import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/task_type.dart';
-import 'package:pingy/screens/home.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
   @override
@@ -60,8 +59,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         todayActivity.activityItems.where((element) => element.score == "0");
     Iterable<ActivityItem> todoActivities =
         todayActivity.activityItems.where((element) => element.score == "");
-    Iterable<ActivityItem> completedActivities =
-        todayActivity.activityItems.where((element) => element.score != "" && element.score != "0");
+    Iterable<ActivityItem> completedActivities = todayActivity.activityItems
+        .where((element) => element.score != "" && element.score != "0");
 
     return DefaultTabController(
       length: 3,
@@ -78,169 +77,209 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             title: const Text('Update Activity')),
         body: TabBarView(
           children: [
-            (missedActivities.length == 0) ? const Center(
-              child: Text('No missed Activities are available. its Empty'),
-            ) : ListView.builder(
-              itemCount: missedActivities.length,
-              itemBuilder: (BuildContext context, int index) {
-                var missedActivity = missedActivities.elementAt(index);
-                ActivityTypeModel missedActivityItemDetail = activityTypeBox.get(missedActivity.activityItemId);
+            (missedActivities.isEmpty)
+                ? const Center(
+                    child:
+                        Text('No missed Activities are available. its Empty'),
+                  )
+                : ListView.builder(
+                    itemCount: missedActivities.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      var missedActivity = missedActivities.elementAt(index);
+                      ActivityTypeModel missedActivityItemDetail =
+                          activityTypeBox.get(missedActivity.activityItemId);
 
-                return taskItem(
-                  missedActivityItemDetail.activityName,
-                  missedActivity.score ?? '0',
-                  false,
-                  index,
-                );
-              },
-            ),
-            (todoActivities.length == 0) ? const Center(
-              child: Text('No Activities are available. its Empty'),
-            ) : ListView.builder(
-              itemCount: todoActivities.length,
-              itemBuilder: (BuildContext context, int index) {
-                var todoActivity = todoActivities.elementAt(index);
-                ActivityTypeModel todayActivityItemDetail = activityTypeBox.get(todoActivity.activityItemId);
-
-                return Dismissible(
-                    key: Key('item_${index + 1}'),
-                    child: taskItem(
-                      todayActivityItemDetail.activityName,
-                      'Swipe right to add score',
-                      false,
-                      index,
-                    ),
-                    confirmDismiss: (direction) async {
-                      if (direction == DismissDirection.startToEnd) {
-                        // Update Box with 0 as score.
-                        // return true;
-                        return await showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (BuildContext context) {
-                            return Padding(
-                              padding: MediaQuery.of(context).viewInsets,
-                              child: Wrap(
-                                children: [
-                                  Center(child: Text('Update')),
-                                  Center(
-                                    child: TextFormField(
-                                      controller: _fullScoreController,
-                                      cursorColor:
-                                          Theme.of(context).backgroundColor,
-                                      keyboardType: TextInputType.number,
-                                      maxLength: 3,
-                                      decoration: const InputDecoration(
-                                        icon: Icon(Icons.numbers),
-                                        labelText: 'Activity Score',
-                                        labelStyle: TextStyle(
-                                          color: Color(0xFF6200EE),
-                                        ),
-                                        helperText: 'Enter the activity score',
-                                        suffixIcon: Icon(
-                                          Icons.check_circle,
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: Color(0xFF6200EE)),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Center(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop(false);
-                                      },
-                                      // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                                      // color: Colors.pink,
-                                      child: const Text(
-                                        'Cancel',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            letterSpacing: 0.6),
-                                      ),
-                                    ),
-                                  ),
-                                  Center(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        var updatedMissedActivity = ActivityItem(todoActivity.activityItemId, _fullScoreController.text);
-                                        var activityItemIndex = todayActivity.activityItems.indexWhere((element) => element.activityItemId == todoActivity.activityItemId);
-                                        if (todayActivity.isInBox) {
-                                          todayActivity.activityItems.setAll(activityItemIndex, [updatedMissedActivity]);
-                                        }
-                                        todayActivity.save();
-                                        setState(() {});
-
-                                        Navigator.of(context).pop(true);
-                                      },
-                                      // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                                      // color: Colors.pink,
-                                      child: const Text(
-                                        'Completed',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            letterSpacing: 0.6),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      } else if (direction == DismissDirection.endToStart) {
-                        var updatedMissedActivity = ActivityItem(todoActivity.activityItemId, '0');
-                        var activityItemIndex = todayActivity.activityItems.indexWhere((element) => element.activityItemId == todoActivity.activityItemId);
-
-                        if (todayActivity.isInBox) {
-                          todayActivity.activityItems.setAll(activityItemIndex, [updatedMissedActivity]);
-                        }
-
-                        todayActivity.save();
-                        setState(() {});
-
-                        // Update Box with score.
-                        return true;
-                      }
+                      return taskItem(
+                        missedActivityItemDetail.activityName,
+                        missedActivity.score ?? '0',
+                        false,
+                        index,
+                      );
                     },
-                    onDismissed: (direction) {
-                      var textMessage = 'not set';
+                  ),
+            (todoActivities.isEmpty)
+                ? const Center(
+                    child: Text('No Activities are available. its Empty'),
+                  )
+                : ListView.builder(
+                    itemCount: todoActivities.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      var todoActivity = todoActivities.elementAt(index);
+                      ActivityTypeModel todayActivityItemDetail =
+                          activityTypeBox.get(todoActivity.activityItemId);
 
-                      switch (direction) {
-                        case DismissDirection.startToEnd:
-                          textMessage = "left";
-                          break;
-                        case DismissDirection.endToStart:
-                          textMessage = "right";
-                          break;
-                      }
-                      if (textMessage != '') {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('swiped $textMessage')));
-                      }
-                    });
-              },
-            ),
-            (completedActivities.length == 0) ? const Center(
-              child: Text('No Completed Activities are available. its Empty'),
-            ) : ListView.builder(
-              itemCount: completedActivities.length,
-              itemBuilder: (BuildContext context, int index) {
-                var completedActivity = completedActivities.elementAt(index);
-                ActivityTypeModel completedActivityItemDetail = activityTypeBox.get(completedActivity.activityItemId);
+                      return Dismissible(
+                          key: Key('item_${index + 1}'),
+                          child: taskItem(
+                            todayActivityItemDetail.activityName,
+                            'Swipe right to add score',
+                            false,
+                            index,
+                          ),
+                          confirmDismiss: (direction) async {
+                            if (direction == DismissDirection.startToEnd) {
+                              // Update Box with 0 as score.
+                              // return true;
+                              return await showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (BuildContext context) {
+                                  return Padding(
+                                    padding: MediaQuery.of(context).viewInsets,
+                                    child: Wrap(
+                                      children: [
+                                        Center(child: Text('Update')),
+                                        Center(
+                                          child: TextFormField(
+                                            controller: _fullScoreController,
+                                            cursorColor: Theme.of(context)
+                                                .backgroundColor,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 3,
+                                            decoration: InputDecoration(
+                                              icon: Icon(Icons.numbers),
+                                              labelText: 'Activity Score',
+                                              labelStyle: TextStyle(
+                                                color: Color(0xFF6200EE),
+                                              ),
+                                              helperText:
+                                                  'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
+                                              suffixIcon: Icon(
+                                                Icons.check_circle,
+                                              ),
+                                              enabledBorder:
+                                                  UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Color(0xFF6200EE)),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Center(
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop(false);
+                                            },
+                                            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                                            // color: Colors.pink,
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w600,
+                                                  letterSpacing: 0.6),
+                                            ),
+                                          ),
+                                        ),
+                                        Center(
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              var updatedMissedActivity =
+                                                  ActivityItem(
+                                                      todoActivity
+                                                          .activityItemId,
+                                                      _fullScoreController
+                                                          .text);
+                                              var activityItemIndex =
+                                                  todayActivity.activityItems
+                                                      .indexWhere((element) =>
+                                                          element
+                                                              .activityItemId ==
+                                                          todoActivity
+                                                              .activityItemId);
+                                              if (todayActivity.isInBox) {
+                                                todayActivity.activityItems
+                                                    .setAll(activityItemIndex, [
+                                                  updatedMissedActivity
+                                                ]);
+                                              }
+                                              todayActivity.save();
+                                              _fullScoreController.text = '';
+                                              setState(() {});
 
-                return taskItem(
-                  completedActivityItemDetail.activityName,
-                  completedActivity.score,
-                  false,
-                  index,
-                );
-              },
-            )
+                                              Navigator.of(context).pop(true);
+                                            },
+                                            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                                            // color: Colors.pink,
+                                            child: const Text(
+                                              'Completed',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w600,
+                                                  letterSpacing: 0.6),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            } else if (direction ==
+                                DismissDirection.endToStart) {
+                              var updatedMissedActivity = ActivityItem(
+                                  todoActivity.activityItemId, '0');
+                              var activityItemIndex = todayActivity
+                                  .activityItems
+                                  .indexWhere((element) =>
+                                      element.activityItemId ==
+                                      todoActivity.activityItemId);
+
+                              if (todayActivity.isInBox) {
+                                todayActivity.activityItems.setAll(
+                                    activityItemIndex, [updatedMissedActivity]);
+                              }
+
+                              todayActivity.save();
+                              setState(() {});
+
+                              // Update Box with score.
+                              return true;
+                            }
+                          },
+                          onDismissed: (direction) {
+                            var textMessage = 'not set';
+
+                            switch (direction) {
+                              case DismissDirection.startToEnd:
+                                textMessage = 'left';
+                                break;
+                              case DismissDirection.endToStart:
+                                textMessage = 'right';
+                                break;
+                              default:
+                                textMessage = 'default';
+                                break;
+                            }
+                            if (textMessage != '') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text('swiped $textMessage')));
+                            }
+                          });
+                    },
+                  ),
+            (completedActivities.isEmpty)
+                ? const Center(
+                    child: Text(
+                        'No Completed Activities are available. its Empty'),
+                  )
+                : ListView.builder(
+                    itemCount: completedActivities.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      var completedActivity =
+                          completedActivities.elementAt(index);
+                      ActivityTypeModel completedActivityItemDetail =
+                          activityTypeBox.get(completedActivity.activityItemId);
+
+                      return taskItem(
+                        completedActivityItemDetail.activityName,
+                        completedActivity.score,
+                        false,
+                        index,
+                      );
+                    },
+                  )
           ],
         ),
       ),
