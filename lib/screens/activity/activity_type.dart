@@ -77,7 +77,12 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                ActivityTypeModel newActivityType = ActivityTypeModel(_nameController.text, _fullScoreController.text);
+                var today = DateTime.now();
+                var todayDate = '${today.year}${today.month}${today.day}';
+                var todayTime = '${today.hour}${today.minute}${today.second}';
+                var activityTypeId = '${todayDate}${todayTime}';
+
+                ActivityTypeModel newActivityType = ActivityTypeModel(activityTypeId, _nameController.text, _fullScoreController.text);
                 activityTypeBox.add(newActivityType);
 
                 Navigator.push(

@@ -51,6 +51,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   Widget build(BuildContext context) {
     var todayDate = DateTime.now();
     var activityKey = '${todayDate.year}${todayDate.month}${todayDate.day}';
+    var activityTimeFrame =
+        '${todayDate.hour}${todayDate.minute}${todayDate.second}';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pingy (Update Activity)')),
@@ -59,7 +61,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           children: [
             Center(
               child: Text(
-                'Date: #$activityKey',
+                'Date: #$activityKey $activityTimeFrame',
                 style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 25,

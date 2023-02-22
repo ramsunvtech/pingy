@@ -5,10 +5,13 @@ part 'activity_type.g.dart';
 @HiveType(typeId: 1)
 class ActivityTypeModel extends HiveObject {
   @HiveField(0)
-  final String activityName;
+  final String activityTypeId;
 
   @HiveField(1)
+  final String activityName;
+
+  @HiveField(2)
   final String fullScore;
 
-  ActivityTypeModel(this.activityName, this.fullScore);
+  ActivityTypeModel(this.activityTypeId, this.activityName, this.fullScore);
 }

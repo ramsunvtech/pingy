@@ -29,7 +29,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
         builder: (context, Box box, widget) {
           if (box.isEmpty) {
             return const Center(
-              child: Text('No Activities Types are available.'),
+              child: Text('Add your first Activity Type and have Fun!'),
             );
           } else {
             return RefreshIndicator(

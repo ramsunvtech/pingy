@@ -19,16 +19,19 @@ class ActivityTypeModelAdapter extends TypeAdapter<ActivityTypeModel> {
     return ActivityTypeModel(
       fields[0] as String,
       fields[1] as String,
+      fields[2] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, ActivityTypeModel obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
-      ..write(obj.activityName)
+      ..write(obj.activityTypeId)
       ..writeByte(1)
+      ..write(obj.activityName)
+      ..writeByte(2)
       ..write(obj.fullScore);
   }
 
