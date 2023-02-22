@@ -3,8 +3,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-import 'package:pingy/models/hive/activity.dart';
+import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
+import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
 // Screen Imports.
@@ -27,12 +28,29 @@ void main() async {
     ..init(path)
     ..registerAdapter(ActivityAdapter())
     ..registerAdapter(ActivityTypeModelAdapter())
+    ..registerAdapter(ActivityItemAdapter())
     ..registerAdapter(RewardsModelAdapter());
 
   // Open Activity Type, Rewards and Activity Box.
-  await Hive.openBox('activity_type');
+  final activityTypeBox = await Hive.openBox('activity_type');
   await Hive.openBox('rewards');
-  await Hive.openBox('activity');
+  var activityBox = await Hive.openBox('activity');
+
+  // Add Today Activity if not exist.
+  var today = DateTime.now();
+  var activityId = 'activity_${today.year}${today.month}${today.day}';
+  if (activityBox.containsKey(activityId)) {
+    Activity todayActivity = activityBox.get(activityId);
+  } else {
+    final activityTypeKeys = await activityTypeBox.keys;
+    final List<ActivityItem> activityItems = [];
+    for (var activityTypeKey in activityTypeKeys) {
+      ActivityItem newActivityItem = ActivityItem(activityTypeKey, '');
+      activityItems.add(newActivityItem);
+    }
+    Activity newActivity = Activity(activityId, activityItems, '');
+    activityBox.put(activityId, newActivity);
+  }
 
   runApp(
     PingyApp(),
