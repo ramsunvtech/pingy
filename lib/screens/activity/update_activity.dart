@@ -172,6 +172,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                           todayActivity.activityItems.setAll(activityItemIndex, [updatedMissedActivity]);
                                         }
                                         todayActivity.save();
+                                        setState(() {});
 
                                         Navigator.of(context).pop(true);
                                       },
@@ -200,6 +201,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                         }
 
                         todayActivity.save();
+                        setState(() {});
 
                         // Update Box with score.
                         return true;
