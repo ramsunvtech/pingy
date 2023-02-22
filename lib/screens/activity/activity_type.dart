@@ -80,7 +80,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                 var today = DateTime.now();
                 var todayDate = '${today.year}${today.month}${today.day}';
                 var todayTime = '${today.hour}${today.minute}${today.second}';
-                var activityTypeId = '${todayDate}${todayTime}';
+                var activityTypeId = 'type_${todayDate}${todayTime}';
 
                 ActivityTypeModel newActivityType = ActivityTypeModel(activityTypeId, _nameController.text, _fullScoreController.text);
                 activityTypeBox.add(newActivityType);

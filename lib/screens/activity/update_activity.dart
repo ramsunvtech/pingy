@@ -51,9 +51,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   @override
   Widget build(BuildContext context) {
     var todayDate = DateTime.now();
-    var activityKey = '${todayDate.year}${todayDate.month}${todayDate.day}';
-    var activityTimeFrame =
-        '${todayDate.hour}${todayDate.minute}${todayDate.second}';
 
     return DefaultTabController(
       length: 3,

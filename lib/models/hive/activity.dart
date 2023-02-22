@@ -8,10 +8,19 @@ class Activity extends HiveObject {
   final String activityId;
 
   @HiveField(1)
-  final String name;
+  late List<ActivityItem> activityItems;
 
   @HiveField(2)
   final String score;
 
-  Activity(this.activityId, this.name, this.score);
+  Activity(this.activityId, this.activityItems, this.score);
+}
+
+@HiveType(typeId: 4, adapterName: 'ActivityItem')
+class ActivityItem extends HiveObject {
+  @HiveField(0)
+  late String activityItemId;
+
+  @HiveField(1)
+  late String score;
 }
