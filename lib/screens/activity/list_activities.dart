@@ -52,7 +52,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                     return InkWell(
                       onTap: () => {},
                       child: ListTile(
-                        title: Text(activityData.name),
+                        title: Text('activityData.name'),
                         subtitle: Text(activityData.score),
                         trailing: IconButton(
                           onPressed: () => {},
