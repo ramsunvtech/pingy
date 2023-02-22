@@ -72,7 +72,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
               itemCount: 3,
               itemBuilder: (BuildContext context, int index) {
                 return taskItem(
-                  'Missed Activity ${index+1}',
+                  'Missed Activity ${index + 1}',
                   '160',
                   false,
                   index,
@@ -82,19 +82,40 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             ListView.builder(
               itemCount: 3,
               itemBuilder: (BuildContext context, int index) {
-                return taskItem(
-                  'Activity ${index+1} To do',
-                  '160',
-                  false,
-                  index,
-                );
+                return Dismissible(
+                    key: Key('item_${index + 1}'),
+                    child: taskItem(
+                      'Activity ${index + 1} To do',
+                      '160',
+                      false,
+                      index,
+                    ),
+                    confirmDismiss: (direction) async {
+                      return (direction == DismissDirection.endToStart);
+                    },
+                    onDismissed: (direction) {
+                      var textMessage = 'not set';
+
+                      switch (direction) {
+                        case DismissDirection.startToEnd:
+                          textMessage = "right";
+                          break;
+                        case DismissDirection.endToStart:
+                          textMessage = "left";
+                          break;
+                      }
+                      if (textMessage != '') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('swiped $textMessage')));
+                      }
+                    });
               },
             ),
             ListView.builder(
               itemCount: 3,
               itemBuilder: (BuildContext context, int index) {
                 return taskItem(
-                  'Completed Activity ${index+1}',
+                  'Completed Activity ${index + 1}',
                   '160',
                   false,
                   index,
@@ -140,7 +161,50 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       ),
       subtitle: Text(mark),
       trailing: getTrailingIcon(isSelected),
-      onTap: () {
+      onTap: () async {
+        showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Wrap(
+              children: [
+                Center(child: Text('Update')),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                    // color: Colors.pink,
+                    child: const Text(
+                      'Mark as Missed',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.6),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                    // color: Colors.pink,
+                    child: const Text(
+                      'Completed',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.6),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+
         setState(() {
           taskTypes[0].isSelected = false;
           taskTypes[1].isSelected = false;
