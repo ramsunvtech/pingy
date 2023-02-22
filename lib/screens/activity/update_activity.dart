@@ -66,82 +66,42 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
               ],
             ),
             title: const Text('Update Activity')),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Center(
-                child: Text(
-                  'Date: #$activityKey $activityTimeFrame',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
-                      fontStyle: FontStyle.italic),
-                ),
-              ),
-              Expanded(
-                  child: ListView.builder(
-                itemCount: activityTypeBox.length,
-                itemBuilder: (BuildContext context, int index) {
-                  var activityType = activityTypeBox.getAt(index)!;
-                  bool isSelected = true;
-                  return taskItem(
-                    activityType.activityName,
-                    activityType.fullScore,
-                    isSelected,
-                    index,
-                  );
-                },
-              )),
-              Center(
-                child: Text(
-                  'Selected Task: ${selectedTaskType.taskName}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
-                      fontStyle: FontStyle.italic),
-                ),
-              ),
-              TextFormField(
-                controller: _scoreController,
-                cursorColor: Theme.of(context).backgroundColor,
-                keyboardType: TextInputType.number,
-                maxLength: 3,
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.favorite),
-                  labelText: 'Task Score',
-                  labelStyle: TextStyle(
-                    color: Color(0xFF6200EE),
-                  ),
-                  helperText: 'Enter your score',
-                  suffixIcon: Icon(
-                    Icons.check_circle,
-                  ),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF6200EE)),
-                  ),
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  var todayDate = DateTime.now();
-                  var activityId =
-                      '${todayDate.year}${todayDate.month}${todayDate.day}';
-                  Activity newActivity = Activity(activityId,
-                      selectedTaskType.taskName, _scoreController.text);
-                  activityBox.add(newActivity);
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (builder) => HomeScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text("Update Task"),
-              )
-            ],
-          ),
+        body: TabBarView(
+          children: [
+            ListView.builder(
+              itemCount: 3,
+              itemBuilder: (BuildContext context, int index) {
+                return taskItem(
+                  'Missed Activity ${index+1}',
+                  '160',
+                  false,
+                  index,
+                );
+              },
+            ),
+            ListView.builder(
+              itemCount: 3,
+              itemBuilder: (BuildContext context, int index) {
+                return taskItem(
+                  'Activity ${index+1} To do',
+                  '160',
+                  false,
+                  index,
+                );
+              },
+            ),
+            ListView.builder(
+              itemCount: 3,
+              itemBuilder: (BuildContext context, int index) {
+                return taskItem(
+                  'Completed Activity ${index+1}',
+                  '160',
+                  false,
+                  index,
+                );
+              },
+            )
+          ],
         ),
       ),
     );
