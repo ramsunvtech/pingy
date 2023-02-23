@@ -17,8 +17,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> homePanes = [
     const Center(
-      child: Image(
-        image: AssetImage('assets/cute.webp'),
+      child: CircleAvatar(
+        radius: 160,
+        backgroundImage: AssetImage('assets/cute.webp'),
       ),
     ),
     const Center(
@@ -91,37 +92,20 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-      body: ValueListenableBuilder(
-        valueListenable: activityBox.listenable(),
-        builder: (context, Box box, widget) {
-          if (box.isEmpty) {
-            return const Center(
-              child: Text('No Activities are available. its Empty'),
-            );
-          } else {
-            return ListView.builder(
-              itemCount: activityBox.length,
-              itemBuilder: (context, index) {
-                var currentBox = activityBox;
-                var activityData = currentBox.getAt(index)!;
-                // inspect(activityData);
-                return InkWell(
-                  onTap: () => {},
-                  child: ListTile(
-                    title: Text('activityData.name'),
-                    subtitle: Text(activityData.score),
-                    trailing: IconButton(
-                      onPressed: () => {},
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
+      body: ListView.builder(
+        itemCount: homePanes.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              print("tapped");
+            },
+            child: new Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: new Container(
+                child: homePanes[index],
+              ),
+            ),
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(
