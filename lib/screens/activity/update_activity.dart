@@ -43,14 +43,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   TaskTypeModel selectedTaskType = TaskTypeModel('default', 100, false);
 
-  final List<Widget> homePanes = [
-    const Center(
-      child: Image(
-        image: AssetImage('assets/cute.webp'),
-      ),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     var today = DateTime.now();
