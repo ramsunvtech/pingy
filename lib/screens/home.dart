@@ -10,50 +10,48 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final Box activityBox;
+  String todayScore = '0';
+  String totalScore = '0';
 
-  static const String _todayMarks = "430";
   static const String _todayScore = "70";
   static const String _totalScore = "90";
 
-  final List<Widget> homePanes = [
-    const Center(
-      child: CircleAvatar(
-        radius: 160,
-        backgroundImage: AssetImage('assets/cute.webp'),
+  List<Widget> getHomeBlocks(String score) {
+
+    final List<Widget> homePanes = [
+      const Center(
+        child: CircleAvatar(
+          radius: 160,
+          backgroundImage: AssetImage('assets/cute.webp'),
+        ),
       ),
-    ),
-    const Center(
-      child: Text(
-        'Today Marks: $_todayMarks',
-        style: TextStyle(
+      Center(
+        child: Text(
+          'Today Score: $todayScore%',
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 25,
-            fontStyle: FontStyle.italic),
-      ),
-    ),
-    const Center(
-      child: Text(
-        'Today Score: $_todayScore%',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 25,
-          fontStyle: FontStyle.italic,
-          color: Colors.blue,
+            fontStyle: FontStyle.italic,
+            color: Colors.blue,
+          ),
         ),
       ),
-    ),
-    const Center(
-      child: Text(
-        'Total Score: $_totalScore%',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 34,
-          fontStyle: FontStyle.italic,
-          color: Colors.blue,
+      Center(
+        child: Text(
+          'Total Score: $totalScore%',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 34,
+            fontStyle: FontStyle.italic,
+            color: Colors.blue,
+          ),
         ),
       ),
-    ),
-  ];
+    ];
+
+    return homePanes;
+  }
+
 
   @override
   void initState() {
@@ -72,6 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> homePanes = getHomeBlocks('100');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pingy'),
