@@ -11,6 +11,8 @@ class UpdateTaskScreen extends StatefulWidget {
 }
 
 class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
+  int defaultActivityTabIndex = 1;
+
   final TextEditingController _scoreController = TextEditingController();
   final TextEditingController _fullScoreController = TextEditingController();
 
@@ -64,7 +66,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
     return DefaultTabController(
       length: 3,
-      initialIndex: 1,
+      initialIndex: defaultActivityTabIndex,
       child: Scaffold(
         appBar: AppBar(
             bottom: const TabBar(
@@ -173,7 +175,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                         ),
                                         Center(
                                           child: ElevatedButton(
-                                            onPressed: () {
+                                            onPressed: () async {
                                               var updatedMissedActivity =
                                                   ActivityItem(
                                                       todoActivity
@@ -192,11 +194,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                                     .setAll(activityItemIndex, [
                                                   updatedMissedActivity
                                                 ]);
+                                                await todayActivity.save();
                                               }
-                                              todayActivity.save();
                                               _fullScoreController.text = '';
-                                              setState(() {});
-
+                                              setState(
+                                                  () => {
+                                                    defaultActivityTabIndex = 2
+                                                  }
+                                              );
                                               Navigator.of(context).pop(true);
                                             },
                                             // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
@@ -228,10 +233,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                               if (todayActivity.isInBox) {
                                 todayActivity.activityItems.setAll(
                                     activityItemIndex, [updatedMissedActivity]);
+                                await todayActivity.save();
                               }
 
-                              todayActivity.save();
-                              setState(() {});
+                              setState(
+                                      () => {
+                                    defaultActivityTabIndex = 0
+                                  }
+                              );
 
                               // Update Box with score.
                               return true;
