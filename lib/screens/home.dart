@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.edit),
         backgroundColor: Colors.green,
       ),
     );
