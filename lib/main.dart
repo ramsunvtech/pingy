@@ -42,10 +42,10 @@ void main() async {
   bool canCreateNewActivity = true;
 
   if (activityBox.containsKey(activityId)) {
-    print('Log: Today Activity is exist');
+    // print('Log: Today Activity is exist');
     Activity todayActivity = activityBox.get(activityId);
     if (todayActivity.activityItems.isNotEmpty) {
-      print('Log: Today Activity Type is not empty');
+      // print('Log: Today Activity Type is not empty');
       canCreateNewActivity = false;
     }
   }
