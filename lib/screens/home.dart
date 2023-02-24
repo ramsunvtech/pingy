@@ -102,10 +102,12 @@ class _HomeScreenState extends State<HomeScreen> {
     Iterable<dynamic> activityTypeBoxMapValues = activityTypeBoxMap.values;
 
     Map rewardBoxMap = rewardBox.toMap();
-    RewardsModel rewardDetails = rewardBoxMap.values.first;
+    if (rewardBoxMap.isNotEmpty) {
+      RewardsModel rewardDetails = rewardBoxMap.values.first;
 
-    print('rewards');
-    print('${rewardDetails.firstPrice}');
+      print('rewards');
+      print('${rewardDetails.firstPrice}');
+    }
 
     int activityTypeFullScore = 0;
     activityTypeBoxMap.forEach((key, value) {
