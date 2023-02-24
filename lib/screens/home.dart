@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pingy/models/hive/activity.dart';
+import 'package:pingy/models/hive/activity_item.dart';
+import 'package:pingy/models/hive/activity_type.dart';
+import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
 import 'settings.dart';
 
@@ -9,9 +14,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // final player = AudioPlayer();
+
+  late final Box rewardBox;
   late final Box activityBox;
+  late final Box activityTypeBox;
+
   String todayScore = '0';
   String totalScore = '0';
+  String predictReward = 'none';
 
   static const String _todayScore = "70";
   static const String _totalScore = "90";
@@ -47,6 +58,29 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      Center(
+        child: Text(
+          'Your Reward: $predictReward',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 40,
+            fontStyle: FontStyle.italic,
+            color: Colors.redAccent,
+          ),
+        ),
+      ),
+      // const Center(
+      //   child: ClipRect(
+      //     borderRadius: BorderRadius.circular(300),
+      //     child: AssetImage('assets/ipad.jpg'),
+      //   ),
+      // ),
+      ElevatedButton(
+        onPressed: () {
+          // player.play(AssetSource('audio/motivation.mp3'));
+        },
+        child: const Text('Play Audio'),
+      ),
     ];
 
     return homePanes;
@@ -57,7 +91,65 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     // Get reference to an already opened box
+    rewardBox = Hive.box('rewards');
     activityBox = Hive.box('activity');
+    activityTypeBox = Hive.box('activity_type');
+
+    Map activityBoxMap = activityBox.toMap();
+    Iterable<dynamic> activityBoxMapValues = activityBoxMap.values;
+
+    Map activityTypeBoxMap = activityTypeBox.toMap();
+    Iterable<dynamic> activityTypeBoxMapValues = activityTypeBoxMap.values;
+
+    Map rewardBoxMap = rewardBox.toMap();
+    RewardsModel rewardDetails = rewardBoxMap.values.first;
+
+    print('rewards');
+    print('${rewardDetails.firstPrice}');
+
+    int activityTypeFullScore = 0;
+    activityTypeBoxMap.forEach((key, value) {
+      activityTypeFullScore += int.tryParse(value.fullScore)!;
+    });
+    print("activityTypeFullScore");
+    print(activityTypeFullScore);
+
+    var today = DateTime.now();
+    var lastActivityId = 'activity_${today.year}${today.month}23';
+    var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
+
+    print("activityBoxMapValues");
+    dynamic totalActivityScore = 0;
+    activityBoxMapValues.forEach((activity) {
+      if (activity.activityId != todayActivityId) {
+        int dayScore = 0;
+        activity.activityItems.forEach((element) {
+          var scoreValue = int.tryParse(element.score ?? "0");
+
+          if (scoreValue != null) {
+            dayScore += scoreValue;
+          }
+          // print('score: ${element.score}');
+        });
+        dynamic todayScoreValue = (((dayScore / activityTypeFullScore)*100).ceil());
+
+        if (activity.activityId == todayActivityId) {
+          todayScore = todayScoreValue.toString();
+        } else {
+          totalActivityScore += todayScoreValue;
+        }
+
+        // print('dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
+      }
+    });
+
+    // print('totalActivityScore: $totalActivityScore');
+
+    int totalActivityDays = activityBoxMapValues.length - 1;
+
+    dynamic rewardScore = ((totalActivityScore)/(100*totalActivityDays)*100);
+
+    totalScore = rewardScore.toString();
   }
 
   @override
@@ -96,9 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: homePanes.length,
         itemBuilder: (context, index) {
           return GestureDetector(
-            onTap: () {
-              print("tapped");
-            },
             child: new Padding(
               padding: const EdgeInsets.all(8.0),
               child: new Container(
