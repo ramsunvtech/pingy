@@ -184,7 +184,11 @@ class _HomeScreenState extends State<HomeScreen> {
         dynamic rewardScore =
         ((totalActivityScore) / (100 * totalActivityDays) * 100);
 
-        totalScore = rewardScore.toString();
+        print('rewardScore');
+        print(rewardScore);
+        if (rewardScore > 0) {
+          totalScore = rewardScore.toString();
+        }
       }
     }
   }
