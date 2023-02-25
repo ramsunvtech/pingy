@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:pingy/screens/home.dart';
 import 'package:pingy/screens/rewards/list_rewards.dart';
 import 'package:pingy/screens/activity/list_activities.dart';
 import 'package:pingy/screens/activity/list_activity_type.dart';
@@ -85,15 +86,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
 
-    if(rewardBox.isNotEmpty) {
+    if (rewardBox.isNotEmpty) {
       rewardExist = '';
     }
 
-    if(activityBox.isNotEmpty) {
+    if (activityBox.isNotEmpty) {
       activityCount = activityBox.length.toString();
     }
 
-    if(activityTypeBox.isNotEmpty) {
+    if (activityTypeBox.isNotEmpty) {
       activityTypeCount = activityTypeBox.length.toString();
     }
   }
@@ -101,7 +102,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pingy (Settings)')),
+      appBar: AppBar(
+        title: const Text('Pingy (Settings)'),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (builder) => HomeScreen(),
+              ),
+            );
+          },
+          child: Icon(
+            Icons.home_rounded, // add custom icons also
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: Column(
@@ -125,7 +141,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // ),
               Center(
                 child: Text(
-                '$activityCount Activity added!',
+                  '$activityCount Activity added!',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -152,9 +168,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     await activityTypeBox.clear();
                     await activityBox.clear();
                   },
-                  child: const Text('Clear Data', style: TextStyle(
-                    fontSize: 20,
-                  ),),
+                  child: const Text(
+                    'Clear Data',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
                 ),
               ),
               // Center(
