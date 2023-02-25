@@ -51,6 +51,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
         _range = '${DateFormat('dd/MM/yyyy').format(args.value.startDate)} -'
         // ignore: lines_longer_than_80_chars
             ' ${DateFormat('dd/MM/yyyy').format(args.value.endDate ?? args.value.startDate)}';
+        _startPeriodController.text = '${startDate} to ${endDate}';
       } else if (args.value is DateTime) {
         _selectedDate = args.value.toString();
       } else if (args.value is List<DateTime>) {
@@ -98,7 +99,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
                 ),
-                helperText: 'Choose starting period',
+                helperText: 'Choose activity period',
                 suffixIcon: Icon(
                   Icons.calendar_month,
                 ),
