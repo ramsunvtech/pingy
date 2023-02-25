@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/rewards/rewards.dart';
 
 class RewardsListScreen extends StatefulWidget {
@@ -48,18 +49,17 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   var currentBox = rewardsBox;
-                  var rewardsData = currentBox.getAt(index)!;
+                  RewardsModel rewardsData = currentBox.getAt(index)!;
                   return InkWell(
                     onTap: () => {},
                     child: ListTile(
                       title: Text(rewardsData.title),
-                      subtitle: Text('${rewardsData.startPeriod} to ${rewardsData.endPeriod}'),
-                      trailing: IconButton(
-                        onPressed: () => {},
-                        icon: const Icon(
-                          Icons.edit,
-                          color: Colors.red,
-                        ),
+                      subtitle: Text(
+                          '${rewardsData.startPeriod}'
+                          ' to ${rewardsData.endPeriod}\n'
+                          'First Prize: ${rewardsData.firstPrice}'
+                          'Second Prize: ${rewardsData.secondPrice}\n'
+                          'Third Prize: ${rewardsData.thirdPrice}'
                       ),
                     ),
                   );
