@@ -223,6 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pingy'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(
