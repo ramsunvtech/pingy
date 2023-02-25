@@ -85,12 +85,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                 ActivityTypeModel newActivityType = ActivityTypeModel(activityTypeId, _nameController.text, _fullScoreController.text);
                 activityTypeBox.put(activityTypeId, newActivityType);
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => ActivityTypeListScreen(),
-                  ),
-                );
+                Navigator.of(context).pop();
               },
               // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
               // color: Colors.pink,
