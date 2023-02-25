@@ -53,7 +53,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     Iterable<ActivityItem> todoActivities = [];
     Iterable<ActivityItem> completedActivities = [];
 
-    if (todayActivity.isInBox) {
+    if (todayActivity != null && todayActivity.isInBox) {
       if (todayActivity.activityItems.isNotEmpty) {
         missedActivities =
         todayActivity.activityItems.where((element) => element.score == "0");
