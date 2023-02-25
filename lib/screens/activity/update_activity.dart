@@ -55,12 +55,13 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
     if (todayActivity.isInBox) {
       if (todayActivity.activityItems.isNotEmpty) {
-        Iterable<ActivityItem> missedActivities =
+        missedActivities =
         todayActivity.activityItems.where((element) => element.score == "0");
-        Iterable<ActivityItem> todoActivities =
+        todoActivities =
         todayActivity.activityItems.where((element) => element.score == "");
-        Iterable<ActivityItem> completedActivities = todayActivity.activityItems
+        completedActivities = todayActivity.activityItems
             .where((element) => element.score != "" && element.score != "0");
+
       }
     }
 
@@ -295,19 +296,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
-  Widget getTrailingIcon(bool isSelected) {
-    if (isSelected) {
-      return const Icon(
-        Icons.check_circle,
-        color: Colors.green,
-      );
-    }
-    return const Icon(
-      Icons.check_circle_outline,
-      color: Colors.grey,
-    );
-  }
-
   Widget taskItem(String taskName, String? mark, bool isSelected, int index) {
     var enabled = true;
 
@@ -327,19 +315,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         ),
       ),
       subtitle: Text(mark ?? '0'),
-      trailing: getTrailingIcon(isSelected),
-      onTap: () async {
-        setState(() {
-          taskTypes[0].isSelected = false;
-          taskTypes[1].isSelected = false;
-          taskTypes[2].isSelected = false;
-          taskTypes[index].isSelected = !taskTypes[index].isSelected;
-          if (taskTypes[index].isSelected == true) {
-            _scoreController.text = taskTypes[index].mark.toString();
-            selectedTaskType = TaskTypeModel(taskName, 160, true);
-          }
-        });
-      },
     );
   }
 }
