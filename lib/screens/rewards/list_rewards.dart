@@ -19,6 +19,25 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
     rewardsBox = Hive.box('rewards');
   }
 
+  Widget getFloatingButton(BuildContext context) {
+    if (!rewardsBox.isEmpty) {
+      return Container();
+    }
+
+    return FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => RewardsScreen(),
+          ),
+        );
+      },
+      child: const Icon(Icons.add),
+      backgroundColor: Colors.green,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,18 +88,7 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => RewardsScreen(),
-            ),
-          );
-        },
-        child: const Icon(Icons.gif_box),
-        backgroundColor: Colors.green,
-      ),
+      floatingActionButton: getFloatingButton(context),
     );
   }
 }
