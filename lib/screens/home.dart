@@ -1,11 +1,14 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
-// import 'package:audioplayers/audioplayers.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/hive/rewards.dart';
+import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
+import 'package:pingy/screens/rewards/rewards.dart';
 import 'settings.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,8 +17,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // final player = AudioPlayer();
-
   late final Box rewardBox;
   late final Box activityBox;
   late final Box activityTypeBox;
@@ -23,12 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String todayScore = '0';
   String totalScore = '0';
   String predictReward = 'none';
-
-  static const String _todayScore = "70";
-  static const String _totalScore = "90";
+  bool containsRewards = false;
+  bool containsTypes = false;
 
   List<Widget> getHomeBlocks(String score) {
-
     final List<Widget> homePanes = [
       const Center(
         child: CircleAvatar(
@@ -36,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundImage: AssetImage('assets/cute.webp'),
         ),
       ),
-      Center(
+      if(containsRewards) Center(
         child: Text(
           'Today Score: $todayScore%',
           style: TextStyle(
@@ -47,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      Center(
+      if(containsRewards) Center(
         child: Text(
           'Total Score: $totalScore%',
           style: TextStyle(
@@ -58,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      Center(
+      if(containsRewards) Center(
         child: Text(
           'Your Reward: $predictReward',
           style: TextStyle(
@@ -75,17 +74,32 @@ class _HomeScreenState extends State<HomeScreen> {
       //     child: AssetImage('assets/ipad.jpg'),
       //   ),
       // ),
-      ElevatedButton(
+      if(!containsRewards) ElevatedButton(
         onPressed: () {
-          // player.play(AssetSource('audio/motivation.mp3'));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (builder) => RewardsScreen(),
+            ),
+          );
         },
-        child: const Text('Play Audio'),
+        child: const Text('Add your Reward details'),
+      ),
+      if(containsRewards && !containsTypes) ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (builder) => TaskTypeScreen(),
+            ),
+          );
+        },
+        child: const Text('Add your Activity Types'),
       ),
     ];
 
     return homePanes;
   }
-
 
   @override
   void initState() {
@@ -103,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Map rewardBoxMap = rewardBox.toMap();
     if (rewardBoxMap.isNotEmpty) {
+      containsRewards = true;
       RewardsModel rewardDetails = rewardBoxMap.values.first;
 
       print('rewards');
@@ -116,42 +131,52 @@ class _HomeScreenState extends State<HomeScreen> {
     print("activityTypeFullScore");
     print(activityTypeFullScore);
 
-    var today = DateTime.now();
-    var lastActivityId = 'activity_${today.year}${today.month}23';
-    var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
+    if (activityTypeFullScore > 0) {
+      containsTypes = true;
 
-    print("activityBoxMapValues");
-    dynamic totalActivityScore = 0;
-    activityBoxMapValues.forEach((activity) {
-      if (activity.activityId != todayActivityId) {
-        int dayScore = 0;
-        activity.activityItems.forEach((element) {
-          var scoreValue = int.tryParse(element.score ?? "0");
+      var today = DateTime.now();
+      var lastActivityId = 'activity_${today.year}${today.month}23';
+      var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
 
-          if (scoreValue != null) {
-            dayScore += scoreValue;
+      print("activityBoxMapValues");
+      dynamic totalActivityScore = 0;
+      activityBoxMapValues.forEach((activity) {
+        if (activity.activityId != todayActivityId) {
+          int dayScore = 0;
+          activity.activityItems.forEach((element) {
+            var scoreValue = int.tryParse(element.score ?? "0");
+
+            if (scoreValue != null) {
+              dayScore += scoreValue;
+            }
+            print('score: ${element.score}');
+          });
+
+          dynamic todayScoreValue =
+              (((dayScore / activityTypeFullScore) * 100).ceil());
+
+          if (activity.activityId == todayActivityId && todayScoreValue != '') {
+            todayScore = todayScoreValue.toString();
+          } else if (todayScoreValue != '') {
+            totalActivityScore += todayScoreValue;
           }
-          // print('score: ${element.score}');
-        });
-        dynamic todayScoreValue = (((dayScore / activityTypeFullScore)*100).ceil());
 
-        if (activity.activityId == todayActivityId) {
-          todayScore = todayScoreValue.toString();
-        } else {
-          totalActivityScore += todayScoreValue;
+          if (todayScoreValue) {
+            print(
+                'dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
+          }
         }
+      });
 
-        // print('dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
-      }
-    });
+      print('totalActivityScore: $totalActivityScore');
 
-    // print('totalActivityScore: $totalActivityScore');
+      int totalActivityDays = activityBoxMapValues.length - 1;
 
-    int totalActivityDays = activityBoxMapValues.length - 1;
+      dynamic rewardScore =
+          ((totalActivityScore) / (100 * totalActivityDays) * 100);
 
-    dynamic rewardScore = ((totalActivityScore)/(100*totalActivityDays)*100);
-
-    totalScore = rewardScore.toString();
+      totalScore = rewardScore.toString();
+    }
   }
 
   @override
@@ -160,6 +185,25 @@ class _HomeScreenState extends State<HomeScreen> {
     Hive.close();
 
     super.dispose();
+  }
+
+  Widget getFloatingButton(BuildContext context) {
+    if (!containsRewards && !containsTypes) {
+      return Container();
+    }
+
+    return FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => UpdateTaskScreen(),
+          ),
+        );
+      },
+      child: const Icon(Icons.edit),
+      backgroundColor: Colors.green,
+    );
   }
 
   @override
@@ -199,18 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => UpdateTaskScreen(),
-            ),
-          );
-        },
-        child: const Icon(Icons.edit),
-        backgroundColor: Colors.green,
-      ),
+      floatingActionButton: getFloatingButton(context),
     );
   }
 }
