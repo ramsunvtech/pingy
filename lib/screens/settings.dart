@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:pingy/screens/rewards/list_rewards.dart';
 import 'package:pingy/screens/activity/list_activities.dart';
@@ -12,6 +13,14 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  late final Box rewardBox;
+  late final Box activityBox;
+  late final Box activityTypeBox;
+
+  String rewardExist = 'No';
+  String activityCount = '0';
+  String activityTypeCount = '0';
+
   final auth = LocalAuthentication();
   String authorized = " not authorized";
   bool _canCheckBiometric = false;
@@ -70,8 +79,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     _checkBiometric();
     _getAvailableBiometric();
-
     super.initState();
+
+    rewardBox = Hive.box('rewards');
+    activityBox = Hive.box('activity');
+    activityTypeBox = Hive.box('activity_type');
+
+    if(rewardBox.isNotEmpty) {
+      rewardExist = '';
+    }
+
+    if(activityBox.isNotEmpty) {
+      activityCount = activityBox.length.toString();
+    }
+
+    if(activityTypeBox.isNotEmpty) {
+      activityTypeCount = activityTypeBox.length.toString();
+    }
   }
 
   @override
@@ -79,19 +103,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Pingy (Settings)')),
       body: SafeArea(
-        child: Column(
-          children: [
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: _authenticate,
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text("Fingerprint Auth"),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '$rewardExist Rewards exist',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.blue,
+                ),
               ),
-            ),
-            Center(
-              child: Text(authorized),
-            )
-          ],
+              // Center(
+              //   child: ElevatedButton.icon(
+              //     onPressed: _authenticate,
+              //     icon: const Icon(Icons.add, size: 18),
+              //     label: const Text("Fingerprint Auth"),
+              //   ),
+              // ),
+              Center(
+                child: Text(
+                '$activityCount Activity added!',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+              Center(
+                child: Text(
+                  '$activityTypeCount Activity Types added!',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await rewardBox.clear();
+                    await activityTypeBox.clear();
+                    await activityBox.clear();
+                  },
+                  child: const Text('Clear Data', style: TextStyle(
+                    fontSize: 20,
+                  ),),
+                ),
+              ),
+              // Center(
+              //   child: Text(authorized),
+              // ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
