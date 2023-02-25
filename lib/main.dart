@@ -33,13 +33,17 @@ void main() async {
 
   // Open Activity Type, Rewards and Activity Box.
   final activityTypeBox = await Hive.openBox('activity_type');
-  await Hive.openBox('rewards');
+  var rewardBox = await Hive.openBox('rewards');
   var activityBox = await Hive.openBox('activity');
 
   // Add Today Activity if not exist.
   var today = DateTime.now();
   var activityId = 'activity_${today.year}${today.month}${today.day}';
   bool canCreateNewActivity = true;
+
+  if (rewardBox.isEmpty || activityTypeBox.isEmpty) {
+    canCreateNewActivity = false;
+  }
 
   if (activityBox.containsKey(activityId)) {
     // print('Log: Today Activity is exist');
