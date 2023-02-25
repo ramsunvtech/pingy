@@ -49,12 +49,20 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     var activityId = 'activity_${today.year}${today.month}${today.day}';
     Activity todayActivity = activityBox.get(activityId);
 
-    Iterable<ActivityItem> missedActivities =
+    Iterable<ActivityItem> missedActivities = [];
+    Iterable<ActivityItem> todoActivities = [];
+    Iterable<ActivityItem> completedActivities = [];
+
+    if (todayActivity.isInBox) {
+      if (todayActivity.activityItems.isNotEmpty) {
+        Iterable<ActivityItem> missedActivities =
         todayActivity.activityItems.where((element) => element.score == "0");
-    Iterable<ActivityItem> todoActivities =
+        Iterable<ActivityItem> todoActivities =
         todayActivity.activityItems.where((element) => element.score == "");
-    Iterable<ActivityItem> completedActivities = todayActivity.activityItems
-        .where((element) => element.score != "" && element.score != "0");
+        Iterable<ActivityItem> completedActivities = todayActivity.activityItems
+            .where((element) => element.score != "" && element.score != "0");
+      }
+    }
 
     return DefaultTabController(
       length: 3,
