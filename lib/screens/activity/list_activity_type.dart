@@ -98,7 +98,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
             ),
           );
         },
-        child: const Icon(Icons.task),
+        child: const Icon(Icons.add),
         backgroundColor: Colors.green,
       ),
     );
