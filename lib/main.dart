@@ -91,6 +91,3 @@ class _PingyAppState extends State<PingyApp> {
     );
   }
 }
-
-// Text('Hello Pingy Rewards')
-// PingyApp
