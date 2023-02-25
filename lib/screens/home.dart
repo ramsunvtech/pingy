@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundImage: AssetImage('assets/cute.webp'),
         ),
       ),
-      if(containsRewards) Center(
+      if(containsRewards && containsTypes) Center(
         child: Text(
           'Today Score: $todayScore%',
           style: TextStyle(
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      if(containsRewards) Center(
+      if(containsRewards && containsTypes) Center(
         child: Text(
           'Total Score: $totalScore%',
           style: TextStyle(
@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      if(containsRewards) Center(
+      if(containsRewards && containsTypes) Center(
         child: Text(
           'Your Reward: $predictReward',
           style: TextStyle(
@@ -128,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
     activityTypeBoxMap.forEach((key, value) {
       activityTypeFullScore += int.tryParse(value.fullScore)!;
     });
+
     print("activityTypeFullScore");
     print(activityTypeFullScore);
 
@@ -138,44 +139,53 @@ class _HomeScreenState extends State<HomeScreen> {
       var lastActivityId = 'activity_${today.year}${today.month}23';
       var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
 
-      print("activityBoxMapValues");
-      dynamic totalActivityScore = 0;
-      activityBoxMapValues.forEach((activity) {
-        if (activity.activityId != todayActivityId) {
-          int dayScore = 0;
-          activity.activityItems.forEach((element) {
-            var scoreValue = int.tryParse(element.score ?? "0");
+      if (activityBoxMapValues.isNotEmpty) {
+        print("activityBoxMapValues");
+        dynamic totalActivityScore = 0;
+        activityBoxMapValues.forEach((activity) {
+          print(activity.activityId);
+          if (activity.activityId != todayActivityId) {
+            int dayScore = 0;
+            activity.activityItems.forEach((element) {
+              var scoreValue = int.tryParse(element.score ?? "0");
 
-            if (scoreValue != null) {
-              dayScore += scoreValue;
+              if (scoreValue != null) {
+                dayScore += scoreValue;
+              }
+              print('score: ${element.score}');
+            });
+
+            print ('day score');
+            print(dayScore);
+
+            dynamic todayScoreValue =
+            (((dayScore / activityTypeFullScore) * 100).ceil());
+
+            print ('todayScoreValue');
+            print(todayScoreValue);
+
+            if (activity.activityId == todayActivityId && todayScoreValue != '') {
+              todayScore = todayScoreValue.toString();
+            } else if (todayScoreValue != '') {
+              totalActivityScore += todayScoreValue;
             }
-            print('score: ${element.score}');
-          });
 
-          dynamic todayScoreValue =
-              (((dayScore / activityTypeFullScore) * 100).ceil());
-
-          if (activity.activityId == todayActivityId && todayScoreValue != '') {
-            todayScore = todayScoreValue.toString();
-          } else if (todayScoreValue != '') {
-            totalActivityScore += todayScoreValue;
+            if (todayScoreValue > 0) {
+              print(
+                  'dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
+            }
           }
+        });
 
-          if (todayScoreValue) {
-            print(
-                'dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
-          }
-        }
-      });
+        print('totalActivityScore: $totalActivityScore');
 
-      print('totalActivityScore: $totalActivityScore');
+        int totalActivityDays = activityBoxMapValues.length - 1;
 
-      int totalActivityDays = activityBoxMapValues.length - 1;
+        dynamic rewardScore =
+        ((totalActivityScore) / (100 * totalActivityDays) * 100);
 
-      dynamic rewardScore =
-          ((totalActivityScore) / (100 * totalActivityDays) * 100);
-
-      totalScore = rewardScore.toString();
+        totalScore = rewardScore.toString();
+      }
     }
   }
 
