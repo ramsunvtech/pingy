@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
+import 'package:pingy/screens/home.dart';
 
 class ActivityTypeListScreen extends StatefulWidget {
   @override
@@ -29,6 +30,19 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Pingy (Activity Types - $activityTypeCount)'),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (builder) => HomeScreen(),
+              ),
+            );
+          },
+          child: Icon(
+            Icons.home_rounded,  // add custom icons also
+          ),
+        ),
       ),
       body: ValueListenableBuilder(
         valueListenable: activityTypeBox.listenable(),
