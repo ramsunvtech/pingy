@@ -11,18 +11,24 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   late final Box activityTypeBox;
 
+  String activityTypeCount = '0';
+
   @override
   void initState() {
     super.initState();
     // Get reference to an already opened box
     activityTypeBox = Hive.box('activity_type');
+
+    if(activityTypeBox.isNotEmpty) {
+      activityTypeCount = activityTypeBox.length.toString();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pingy (Activity Types)'),
+        title: Text('Pingy (Activity Types - $activityTypeCount)'),
       ),
       body: ValueListenableBuilder(
         valueListenable: activityTypeBox.listenable(),
