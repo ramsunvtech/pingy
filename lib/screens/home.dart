@@ -174,15 +174,19 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         });
 
-        // print('totalActivityScore: $totalActivityScore');
+        print('totalActivityScore: $totalActivityScore');
 
         dynamic totalActivityDays = activityBoxMapValues.length - 1;
 
-        dynamic rewardScore =
-        ((totalActivityScore) / (100 * totalActivityDays) * 100);
+        print('totalActivityDays: $totalActivityDays');
 
-        // print('rewardScore');
-        // print(rewardScore);
+        dynamic rewardScore = 0;
+
+        if (totalActivityScore > 0 && totalActivityScore > 0) {
+          rewardScore = ((totalActivityScore) / (100 * totalActivityDays) * 100);
+        }
+
+        print('rewardScore: $rewardScore');
         if (rewardScore > 0) {
           totalScore = rewardScore.toString();
         }
