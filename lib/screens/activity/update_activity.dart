@@ -252,19 +252,25 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
                             switch (direction) {
                               case DismissDirection.startToEnd:
-                                textMessage = 'left';
+                                textMessage = 'right';
                                 break;
                               case DismissDirection.endToStart:
-                                textMessage = 'right';
+                                textMessage = 'left';
                                 break;
                               default:
                                 textMessage = 'default';
                                 break;
                             }
                             if (textMessage != '') {
+                              String toastMessage = '';
+                              if(textMessage == 'right') {
+                                toastMessage = 'Activity completed successfully with specified Score.';
+                              } else {
+                                toastMessage = 'Activity marked as missed successfully.';
+                              }
                               ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                      content: Text('swiped $textMessage')));
+                                      content: Text(toastMessage)));
                             }
                           });
                     },
