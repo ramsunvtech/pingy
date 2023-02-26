@@ -43,12 +43,97 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   TaskTypeModel selectedTaskType = TaskTypeModel('default', 100, false);
 
-  @override
-  Widget build(BuildContext context) {
+  Widget getUpdateActivityForm(BuildContext content, dynamic todoActivity) {
+    Activity todayActivity = getTodatyActivity();
+    ActivityTypeModel todayActivityItemDetail = activityTypeBox.get(todoActivity.activityItemId);
+
+    return Wrap(
+      children: [
+        Center(child: Text('Update')),
+        Center(
+          child: TextFormField(
+            controller: _fullScoreController,
+            cursorColor: Theme.of(context)
+                .backgroundColor,
+            keyboardType: TextInputType.number,
+            maxLength: 3,
+            decoration: InputDecoration(
+              icon: Icon(Icons.numbers),
+              labelText: 'Activity Score',
+              labelStyle: TextStyle(
+                color: Color(0xFF6200EE),
+              ),
+              helperText:
+              'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
+              suffixIcon: Icon(
+                Icons.check_circle,
+              ),
+              enabledBorder:
+              UnderlineInputBorder(
+                borderSide: BorderSide(
+                    color: Color(0xFF6200EE)),
+              ),
+            ),
+          ),
+        ),
+        Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+            // color: Colors.pink,
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.6),
+            ),
+          ),
+        ),
+        Center(
+          child: ElevatedButton(
+            onPressed: () async {
+              var updatedMissedActivity = ActivityItem(todoActivity.activityItemId, _fullScoreController.text);
+              var activityItemIndex = todayActivity.activityItems.indexWhere((element) => element.activityItemId == todoActivity.activityItemId);
+              if (todayActivity.isInBox) {
+                todayActivity.activityItems.setAll(activityItemIndex, [
+                  updatedMissedActivity
+                ]);
+                await todayActivity.save();
+              }
+              _fullScoreController.text = '';
+              setState(() => {
+                defaultActivityTabIndex = 2
+              });
+              Navigator.of(context).pop(true);
+            },
+            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+            // color: Colors.pink,
+            child: const Text(
+              'Completed',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.6),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Activity getTodatyActivity() {
     var today = DateTime.now();
     var activityId = 'activity_${today.year}${today.month}${today.day}';
     Activity todayActivity = activityBox.get(activityId);
+    return todayActivity;
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    Activity todayActivity = getTodatyActivity();
     Iterable<ActivityItem> missedActivities = [];
     Iterable<ActivityItem> todoActivities = [];
     Iterable<ActivityItem> completedActivities = [];
@@ -95,6 +180,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                       return taskItem(
                         missedActivityItemDetail.activityName,
                         missedActivity.score ?? '0',
+                        missedActivity,
                         false,
                         index,
                       );
@@ -115,9 +201,10 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                           key: Key('item_${index + 1}'),
                           child: taskItem(
                             todayActivityItemDetail.activityName,
-                            'Swipe right to add score',
+                            'Swipe right to add score / left to mark as missed',
+                              todoActivity,
                             false,
-                            index,
+                            index
                           ),
                           confirmDismiss: (direction) async {
                             if (direction == DismissDirection.startToEnd) {
@@ -129,95 +216,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                 builder: (BuildContext context) {
                                   return Padding(
                                     padding: MediaQuery.of(context).viewInsets,
-                                    child: Wrap(
-                                      children: [
-                                        Center(child: Text('Update')),
-                                        Center(
-                                          child: TextFormField(
-                                            controller: _fullScoreController,
-                                            cursorColor: Theme.of(context)
-                                                .backgroundColor,
-                                            keyboardType: TextInputType.number,
-                                            maxLength: 3,
-                                            decoration: InputDecoration(
-                                              icon: Icon(Icons.numbers),
-                                              labelText: 'Activity Score',
-                                              labelStyle: TextStyle(
-                                                color: Color(0xFF6200EE),
-                                              ),
-                                              helperText:
-                                                  'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
-                                              suffixIcon: Icon(
-                                                Icons.check_circle,
-                                              ),
-                                              enabledBorder:
-                                                  UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Color(0xFF6200EE)),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Center(
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop(false);
-                                            },
-                                            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                                            // color: Colors.pink,
-                                            child: Text(
-                                              'Cancel',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  letterSpacing: 0.6),
-                                            ),
-                                          ),
-                                        ),
-                                        Center(
-                                          child: ElevatedButton(
-                                            onPressed: () async {
-                                              var updatedMissedActivity =
-                                                  ActivityItem(
-                                                      todoActivity
-                                                          .activityItemId,
-                                                      _fullScoreController
-                                                          .text);
-                                              var activityItemIndex =
-                                                  todayActivity.activityItems
-                                                      .indexWhere((element) =>
-                                                          element
-                                                              .activityItemId ==
-                                                          todoActivity
-                                                              .activityItemId);
-                                              if (todayActivity.isInBox) {
-                                                todayActivity.activityItems
-                                                    .setAll(activityItemIndex, [
-                                                  updatedMissedActivity
-                                                ]);
-                                                await todayActivity.save();
-                                              }
-                                              _fullScoreController.text = '';
-                                              setState(
-                                                  () => {
-                                                    defaultActivityTabIndex = 2
-                                                  }
-                                              );
-                                              Navigator.of(context).pop(true);
-                                            },
-                                            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                                            // color: Colors.pink,
-                                            child: const Text(
-                                              'Completed',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  letterSpacing: 0.6),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    child: getUpdateActivityForm(context, todoActivity),
                                   );
                                 },
                               );
@@ -291,6 +290,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                       return taskItem(
                         completedActivityItemDetail.activityName,
                         completedActivity.score,
+                        completedActivity,
                         false,
                         index,
                       );
@@ -302,7 +302,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
-  Widget taskItem(String taskName, String? mark, bool isSelected, int index) {
+  Widget taskItem(String taskName, String? mark, ActivityItem selectActivity, bool isSelected, int index) {
     var enabled = true;
 
     return ListTile(
@@ -321,6 +321,18 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         ),
       ),
       subtitle: Text(mark ?? '0'),
+      onTap: () async {
+        return await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (BuildContext context) {
+            return Padding(
+              padding: MediaQuery.of(context).viewInsets,
+              child: getUpdateActivityForm(context, selectActivity),
+            );
+          },
+        );
+      },
     );
   }
 }
