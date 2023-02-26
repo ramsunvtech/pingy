@@ -199,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget getFloatingButton(BuildContext context) {
-    if (!containsRewards && !containsTypes) {
+    if (!containsRewards || !containsTypes || activityBox.length == 0) {
       return Container();
     }
 
