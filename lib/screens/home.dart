@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/activity.dart';
@@ -155,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // print('score: ${element.score}');
             });
 
-            print ('day score');
+            // print ('day score');
             // print(dayScore);
 
             dynamic todayScoreValue =
