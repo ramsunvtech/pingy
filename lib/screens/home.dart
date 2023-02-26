@@ -122,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // print('${rewardDetails.firstPrice}');
     }
 
-    int activityTypeFullScore = 0;
+    dynamic activityTypeFullScore = 0;
     activityTypeBoxMap.forEach((key, value) {
       activityTypeFullScore += int.tryParse(value.fullScore)!;
     });
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
         activityBoxMapValues.forEach((activity) {
           // print(activity.activityId);
           if (activity.activityId != todayActivityId) {
-            int dayScore = 0;
+            dynamic dayScore = 0;
             activity.activityItems.forEach((element) {
               var scoreValue = int.tryParse(element.score ?? "0");
 
@@ -176,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // print('totalActivityScore: $totalActivityScore');
 
-        int totalActivityDays = activityBoxMapValues.length - 1;
+        dynamic totalActivityDays = activityBoxMapValues.length - 1;
 
         dynamic rewardScore =
         ((totalActivityScore) / (100 * totalActivityDays) * 100);

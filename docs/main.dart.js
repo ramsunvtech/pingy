@@ -74993,15 +74993,16 @@ $0(){this.a.d=0
 return A.cE([0],t.S)},
 $S:0}
 A.ain.prototype={
-$1(a){var s,r,q=null
-switch(a.a){case 3:s="left"
+$1(a){var s,r,q,p=null
+switch(a.a){case 3:s="right"
 break
-case 2:s="right"
+case 2:s="left"
 break
 default:s="default"
-break}if(s!==""){r=this.a.N(t.Pu)
-r.toString
-r.f.RB(A.arh(q,q,q,q,B.a1,A.cX("swiped "+s,q,q,q,q,q,q,q),B.nv,B.Cu,q,q,q,q,q,q,q))}},
+break}if(s!==""){r=s==="right"?"Activity completed successfully with specified Score.":"Activity marked as missed successfully."
+q=this.a.N(t.Pu)
+q.toString
+q.f.RB(A.arh(p,p,p,p,B.a1,A.cX(r,p,p,p,p,p,p,p),B.nv,B.Cu,p,p,p,p,p,p,p))}},
 $S:117}
 A.ait.prototype={
 $2(a,b){var s=J.qg(this.a.c,b),r=this.b,q=r.w
