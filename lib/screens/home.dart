@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String todayScore = '0';
   String totalScore = '0';
-  String predictReward = 'none';
+  String predictReward = '';
   bool containsRewards = false;
   bool containsTypes = false;
 
@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      if(containsRewards && containsTypes) Center(
+      if(containsRewards && containsTypes && predictReward != '') Center(
         child: Text(
           'Your Reward: $predictReward',
           style: TextStyle(
