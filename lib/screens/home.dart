@@ -120,8 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
       containsRewards = true;
       RewardsModel rewardDetails = rewardBoxMap.values.first;
 
-      print('rewards');
-      print('${rewardDetails.firstPrice}');
+      // print('rewards');
+      // print('${rewardDetails.firstPrice}');
     }
 
     int activityTypeFullScore = 0;
@@ -129,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
       activityTypeFullScore += int.tryParse(value.fullScore)!;
     });
 
-    print("activityTypeFullScore");
-    print(activityTypeFullScore);
+    // print("activityTypeFullScore");
+    // print(activityTypeFullScore);
 
     if (activityTypeFullScore > 0) {
       containsTypes = true;
@@ -140,10 +140,10 @@ class _HomeScreenState extends State<HomeScreen> {
       var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
 
       if (activityBoxMapValues.isNotEmpty) {
-        print("activityBoxMapValues");
+        // print("activityBoxMapValues");
         dynamic totalActivityScore = 0;
         activityBoxMapValues.forEach((activity) {
-          print(activity.activityId);
+          // print(activity.activityId);
           if (activity.activityId != todayActivityId) {
             int dayScore = 0;
             activity.activityItems.forEach((element) {
@@ -152,17 +152,17 @@ class _HomeScreenState extends State<HomeScreen> {
               if (scoreValue != null) {
                 dayScore += scoreValue;
               }
-              print('score: ${element.score}');
+              // print('score: ${element.score}');
             });
 
             print ('day score');
-            print(dayScore);
+            // print(dayScore);
 
             dynamic todayScoreValue =
             (((dayScore / activityTypeFullScore) * 100).ceil());
 
-            print ('todayScoreValue');
-            print(todayScoreValue);
+            // print ('todayScoreValue');
+            // print(todayScoreValue);
 
             if (activity.activityId == todayActivityId && todayScoreValue != '') {
               todayScore = todayScoreValue.toString();
@@ -171,21 +171,20 @@ class _HomeScreenState extends State<HomeScreen> {
             }
 
             if (todayScoreValue > 0) {
-              print(
-                  'dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
+              // print('dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
             }
           }
         });
 
-        print('totalActivityScore: $totalActivityScore');
+        // print('totalActivityScore: $totalActivityScore');
 
         int totalActivityDays = activityBoxMapValues.length - 1;
 
         dynamic rewardScore =
         ((totalActivityScore) / (100 * totalActivityDays) * 100);
 
-        print('rewardScore');
-        print(rewardScore);
+        // print('rewardScore');
+        // print(rewardScore);
         if (rewardScore > 0) {
           totalScore = rewardScore.toString();
         }

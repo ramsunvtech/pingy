@@ -35,8 +35,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         authenticated = await auth.authenticate(
             localizedReason: "Scan your finger to authenticate");
       } on PlatformException catch (e) {
-        print('platform exception');
-        print(e);
+        // print('platform exception');
+        // print(e);
       }
     }
 
