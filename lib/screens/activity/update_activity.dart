@@ -45,7 +45,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   Widget getUpdateActivityForm(BuildContext content, dynamic todoActivity) {
     Activity todayActivity = getTodatyActivity();
-    ActivityTypeModel todayActivityItemDetail = activityTypeBox.get(todoActivity.activityItemId);
+    ActivityTypeModel todayActivityItemDetail =
+        activityTypeBox.get(todoActivity.activityItemId);
 
     return Wrap(
       children: [
@@ -53,8 +54,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         Center(
           child: TextFormField(
             controller: _fullScoreController,
-            cursorColor: Theme.of(context)
-                .backgroundColor,
+            cursorColor: Theme.of(context).backgroundColor,
             keyboardType: TextInputType.number,
             maxLength: 3,
             decoration: InputDecoration(
@@ -64,14 +64,12 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 color: Color(0xFF6200EE),
               ),
               helperText:
-              'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
+                  'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
               suffixIcon: Icon(
                 Icons.check_circle,
               ),
-              enabledBorder:
-              UnderlineInputBorder(
-                borderSide: BorderSide(
-                    color: Color(0xFF6200EE)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFF6200EE)),
               ),
             ),
           ),
@@ -95,18 +93,18 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         Center(
           child: ElevatedButton(
             onPressed: () async {
-              var updatedMissedActivity = ActivityItem(todoActivity.activityItemId, _fullScoreController.text);
-              var activityItemIndex = todayActivity.activityItems.indexWhere((element) => element.activityItemId == todoActivity.activityItemId);
+              var updatedMissedActivity = ActivityItem(
+                  todoActivity.activityItemId, _fullScoreController.text);
+              var activityItemIndex = todayActivity.activityItems.indexWhere(
+                  (element) =>
+                      element.activityItemId == todoActivity.activityItemId);
               if (todayActivity.isInBox) {
-                todayActivity.activityItems.setAll(activityItemIndex, [
-                  updatedMissedActivity
-                ]);
+                todayActivity.activityItems
+                    .setAll(activityItemIndex, [updatedMissedActivity]);
                 await todayActivity.save();
               }
               _fullScoreController.text = '';
-              setState(() => {
-                defaultActivityTabIndex = 2
-              });
+              setState(() => {defaultActivityTabIndex = 2});
               Navigator.of(context).pop(true);
             },
             // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
@@ -140,13 +138,12 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
     if (todayActivity != null && todayActivity.isInBox) {
       if (todayActivity.activityItems.isNotEmpty) {
-        missedActivities =
-        todayActivity.activityItems.where((element) => element.score == "0");
+        missedActivities = todayActivity.activityItems
+            .where((element) => element.score == "0");
         todoActivities =
-        todayActivity.activityItems.where((element) => element.score == "");
+            todayActivity.activityItems.where((element) => element.score == "");
         completedActivities = todayActivity.activityItems
             .where((element) => element.score != "" && element.score != "0");
-
       }
     }
 
@@ -162,7 +159,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 Tab(text: 'Done'),
               ],
             ),
-            title: const Text('Update Activity')),
+            title: const Text('Activity Today')),
         body: TabBarView(
           children: [
             (missedActivities.isEmpty)
@@ -187,8 +184,10 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                     },
                   ),
             (todoActivities.isEmpty)
-                ? const Center(
-                    child: Text('No Activities are available. its Empty'),
+                ? Center(
+                    child: Text(
+                        (todoActivities.isEmpty && completedActivities.length == todayActivity.activityItems.length) ? 'Cool, You are done for the day!' : 'No Activities are available. its Empty'
+                    ),
                   )
                 : ListView.builder(
                     itemCount: todoActivities.length,
@@ -200,12 +199,11 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                       return Dismissible(
                           key: Key('item_${index + 1}'),
                           child: taskItem(
-                            todayActivityItemDetail.activityName,
-                            'Swipe right to add score / left to mark as missed',
+                              todayActivityItemDetail.activityName,
+                              'Swipe right to add score / left to mark as missed',
                               todoActivity,
-                            false,
-                            index
-                          ),
+                              false,
+                              index),
                           confirmDismiss: (direction) async {
                             if (direction == DismissDirection.startToEnd) {
                               // Update Box with 0 as score.
@@ -216,7 +214,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                 builder: (BuildContext context) {
                                   return Padding(
                                     padding: MediaQuery.of(context).viewInsets,
-                                    child: getUpdateActivityForm(context, todoActivity),
+                                    child: getUpdateActivityForm(
+                                        context, todoActivity),
                                   );
                                 },
                               );
@@ -236,11 +235,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                 await todayActivity.save();
                               }
 
-                              setState(
-                                      () => {
-                                    defaultActivityTabIndex = 0
-                                  }
-                              );
+                              setState(() => {defaultActivityTabIndex = 0});
 
                               // Update Box with score.
                               return true;
@@ -262,14 +257,15 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                             }
                             if (textMessage != '') {
                               String toastMessage = '';
-                              if(textMessage == 'right') {
-                                toastMessage = 'Activity completed successfully with specified Score.';
+                              if (textMessage == 'right') {
+                                toastMessage =
+                                    'Activity completed successfully with specified Score.';
                               } else {
-                                toastMessage = 'Activity marked as missed successfully.';
+                                toastMessage =
+                                    'Activity marked as missed successfully.';
                               }
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(toastMessage)));
+                                  SnackBar(content: Text(toastMessage)));
                             }
                           });
                     },
@@ -302,7 +298,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
-  Widget taskItem(String taskName, String? mark, ActivityItem selectActivity, bool isSelected, int index) {
+  Widget taskItem(String taskName, String? mark, ActivityItem selectActivity,
+      bool isSelected, int index) {
     var enabled = true;
 
     return ListTile(
