@@ -75055,74 +75055,74 @@ if(s.y&&s.z&&s.x!=="")q.push(A.dE(A.cO(s.x+" Reward on your way!",r,r,r,r,A.bt(r
 if(!s.y)q.push(A.o3(B.Of,new A.adK(s)))
 if(s.y&&!s.z)q.push(A.o3(B.Ow,new A.adL(s)))
 return q},
-aA(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1=this,a2=null,a3="Box has already been closed.",a4={}
-a1.aS()
+aA(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0=this,a1=null,a2="Box has already been closed.",a3={}
+a0.aS()
 s=$.ib()
 r=t.z
 q=t.C
 p=q.a(s.eI("rewards",!1,r))
-a1.d!==$&&A.bS()
-a1.d=p
+a0.d!==$&&A.bS()
+a0.d=p
 o=q.a(s.eI("activity",!1,r))
-a1.e!==$&&A.bS()
-a1.e=o
+a0.e!==$&&A.bS()
+a0.e=o
 s=q.a(s.eI("activity_type",!1,r))
-a1.f!==$&&A.bS()
-a1.f=s
+a0.f!==$&&A.bS()
+a0.f=s
 n=new A.be(Date.now(),!1)
 m="activity_"+A.aQ(n)+A.bW(n)+A.kL(n)
-if(!p.f)A.B(A.bn(a3))
+l=p.ox()
+if(l.a!==0)a0.y=!0
+if(!p.f)A.B(A.bn(a2))
 q=p.e
 q===$&&A.a()
-if(q.c.e!==0){if(!s.f)A.B(A.bn(a3))
+if(q.c.e!==0){if(!s.f)A.B(A.bn(a2))
 q=s.e
 q===$&&A.a()
 q=q.c.e===0}else q=!0
-l=!q||!1
-if(!o.f)A.B(A.bn(a3))
+k=!q||!1
+if(!o.f)A.B(A.bn(a2))
 q=o.e
 q===$&&A.a()
 q=q.c.lO(m)
-if((q==null?a2:q.b)!=null)if(J.lv(o.kp(0,m).e))l=!1
-if(l){if(!s.f)A.B(A.bn(a3))
+if((q==null?a1:q.b)!=null)if(J.lv(o.kp(0,m).e))k=!1
+if(k){if(!s.f)A.B(A.bn(a2))
 q=s.e
 q===$&&A.a()
 q=q.c.a
-k=A.b([],t.FJ)
-for(j=t.o,i=t.S;q=q.c[0],q!=null;){h=q.a
+j=A.b([],t.FJ)
+for(p=t.o,i=t.S;q=q.c[0],q!=null;){h=q.a
 h.toString
-k.push(new A.fs(h,"",a2,a2,A.A(j,i)))}o.jo(A.aK([m,new A.nB(m,k,"",a2,a2,A.A(j,i))],r,o.$ti.c))}g=o.ox()
+j.push(new A.fs(h,"",a1,a1,A.A(p,i)))}o.jo(A.aK([m,new A.nB(m,j,"",a1,a1,A.A(p,i))],r,o.$ti.c))}g=o.ox()
 f=g.gaB(g)
 e=s.ox()
 e.gaB(e)
-d=p.ox()
-a4.a=0
-e.a9(0,new A.adN(a4))
-A.db("activityTypeFullScore: "+a4.a)
-if(a4.a>0){a1.z=!0
+a3.a=0
+e.a9(0,new A.adN(a3))
+A.db("activityTypeFullScore: "+a3.a)
+if(a3.a>0){a0.z=!0
 n=new A.be(Date.now(),!1)
-c="activity_"+A.aQ(n)+A.bW(n)+A.kL(n)
-A.db("Today ActivityId: "+c)
+d="activity_"+A.aQ(n)+A.bW(n)+A.kL(n)
+A.db("Today ActivityId: "+d)
 s=f.a
 r=J.ab(s)
 A.db("Activity Count: "+r.gp(s))
 if(!f.ga4(f)){A.db("activityBoxMapValues is exist")
-a4.b=0
-f.a9(0,new A.adO(a4,a1,c,0))
-A.db("totalActivityScore: "+a4.b)
-b=r.gp(s)
-A.db("totalActivityDays: "+b)
-s=a4.b
+a3.b=0
+f.a9(0,new A.adO(a3,a0,d,0))
+A.db("totalActivityScore: "+a3.b)
+c=r.gp(s)
+A.db("totalActivityDays: "+c)
+s=a3.b
 r=s>0
-a=r&&r?s/(100*b)*100:0
-A.db("rewardScore: "+A.h(a))
-if(a>0){a1.w=B.d.k(a)
-if(d.a!==0){a1.y=!0
-s=d.gaB(d)
-a0=s.b.$1(J.qh(s.a))
-if(a>=95)a1.x=a0.r
-else if(a>=85)a1.x=a0.w
-else if(a>=75)a1.x=a0.x}}}}},
+b=r&&r?s/(100*c)*100:0
+A.db("rewardScore: "+A.h(b))
+if(b>0){a0.w=B.d.k(b)
+if(l.a!==0){s=l.gaB(l)
+a=s.b.$1(J.qh(s.a))
+if(b>=95)a0.x=a.r
+else if(b>=85)a0.x=a.w
+else if(b>=75)a0.x=a.x}}}}},
 n(){$.ib().dg(0)
 this.aN()},
 xt(a){var s,r=null
