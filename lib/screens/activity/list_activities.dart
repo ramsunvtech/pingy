@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 
 class ActivitiesListScreen extends StatefulWidget {
@@ -9,13 +10,16 @@ class ActivitiesListScreen extends StatefulWidget {
 
 class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+
   late final Box activityBox;
+  late final Box activityTypeBox;
 
   @override
   void initState() {
     super.initState();
     // Get reference to an already opened box
     activityBox = Hive.box('activity');
+    activityTypeBox = Hive.box('activity_type');
   }
 
   @override
@@ -48,19 +52,34 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     var currentBox = activityBox;
-                    var activityData = currentBox.getAt(index)!;
+                    Activity activityData = currentBox.getAt(index)!;
+                    Map activityTypeBoxMap = activityTypeBox.toMap();
+                    Iterable<dynamic> activityTypeBoxMapValues = activityTypeBoxMap.values;
+
+                    // Activity Total Score.
+                    dynamic activityTypeFullScore = 0;
+                    activityTypeBoxMap.forEach((key, value) {
+                      activityTypeFullScore += int.tryParse(value.fullScore)!;
+                    });
+
+                    dynamic dayScore = 0;
+                    if (activityData.activityItems.isNotEmpty) {
+                      activityData.activityItems.forEach((element) {
+                        var scoreValue = int.tryParse(element.score ?? "0");
+
+                        if (scoreValue != null) {
+                          dayScore += scoreValue;
+                        }
+                      });
+                    }
+
+                    dynamic activityScoreValue = (((dayScore / activityTypeFullScore) * 100).ceil());
+
                     return InkWell(
                       onTap: () => {},
                       child: ListTile(
-                        title: Text('activityData.name'),
-                        subtitle: Text(activityData.score),
-                        trailing: IconButton(
-                          onPressed: () => {},
-                          icon: const Icon(
-                            Icons.edit,
-                            color: Colors.red,
-                          ),
-                        ),
+                        title: Text('Activity - $activityScoreValue%'),
+                        subtitle: Text('$dayScore/$activityTypeFullScore'),
                       ),
                     );
                   },
@@ -68,18 +87,6 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
               );
           }
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => TaskTypeScreen(),
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
-        backgroundColor: Colors.green,
       ),
     );
   }
