@@ -66,12 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      // const Center(
-      //   child: ClipRect(
-      //     borderRadius: BorderRadius.circular(300),
-      //     child: AssetImage('assets/ipad.jpg'),
-      //   ),
-      // ),
       if(!containsRewards) ElevatedButton(
         onPressed: () {
           Navigator.push(
@@ -111,6 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
     var activityId = 'activity_${today.year}${today.month}${today.day}';
     bool canCreateNewActivity = true;
 
+    Map rewardBoxMap = rewardBox.toMap();
+    if (rewardBoxMap.isNotEmpty) {
+      containsRewards = true;
+    }
+
     if (rewardBox.isEmpty || activityTypeBox.isEmpty) {
       canCreateNewActivity = false;
     }
@@ -140,8 +139,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Map activityTypeBoxMap = activityTypeBox.toMap();
     Iterable<dynamic> activityTypeBoxMapValues = activityTypeBoxMap.values;
-
-    Map rewardBoxMap = rewardBox.toMap();
 
     dynamic activityTypeFullScore = 0;
     activityTypeBoxMap.forEach((key, value) {
@@ -216,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
           totalScore = rewardScore.toString();
 
           if (rewardBoxMap.isNotEmpty) {
-            containsRewards = true;
             RewardsModel rewardDetails = rewardBoxMap.values.first;
 
             if (rewardScore >= 95) {
