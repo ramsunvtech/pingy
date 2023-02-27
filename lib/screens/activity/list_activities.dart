@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
+import 'package:pingy/screens/settings.dart';
 
 class ActivitiesListScreen extends StatefulWidget {
   @override
@@ -27,6 +28,23 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pingy (Activities)'),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (builder) => SettingsScreen(),
+                ),
+              );
+            },
+          )
+        ],
       ),
       body: ValueListenableBuilder(
         valueListenable: activityBox.listenable(),
