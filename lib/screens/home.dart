@@ -110,6 +110,10 @@ class _HomeScreenState extends State<HomeScreen> {
       containsRewards = true;
     }
 
+    if(activityTypeBox.isNotEmpty) {
+      containsTypes = true;
+    }
+
     if (rewardBox.isEmpty || activityTypeBox.isEmpty) {
       canCreateNewActivity = false;
     }
@@ -149,8 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Check Activity Types are exist and scores is greater than zero.
     if (activityTypeFullScore > 0) {
-      containsTypes = true;
-
       var today = DateTime.now();
       var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
 
