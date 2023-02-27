@@ -57,10 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       if(containsRewards && containsTypes && predictReward != '') Center(
         child: Text(
-          'Your Reward: $predictReward',
+          '$predictReward Reward on your way!',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 40,
+            fontSize: 30,
             fontStyle: FontStyle.italic,
             color: Colors.redAccent,
           ),
