@@ -16,6 +16,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   final TextEditingController _scoreController = TextEditingController();
   final TextEditingController _fullScoreController = TextEditingController();
 
+  final _activateFormKey = GlobalKey<FormState>();
+
   late final Box activityBox;
   late final Box activityTypeBox;
 
@@ -48,77 +50,93 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     ActivityTypeModel todayActivityItemDetail =
         activityTypeBox.get(todoActivity.activityItemId);
 
-    return Wrap(
-      children: [
-        Center(child: Text('Update')),
-        Center(
-          child: TextFormField(
-            controller: _fullScoreController,
-            cursorColor: Theme.of(context).backgroundColor,
-            keyboardType: TextInputType.number,
-            maxLength: 3,
-            decoration: InputDecoration(
-              icon: Icon(Icons.numbers),
-              labelText: 'Activity Score',
-              labelStyle: TextStyle(
-                color: Color(0xFF6200EE),
-              ),
-              helperText:
-                  'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
-              suffixIcon: Icon(
-                Icons.check_circle,
-              ),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFF6200EE)),
+    return Form(
+      key: _activateFormKey,
+      child: Wrap(
+        children: [
+          Center(child: Text('Update')),
+          Center(
+            child: TextFormField(
+              controller: _fullScoreController,
+              cursorColor: Theme.of(context).backgroundColor,
+              keyboardType: TextInputType.number,
+              maxLength: 3,
+              validator: (value) {
+                bool hasNoValue = value == '' || value == null || value.isEmpty;
+                var parsedIntegerValue = int.tryParse(value!);
+                var parsedFullScoreValue = int.tryParse(todayActivityItemDetail.fullScore);
+                bool isValidScore = (parsedIntegerValue != null && parsedFullScoreValue != null && parsedIntegerValue > 0 && parsedIntegerValue <= parsedFullScoreValue);
+
+                if (hasNoValue || parsedIntegerValue == 0 || !isValidScore) {
+                  return 'Score should be a number between 1 and ${todayActivityItemDetail.fullScore}';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                icon: Icon(Icons.numbers),
+                labelText: 'Activity Score',
+                labelStyle: TextStyle(
+                  color: Color(0xFF6200EE),
+                ),
+                helperText:
+                    'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
+                suffixIcon: Icon(
+                  Icons.check_circle,
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF6200EE)),
+                ),
               ),
             ),
           ),
-        ),
-        Center(
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-            // color: Colors.pink,
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.6),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+              // color: Colors.pink,
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.6),
+              ),
             ),
           ),
-        ),
-        Center(
-          child: ElevatedButton(
-            onPressed: () async {
-              var updatedMissedActivity = ActivityItem(
-                  todoActivity.activityItemId, _fullScoreController.text);
-              var activityItemIndex = todayActivity.activityItems.indexWhere(
-                  (element) =>
+          Center(
+            child: ElevatedButton(
+              onPressed: () async {
+                if (_activateFormKey.currentState!.validate()) {
+                  var updatedMissedActivity = ActivityItem(
+                      todoActivity.activityItemId, _fullScoreController.text);
+                  var activityItemIndex = todayActivity.activityItems.indexWhere(
+                          (element) =>
                       element.activityItemId == todoActivity.activityItemId);
-              if (todayActivity.isInBox) {
-                todayActivity.activityItems
-                    .setAll(activityItemIndex, [updatedMissedActivity]);
-                await todayActivity.save();
-              }
-              _fullScoreController.text = '';
-              setState(() => {defaultActivityTabIndex = 2});
-              Navigator.of(context).pop(true);
-            },
-            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-            // color: Colors.pink,
-            child: const Text(
-              'Completed',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.6),
+                  if (todayActivity.isInBox) {
+                    todayActivity.activityItems
+                        .setAll(activityItemIndex, [updatedMissedActivity]);
+                    await todayActivity.save();
+                  }
+                  _fullScoreController.text = '';
+                  setState(() => {defaultActivityTabIndex = 2});
+                  Navigator.of(context).pop(true);
+                }
+              },
+              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+              // color: Colors.pink,
+              child: const Text(
+                'Completed',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.6),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -185,9 +203,11 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                   ),
             (todoActivities.isEmpty)
                 ? Center(
-                    child: Text(
-                        (todoActivities.isEmpty && completedActivities.length == todayActivity.activityItems.length) ? 'Cool, You are done for the day!' : 'No Activities are available. its Empty'
-                    ),
+                    child: Text((todoActivities.isEmpty &&
+                            completedActivities.length ==
+                                todayActivity.activityItems.length)
+                        ? 'Cool, You are done for the day!'
+                        : 'No Activities are available. its Empty'),
                   )
                 : ListView.builder(
                     itemCount: todoActivities.length,
