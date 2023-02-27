@@ -167,6 +167,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     await rewardBox.clear();
                     await activityTypeBox.clear();
                     await activityBox.clear();
+                    setState(() {
+                      rewardExist = 'No';
+                      activityCount = '0';
+                      activityTypeCount = '0';
+
+                      if (rewardBox.isNotEmpty) {
+                        rewardExist = '';
+                      }
+
+                      if (activityBox.isNotEmpty) {
+                        activityCount = activityBox.length.toString();
+                      }
+
+                      if (activityTypeBox.isNotEmpty) {
+                        activityTypeCount = activityTypeBox.length.toString();
+                      }
+                    });
                   },
                   child: const Text(
                     'Clear Data',
