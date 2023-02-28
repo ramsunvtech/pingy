@@ -49,17 +49,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _checkBiometric() async {
     bool canCheckBiometric = false;
 
-    try {
-      canCheckBiometric = await auth.canCheckBiometrics;
-    } on PlatformException catch (e) {
-      print(e);
+    if (!kIsWeb) {
+      try {
+        canCheckBiometric = await auth.canCheckBiometrics;
+      } on PlatformException catch (e) {
+        // print(e);
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _canCheckBiometric = canCheckBiometric;
+      });
     }
-
-    if (!mounted) return;
-
-    setState(() {
-      _canCheckBiometric = canCheckBiometric;
-    });
   }
 
   Future _getAvailableBiometric() async {
@@ -68,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       availableBiometric = await auth.getAvailableBiometrics();
     } on PlatformException catch (e) {
-      print(e);
+      // print(e);
     }
 
     setState(() {
