@@ -170,18 +170,22 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       }
     }
 
+    String getTodoTabTitle() {
+      return 'To do (${todoActivities.length.toString()})';
+    }
+
     return DefaultTabController(
       length: 3,
       initialIndex: defaultActivityTabIndex,
       child: Scaffold(
         appBar: AppBar(
-            bottom: const TabBar(
+            bottom: TabBar(
               tabs: [
                 Tab(
                   text: 'Missed',
                 ),
                 Tab(
-                  text: 'To do',
+                  text: getTodoTabTitle(),
                 ),
                 Tab(
                   text: 'Done',
