@@ -93,9 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return homePanes;
   }
 
-  @override
-  void initState() {
-    super.initState();
+  Future<void> _updateScores() async {
     // Get reference to an already opened box
     rewardBox = Hive.box('rewards');
     activityBox = Hive.box('activity');
@@ -207,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
         dynamic rewardScore = 0;
 
         if (totalActivityScore > 0 && totalActivityScore > 0) {
-          rewardScore = ((totalActivityScore) / (100 * totalActivityDays) * 100);
+          rewardScore = ((totalActivityScore) / (100 * totalActivityDays) * 100).ceil();
         }
 
         print('rewardScore: $rewardScore');
@@ -228,6 +226,12 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateScores();
   }
 
   @override
