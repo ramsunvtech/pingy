@@ -64,8 +64,12 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
               validator: (value) {
                 bool hasNoValue = value == '' || value == null || value.isEmpty;
                 var parsedIntegerValue = int.tryParse(value!);
-                var parsedFullScoreValue = int.tryParse(todayActivityItemDetail.fullScore);
-                bool isValidScore = (parsedIntegerValue != null && parsedFullScoreValue != null && parsedIntegerValue > 0 && parsedIntegerValue <= parsedFullScoreValue);
+                var parsedFullScoreValue =
+                    int.tryParse(todayActivityItemDetail.fullScore);
+                bool isValidScore = (parsedIntegerValue != null &&
+                    parsedFullScoreValue != null &&
+                    parsedIntegerValue > 0 &&
+                    parsedIntegerValue <= parsedFullScoreValue);
 
                 if (hasNoValue || parsedIntegerValue == 0 || !isValidScore) {
                   return 'Score should be a number between 1 and ${todayActivityItemDetail.fullScore}';
@@ -111,9 +115,10 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 if (_activateFormKey.currentState!.validate()) {
                   var updatedMissedActivity = ActivityItem(
                       todoActivity.activityItemId, _fullScoreController.text);
-                  var activityItemIndex = todayActivity.activityItems.indexWhere(
-                          (element) =>
-                      element.activityItemId == todoActivity.activityItemId);
+                  var activityItemIndex = todayActivity.activityItems
+                      .indexWhere((element) =>
+                          element.activityItemId ==
+                          todoActivity.activityItemId);
                   if (todayActivity.isInBox) {
                     todayActivity.activityItems
                         .setAll(activityItemIndex, [updatedMissedActivity]);
@@ -172,9 +177,15 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         appBar: AppBar(
             bottom: const TabBar(
               tabs: [
-                Tab(text: 'Missed'),
-                Tab(text: 'To do'),
-                Tab(text: 'Done'),
+                Tab(
+                  text: 'Missed',
+                ),
+                Tab(
+                  text: 'To do',
+                ),
+                Tab(
+                  text: 'Done',
+                ),
               ],
             ),
             title: const Text('Activity Today')),
