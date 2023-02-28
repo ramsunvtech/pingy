@@ -116,9 +116,6 @@ class _RewardsScreenState extends State<RewardsScreen> {
                           SfDateRangePicker(
                             onSelectionChanged: _onSelectionChanged,
                             selectionMode: DateRangePickerSelectionMode.range,
-                            initialSelectedRange: PickerDateRange(
-                                DateTime.now().subtract(const Duration(days: 4)),
-                                DateTime.now().add(const Duration(days: 3))),
                           ),
                           Center(
                             child: ElevatedButton(
@@ -151,7 +148,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
                 ),
-                helperText: 'Enter First Prize',
+                helperText: 'Enter First Prize those who score 95% or above',
                 suffixIcon: Icon(
                   Icons.check_circle,
                 ),
@@ -169,7 +166,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
                 ),
-                helperText: 'Enter Second Prize',
+                helperText: 'Enter Second Prize those who score 85% or above',
                 suffixIcon: Icon(
                   Icons.check_circle,
                 ),
@@ -187,7 +184,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
                 ),
-                helperText: 'Enter Third Prize',
+                helperText: 'Enter Third Prize those who score 75% or above',
                 suffixIcon: Icon(
                   Icons.check_circle,
                 ),
@@ -207,6 +204,9 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   _thirdPrizeController.text,
                 );
                 rewardsBox.add(newRewards);
+                String toastMessage = 'Rewards Added!';
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(toastMessage)));
 
                 Navigator.push(
                   context,

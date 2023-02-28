@@ -76,9 +76,9 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
                       subtitle: Text(
                           '${rewardsData.startPeriod}'
                           ' to ${rewardsData.endPeriod}\n'
-                          'First Prize: ${rewardsData.firstPrice}\n'
-                          'Second Prize: ${rewardsData.secondPrice}\n'
-                          'Third Prize: ${rewardsData.thirdPrice}'
+                          'First Prize (95%): ${rewardsData.firstPrice}\n'
+                          'Second Prize (85%): ${rewardsData.secondPrice}\n'
+                          'Third Prize (75%): ${rewardsData.thirdPrice}'
                       ),
                     ),
                   );
