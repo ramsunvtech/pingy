@@ -147,39 +147,39 @@ class _HomeScreenState extends State<HomeScreen> {
       activityTypeFullScore += int.tryParse(value.fullScore)!;
     });
 
-    print('activityTypeFullScore: $activityTypeFullScore');
+    // print('activityTypeFullScore: $activityTypeFullScore');
 
     // Check Activity Types are exist and scores is greater than zero.
     if (activityTypeFullScore > 0) {
       var today = DateTime.now();
       var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
 
-      print('Today ActivityId: $todayActivityId');
-      print('Activity Count: ${activityBoxMapValues.length}');
+      // print('Today ActivityId: $todayActivityId');
+      // print('Activity Count: ${activityBoxMapValues.length}');
 
       dynamic todayScoreValue = 0;
 
       if (activityBoxMapValues.isNotEmpty) {
-        print("activityBoxMapValues is exist");
+        // print("activityBoxMapValues is exist");
         dynamic totalActivityScore = 0;
         activityBoxMapValues.forEach((activity) {
-          print('Activitiy Id: ${activity.activityId}');
+          // print('Activitiy Id: ${activity.activityId}');
           dynamic dayScore = 0;
           if (activity.activityItems.length > 0) {
             activity.activityItems.forEach((element) {
-              print('Activity Item Score: ${element.score}');
+              // print('Activity Item Score: ${element.score}');
               var scoreValue = int.tryParse(element.score ?? "0");
 
               if (scoreValue != null) {
                 dayScore += scoreValue;
               }
-              print('score: ${element.score}');
+              // print('score: ${element.score}');
             });
 
-            print ('day score: $dayScore');
+            // print ('day score: $dayScore');
 
             dynamic todayScoreValue = (((dayScore / activityTypeFullScore) * 100).ceil());
-            print ('todayScoreValue: $todayScoreValue');
+            // print ('todayScoreValue: $todayScoreValue');
 
             if (activity.activityId == todayActivityId && todayScoreValue != '') {
               totalActivityScore += todayScoreValue;
@@ -196,11 +196,11 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         });
 
-        print('totalActivityScore: $totalActivityScore');
+        // print('totalActivityScore: $totalActivityScore');
 
         dynamic totalActivityDays = activityBoxMapValues.length;
 
-        print('totalActivityDays: $totalActivityDays');
+        // print('totalActivityDays: $totalActivityDays');
 
         dynamic rewardScore = 0;
 
@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
           rewardScore = ((totalActivityScore) / (100 * totalActivityDays) * 100).ceil();
         }
 
-        print('rewardScore: $rewardScore');
+        // print('rewardScore: $rewardScore');
         if (rewardScore > 0) {
           totalScore = rewardScore.toString();
 
