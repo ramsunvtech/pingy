@@ -85,6 +85,10 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                 ActivityTypeModel newActivityType = ActivityTypeModel(activityTypeId, _nameController.text, _fullScoreController.text);
                 activityTypeBox.put(activityTypeId, newActivityType);
 
+                String toastMessage = 'Activity Type Added!';
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(toastMessage)));
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
