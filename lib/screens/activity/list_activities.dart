@@ -10,7 +10,8 @@ class ActivitiesListScreen extends StatefulWidget {
 }
 
 class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   late final Box activityBox;
   late final Box activityTypeBox;
@@ -21,6 +22,20 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     // Get reference to an already opened box
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
+  }
+
+  Widget getListTileTrailingIcon(String activityId) {
+    var today = DateTime.now();
+    var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
+
+    if (activityId != todayActivityId) {
+      return Container();
+    }
+
+    return const Icon(
+      Icons.delete,
+      color: Colors.red,
+    );
   }
 
   @override
@@ -55,54 +70,66 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
             );
           } else {
             return RefreshIndicator(
-                key: _refreshIndicatorKey,
-                color: Colors.white,
-                backgroundColor: Colors.blue,
-                strokeWidth: 4.0,
-                onRefresh: () async {
-                  // Replace this delay with the code to be executed during refresh
-                  // and return a Future when code finish execution.
-                  return Future<void>.delayed(const Duration(seconds: 3));
-                },
-                // Pull from top to show refresh indicator.
-                child: ListView.builder(
-                  itemCount: activityBox.length,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    var currentBox = activityBox;
-                    Activity activityData = currentBox.getAt(index)!;
-                    Map activityTypeBoxMap = activityTypeBox.toMap();
-                    Iterable<dynamic> activityTypeBoxMapValues = activityTypeBoxMap.values;
+              key: _refreshIndicatorKey,
+              color: Colors.white,
+              backgroundColor: Colors.blue,
+              strokeWidth: 4.0,
+              onRefresh: () async {
+                // Replace this delay with the code to be executed during refresh
+                // and return a Future when code finish execution.
+                return Future<void>.delayed(const Duration(seconds: 3));
+              },
+              // Pull from top to show refresh indicator.
+              child: ListView.builder(
+                itemCount: activityBox.length,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  var currentBox = activityBox;
+                  Activity activityData = currentBox.getAt(index)!;
+                  Map activityTypeBoxMap = activityTypeBox.toMap();
+                  Iterable<dynamic> activityTypeBoxMapValues =
+                      activityTypeBoxMap.values;
 
-                    // Activity Total Score.
-                    dynamic activityTypeFullScore = 0;
-                    activityTypeBoxMap.forEach((key, value) {
-                      activityTypeFullScore += int.tryParse(value.fullScore)!;
+                  // Activity Total Score.
+                  dynamic activityTypeFullScore = 0;
+                  activityTypeBoxMap.forEach((key, value) {
+                    activityTypeFullScore += int.tryParse(value.fullScore)!;
+                  });
+
+                  dynamic dayScore = 0;
+                  if (activityData.activityItems.isNotEmpty) {
+                    activityData.activityItems.forEach((element) {
+                      var scoreValue = int.tryParse(element.score ?? "0");
+
+                      if (scoreValue != null) {
+                        dayScore += scoreValue;
+                      }
                     });
+                  }
 
-                    dynamic dayScore = 0;
-                    if (activityData.activityItems.isNotEmpty) {
-                      activityData.activityItems.forEach((element) {
-                        var scoreValue = int.tryParse(element.score ?? "0");
+                  dynamic activityScoreValue =
+                      (((dayScore / activityTypeFullScore) * 100).ceil());
 
-                        if (scoreValue != null) {
-                          dayScore += scoreValue;
-                        }
-                      });
-                    }
-
-                    dynamic activityScoreValue = (((dayScore / activityTypeFullScore) * 100).ceil());
-
-                    return InkWell(
-                      onTap: () => {},
-                      child: ListTile(
-                        title: Text('Activity - $activityScoreValue%'),
-                        subtitle: Text('$dayScore/$activityTypeFullScore'),
+                  return InkWell(
+                    onTap: () => {},
+                    child: ListTile(
+                      title: Text('Activity - $activityScoreValue%'),
+                      subtitle: Text('$dayScore/$activityTypeFullScore'),
+                      trailing: IconButton(
+                        onPressed: () {
+                          activityBox.delete(activityData.activityId);
+                          String toastMessage =
+                              'Activity removed successfully!';
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(toastMessage)));
+                        },
+                        icon: getListTileTrailingIcon(activityData.activityId),
                       ),
-                    );
-                  },
-                ),
-              );
+                    ),
+                  );
+                },
+              ),
+            );
           }
         },
       ),
