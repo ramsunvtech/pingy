@@ -115,6 +115,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                         children: [
                           SfDateRangePicker(
                             onSelectionChanged: _onSelectionChanged,
+                            enablePastDates: false,
                             selectionMode: DateRangePickerSelectionMode.range,
                           ),
                           Center(
