@@ -34,7 +34,7 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
         );
       },
       child: const Icon(Icons.add),
-      backgroundColor: Colors.green,
+      backgroundColor: const Color(0xFF98006D),
     );
   }
 
