@@ -54,7 +54,7 @@ void main() async {
     }
   }
 
-  if(canCreateNewActivity) {
+  if (canCreateNewActivity) {
     final activityTypeKeys = await activityTypeBox.keys;
     final List<ActivityItem> activityItems = [];
     for (var activityTypeKey in activityTypeKeys) {
@@ -87,6 +87,7 @@ class _PingyAppState extends State<PingyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
       home: HomeScreen(),
     );
   }
