@@ -12,6 +12,7 @@ class ActivityTypeListScreen extends StatefulWidget {
 class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   late final Box activityTypeBox;
+  late final Box activityBox;
 
   String activityTypeCount = '0';
 
@@ -19,11 +20,31 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   void initState() {
     super.initState();
     // Get reference to an already opened box
+    activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
 
     if(activityTypeBox.isNotEmpty) {
       activityTypeCount = activityTypeBox.length.toString();
     }
+  }
+
+  Widget getFloatingActionButton() {
+    if (activityBox.isNotEmpty) {
+      return Container();
+    }
+
+    return FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => TaskTypeScreen(),
+          ),
+        );
+      },
+      child: const Icon(Icons.add),
+      backgroundColor: const Color(0xFF98006D),
+    );
   }
 
   @override
@@ -87,18 +108,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => TaskTypeScreen(),
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
-        backgroundColor: const Color(0xFF98006D),
-      ),
+      floatingActionButton: getFloatingActionButton(),
     );
   }
 }
