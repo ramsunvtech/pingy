@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
@@ -146,6 +147,20 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
+  String getAppBarTitle() {
+    if (widget.activityId != '') {
+      Activity activityDetails = getActivityDetails();
+      if (activityDetails!.activityDate != null) {
+        DateFormat dateFormat = DateFormat("dd/MM/yyyy");
+        String formattedDate = '(${dateFormat.format(activityDetails!.activityDate as DateTime)})';
+        return 'Edit Activity $formattedDate';
+      }
+
+      return 'Edit Activity';
+    }
+    return 'Activity Today';
+  }
+
   // TODO: fix this optional value.
   String? getActivityId() {
     if (widget.activityId != '') {
@@ -164,7 +179,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('activityId: ${widget.activityId}');
     Activity todayActivity = getActivityDetails();
     Iterable<ActivityItem> missedActivities = [];
     Iterable<ActivityItem> todoActivities = [];
@@ -203,7 +217,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 ),
               ],
             ),
-            title: const Text('Activity Today')),
+            title: Text(getAppBarTitle()),
+        ),
         body: TabBarView(
           children: [
             (missedActivities.isEmpty)
@@ -351,9 +366,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     return ListTile(
       enabled: enabled,
       leading: CircleAvatar(
-        backgroundColor: isSelected ? Colors.green[700] : Colors.grey,
         child: const Icon(
-          Icons.person_outline_outlined,
+          Icons.task_outlined,
           color: Colors.white,
         ),
       ),
