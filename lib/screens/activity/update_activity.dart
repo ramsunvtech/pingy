@@ -35,9 +35,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   @override
   void dispose() {
-    // Close Hive Connection.
-    // Hive.close();
-
     super.dispose();
   }
 

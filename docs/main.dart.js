@@ -75349,25 +75349,26 @@ case 1:return A.X(q,r)}})
 return A.Y($async$$0,r)},
 $S:14}
 A.abv.prototype={
-$2(a,b){var s,r,q,p,o,n=null,m={},l=this.a,k=l.e
-k===$&&A.a()
-k=k.xo(b)
-k.toString
-s=l.f
+$2(a,b){var s,r,q,p,o,n,m=null,l={},k=this.a,j=k.e
+j===$&&A.a()
+j=j.xo(b)
+j.toString
+s=k.f
 s===$&&A.a()
 r=s.oy()
 r.gaz(r)
-m.a=0
-r.aa(0,new A.abs(m))
-m.b=0
-s=k.e
+l.a=0
+r.aa(0,new A.abs(l))
+l.b=0
+s=j.e
 q=J.a8(s)
-if(q.gcc(s))q.aa(s,new A.abt(m))
-p=B.d.d8(m.b/m.a*100)
-o=A.h8("dd/MM/yyyy",n)
-s=k.r
-s=A.cv("Activity ("+o.el(0,s==null?t.W7.a(s):s)+") - "+p+"%",n,n,n,n,n,n,n)
-return A.rt(!1,n,!0,A.a2G(!0,n,n,A.cv(""+m.b+"/"+m.a,n,n,n,n,n,n,n),s,l.QX(k.d)),n,!0,n,n,n,n,n,n,n,n,n,new A.abu(),n,n,n,n)},
+if(q.gcc(s))q.aa(s,new A.abt(l))
+p=B.d.d8(l.b/l.a*100)
+s=j.r
+if(s!=null){o=A.h8("dd/MM/yyyy",m)
+n="("+o.el(0,s)+")"}else n=""
+s=A.cv("Activity "+n+" - "+p+"%",m,m,m,m,m,m,m)
+return A.rt(!1,m,!0,A.a2G(!0,m,m,A.cv(""+l.b+"/"+l.a,m,m,m,m,m,m,m),s,k.QX(j.d)),m,!0,m,m,m,m,m,m,m,m,m,new A.abu(),m,m,m,m)},
 $S:90}
 A.abs.prototype={
 $2(a,b){var s=this.a,r=s.a,q=A.p_(b.go8(),null)
