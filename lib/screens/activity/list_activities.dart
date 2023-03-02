@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
+import 'package:pingy/screens/activity/update_activity.dart';
 import 'package:pingy/screens/settings.dart';
 
 class ActivitiesListScreen extends StatefulWidget {
@@ -24,17 +25,39 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     activityTypeBox = Hive.box('activity_type');
   }
 
-  Widget getListTileTrailingIcon(String activityId) {
+  Widget getListTileTrailingIconButton(String activityId) {
     var today = DateTime.now();
     var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
 
     if (activityId != todayActivityId) {
-      return Container();
+      return IconButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (builder) => UpdateTaskScreen(activityId: activityId),
+            ),
+          );
+        },
+        icon: const Icon(
+          Icons.edit,
+          color: Colors.red,
+        ),
+      );
     }
 
-    return const Icon(
-      Icons.delete,
-      color: Colors.red,
+    return IconButton(
+      onPressed: () {
+        activityBox.delete(activityId);
+        String toastMessage =
+            'Activity removed successfully!';
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(toastMessage)));
+      },
+      icon: const Icon(
+        Icons.delete,
+        color: Colors.red,
+      ),
     );
   }
 
@@ -115,16 +138,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                     child: ListTile(
                       title: Text('Activity - $activityScoreValue%'),
                       subtitle: Text('$dayScore/$activityTypeFullScore'),
-                      trailing: IconButton(
-                        onPressed: () {
-                          activityBox.delete(activityData.activityId);
-                          String toastMessage =
-                              'Activity removed successfully!';
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(toastMessage)));
-                        },
-                        icon: getListTileTrailingIcon(activityData.activityId),
-                      ),
+                      trailing: getListTileTrailingIconButton(activityData.activityId),
                     ),
                   );
                 },
