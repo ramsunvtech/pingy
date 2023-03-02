@@ -6,6 +6,10 @@ import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/task_type.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
+  String? activityId;
+
+  UpdateTaskScreen({ this.activityId });
+
   @override
   _UpdateTaskScreenState createState() => _UpdateTaskScreenState();
 }
@@ -46,7 +50,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   TaskTypeModel selectedTaskType = TaskTypeModel('default', 100, false);
 
   Widget getUpdateActivityForm(BuildContext content, dynamic todoActivity) {
-    Activity todayActivity = getTodatyActivity();
+    Activity todayActivity = getActivityDetails();
     ActivityTypeModel todayActivityItemDetail =
         activityTypeBox.get(todoActivity.activityItemId);
 
@@ -145,16 +149,26 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
-  Activity getTodatyActivity() {
+  // TODO: fix this optional value.
+  String? getActivityId() {
+    if (widget.activityId != '') {
+      return widget.activityId;
+    }
+
     var today = DateTime.now();
     var activityId = 'activity_${today.year}${today.month}${today.day}';
-    Activity todayActivity = activityBox.get(activityId);
+    return activityId;
+  }
+
+  Activity getActivityDetails() {
+    Activity todayActivity = activityBox.get(getActivityId());
     return todayActivity;
   }
 
   @override
   Widget build(BuildContext context) {
-    Activity todayActivity = getTodatyActivity();
+    print('activityId: ${widget.activityId}');
+    Activity todayActivity = getActivityDetails();
     Iterable<ActivityItem> missedActivities = [];
     Iterable<ActivityItem> todoActivities = [];
     Iterable<ActivityItem> completedActivities = [];
