@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       if(containsRewards && containsTypes && predictReward != '') Center(
         child: Text(
-          '$predictReward Reward on your way!',
+          predictReward,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 30,
@@ -221,6 +221,19 @@ class _HomeScreenState extends State<HomeScreen> {
               predictReward = rewardDetails.secondPrice;
             } else if (rewardScore >= 75) {
               predictReward = rewardDetails.thirdPrice;
+            }
+
+            List endPeriod = rewardDetails.endPeriod.split('/').toList();
+            String todayDate = '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
+            DateTime endDate = DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
+            Duration diff = endDate.difference(today);
+
+            if (diff.inDays < 0) {
+              predictReward = 'Already Won $predictReward Reward!';
+            } else if (diff.inDays == 0) {
+              predictReward = 'Won $predictReward Reward!';
+            } else {
+              predictReward = '$predictReward Reward on your way!';
             }
           }
         }
