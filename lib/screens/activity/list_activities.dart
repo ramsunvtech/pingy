@@ -134,7 +134,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                   dynamic activityScoreValue =
                       (((dayScore / activityTypeFullScore) * 100).ceil());
 
-                  DateFormat dateFormat = DateFormat("dd-MM-yyyy");
+                  DateFormat dateFormat = DateFormat("dd/MM/yyyy");
                   String formattedDate = dateFormat.format(activityData!.activityDate as DateTime);
 
                   return InkWell(
