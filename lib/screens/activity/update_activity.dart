@@ -6,9 +6,9 @@ import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/task_type.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
-  String? activityId;
+  final String? activityId;
 
-  UpdateTaskScreen({ this.activityId });
+  UpdateTaskScreen({ this.activityId = "" });
 
   @override
   _UpdateTaskScreenState createState() => _UpdateTaskScreenState();
