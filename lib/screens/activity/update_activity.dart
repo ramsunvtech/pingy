@@ -246,7 +246,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                           key: Key('item_${index + 1}'),
                           child: taskItem(
                               todayActivityItemDetail.activityName,
-                              'Swipe right to add score / left to mark as missed',
+                              'Swipe left to skip / right to update score',
                               todoActivity,
                               false,
                               index),
