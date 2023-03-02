@@ -85,6 +85,11 @@ class _PingyAppState extends State<PingyApp> {
 
   @override
   Widget build(BuildContext context) {
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+      // if (kReleaseMode) exit(1);
+    };
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
