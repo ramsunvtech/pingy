@@ -134,13 +134,16 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                   dynamic activityScoreValue =
                       (((dayScore / activityTypeFullScore) * 100).ceil());
 
-                  DateFormat dateFormat = DateFormat("dd/MM/yyyy");
-                  String formattedDate = dateFormat.format(activityData!.activityDate as DateTime);
+                  String formattedDate = '';
+                  if (activityData!.activityDate != null) {
+                    DateFormat dateFormat = DateFormat("dd/MM/yyyy");
+                    formattedDate = '(${dateFormat.format(activityData!.activityDate as DateTime)})';
+                  }
 
                   return InkWell(
                     onTap: () => {},
                     child: ListTile(
-                      title: Text('Activity ($formattedDate) - $activityScoreValue%'),
+                      title: Text('Activity $formattedDate - $activityScoreValue%'),
                       subtitle: Text('$dayScore/$activityTypeFullScore'),
                       trailing: getListTileTrailingIconButton(activityData.activityId),
                     ),
