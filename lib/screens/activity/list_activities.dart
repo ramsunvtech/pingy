@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
-import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
 import 'package:pingy/screens/settings.dart';
 
