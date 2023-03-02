@@ -75580,7 +75580,7 @@ $S:131}
 A.aiW.prototype={
 $2(a,b){var s=J.ql(this.a.b,b),r=this.b,q=r.x
 q===$&&A.a()
-return A.aq5(r.E4(q.aX(0,s.d).e,"Swipe right to add score / left to mark as missed",s,!1,b),new A.aiQ(r,a,s,this.c),B.nx,new A.dm("item_"+(b+1),t.kK),new A.aiR(a),B.bT)},
+return A.aq5(r.E4(q.aX(0,s.d).e,"Swipe left to skip / right to update score",s,!1,b),new A.aiQ(r,a,s,this.c),B.nx,new A.dm("item_"+(b+1),t.kK),new A.aiR(a),B.bT)},
 $S:434}
 A.aiQ.prototype={
 $1(a){return this.QN(a)},
