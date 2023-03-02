@@ -61,7 +61,7 @@ void main() async {
       ActivityItem newActivityItem = ActivityItem(activityTypeKey, '');
       activityItems.add(newActivityItem);
     }
-    Activity newActivity = Activity(activityId, activityItems, '');
+    Activity newActivity = Activity(activityId, activityItems, '', DateTime.now());
     activityBox.put(activityId, newActivity);
   }
 

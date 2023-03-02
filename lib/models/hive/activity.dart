@@ -14,5 +14,8 @@ class Activity extends HiveObject {
   @HiveField(2)
   final String score;
 
-  Activity(this.activityId, this.activityItems, this.score);
+  @HiveField(3)
+  final DateTime? activityDate;
+
+  Activity(this.activityId, this.activityItems, this.score, this.activityDate);
 }

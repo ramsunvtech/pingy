@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
@@ -133,10 +134,13 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                   dynamic activityScoreValue =
                       (((dayScore / activityTypeFullScore) * 100).ceil());
 
+                  DateFormat dateFormat = DateFormat("dd-MM-yyyy");
+                  String formattedDate = dateFormat.format(activityData!.activityDate as DateTime);
+
                   return InkWell(
                     onTap: () => {},
                     child: ListTile(
-                      title: Text('Activity - $activityScoreValue%'),
+                      title: Text('Activity ($formattedDate) - $activityScoreValue%'),
                       subtitle: Text('$dayScore/$activityTypeFullScore'),
                       trailing: getListTileTrailingIconButton(activityData.activityId),
                     ),

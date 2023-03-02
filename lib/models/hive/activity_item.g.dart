@@ -18,7 +18,7 @@ class ActivityItemAdapter extends TypeAdapter<ActivityItem> {
     };
     return ActivityItem(
       fields[0] as String,
-      fields[1] as String,
+      fields[1] as String?,
     );
   }
 
