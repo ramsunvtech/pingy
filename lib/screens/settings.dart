@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:pingy/screens/home.dart';
@@ -14,6 +16,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
   late final Box rewardBox;
   late final Box activityBox;
   late final Box activityTypeBox;
@@ -134,13 +139,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: Colors.blue,
                 ),
               ),
-              // Center(
-              //   child: ElevatedButton.icon(
-              //     onPressed: _authenticate,
-              //     icon: const Icon(Icons.add, size: 18),
-              //     label: const Text("Fingerprint Auth"),
-              //   ),
-              // ),
               Center(
                 child: Text(
                   '$activityCount Activity added!',
@@ -191,6 +189,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Clear Data',
                     style: TextStyle(
                       fontSize: 20,
+                    ),
+                  ),
+                ),
+              ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final NotificationAppLaunchDetails? notificationAppLaunchDetails = await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+                    String initialRoute = 'HomePage.routeName';
+
+                  },
+                  child: const Text(
+                    'Show Notification',
+                    style: TextStyle(
+                      fontSize: 18,
                     ),
                   ),
                 ),
