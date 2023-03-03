@@ -228,12 +228,16 @@ class _HomeScreenState extends State<HomeScreen> {
             DateTime endDate = DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
             Duration diff = endDate.difference(today);
 
-            if (diff.inDays < 0) {
-              predictReward = 'Already Won $predictReward Reward!';
-            } else if (diff.inDays == 0) {
-              predictReward = 'Won $predictReward Reward!';
+            if (predictReward.isNotEmpty) {
+              if (diff.inDays < 0) {
+                 predictReward = 'Already Won $predictReward Reward!';
+              } else if (diff.inDays == 0) {
+                predictReward = 'Won $predictReward Reward!';
+              } else {
+                predictReward = '$predictReward Reward on your way!';
+              }
             } else {
-              predictReward = '$predictReward Reward on your way!';
+              predictReward = 'Sorry, No Reward, Try again!';
             }
           }
         }
