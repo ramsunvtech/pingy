@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:pingy/screens/home.dart';
@@ -16,9 +15,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
-
   late final Box rewardBox;
   late final Box activityBox;
   late final Box activityTypeBox;
@@ -196,8 +192,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
-                    final NotificationAppLaunchDetails? notificationAppLaunchDetails = await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
-                    String initialRoute = 'HomePage.routeName';
 
                   },
                   child: const Text(
