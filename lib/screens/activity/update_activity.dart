@@ -4,12 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
-import 'package:pingy/models/task_type.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
   final String? activityId;
 
-  UpdateTaskScreen({ this.activityId = "" });
+  const UpdateTaskScreen({ this.activityId = "" });
 
   @override
   _UpdateTaskScreenState createState() => _UpdateTaskScreenState();
@@ -18,7 +17,6 @@ class UpdateTaskScreen extends StatefulWidget {
 class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   int defaultActivityTabIndex = 1;
 
-  final TextEditingController _scoreController = TextEditingController();
   final TextEditingController _fullScoreController = TextEditingController();
 
   final _activateFormKey = GlobalKey<FormState>();
@@ -38,14 +36,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   void dispose() {
     super.dispose();
   }
-
-  List<TaskTypeModel> taskTypes = [
-    TaskTypeModel('Breakfast', 250, false),
-    TaskTypeModel('Lunch', 150, false),
-    TaskTypeModel('Dinner', 200, false),
-  ];
-
-  TaskTypeModel selectedTaskType = TaskTypeModel('default', 100, false);
 
   Widget getUpdateActivityForm(BuildContext content, dynamic todoActivity) {
     Activity todayActivity = getActivityDetails();
