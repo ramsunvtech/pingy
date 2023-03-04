@@ -189,19 +189,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-
-                  },
-                  child: const Text(
-                    'Show Notification',
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              ),
               // Center(
               //   child: Text(authorized),
               // ),
