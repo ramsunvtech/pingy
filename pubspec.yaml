@@ -41,7 +41,6 @@ dependencies:
   local_auth: ^2.1.6
   syncfusion_flutter_datepicker: ^20.4.52
   flutter_native_splash: ^2.2.18
-  flutter_local_notifications: ^8.2.0
 
 dev_dependencies:
   flutter_test:
