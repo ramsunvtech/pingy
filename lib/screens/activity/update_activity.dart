@@ -8,7 +8,7 @@ import 'package:pingy/models/hive/activity_type.dart';
 class UpdateTaskScreen extends StatefulWidget {
   final String? activityId;
 
-  const UpdateTaskScreen({ this.activityId = "" });
+  const UpdateTaskScreen({this.activityId = ""});
 
   @override
   _UpdateTaskScreenState createState() => _UpdateTaskScreenState();
@@ -17,6 +17,10 @@ class UpdateTaskScreen extends StatefulWidget {
 class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   int defaultActivityTabIndex = 1;
 
+  Iterable<ActivityItem> missedActivities = [];
+  Iterable<ActivityItem> todoActivities = [];
+  Iterable<ActivityItem> completedActivities = [];
+
   final TextEditingController _fullScoreController = TextEditingController();
 
   final _activateFormKey = GlobalKey<FormState>();
@@ -24,12 +28,27 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   late final Box activityBox;
   late final Box activityTypeBox;
 
+  void splitActivitiesForTabs() {
+    dynamic todayActivity = activityBox.get(getActivityId());
+    if (todayActivity != null && todayActivity.isInBox) {
+      if (todayActivity.activityItems.isNotEmpty) {
+        missedActivities = todayActivity.activityItems
+            .where((element) => element.score == "0");
+        todoActivities =
+            todayActivity.activityItems.where((element) => element.score == "");
+        completedActivities = todayActivity.activityItems
+            .where((element) => element.score != "" && element.score != "0");
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     // Get reference to an already opened box
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
+    splitActivitiesForTabs();
   }
 
   @override
@@ -92,7 +111,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
               },
               // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
               // color: Colors.pink,
-              child: Text(
+              child: const Text(
                 'Cancel',
                 style: TextStyle(
                     color: Colors.white,
@@ -142,7 +161,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       Activity activityDetails = getActivityDetails();
       if (activityDetails!.activityDate != null) {
         DateFormat dateFormat = DateFormat("dd/MM/yyyy");
-        String formattedDate = '(${dateFormat.format(activityDetails!.activityDate as DateTime)})';
+        String formattedDate =
+            '(${dateFormat.format(activityDetails!.activityDate as DateTime)})';
         return 'Edit Activity $formattedDate';
       }
 
@@ -170,20 +190,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   @override
   Widget build(BuildContext context) {
     Activity todayActivity = getActivityDetails();
-    Iterable<ActivityItem> missedActivities = [];
-    Iterable<ActivityItem> todoActivities = [];
-    Iterable<ActivityItem> completedActivities = [];
-
-    if (todayActivity != null && todayActivity.isInBox) {
-      if (todayActivity.activityItems.isNotEmpty) {
-        missedActivities = todayActivity.activityItems
-            .where((element) => element.score == "0");
-        todoActivities =
-            todayActivity.activityItems.where((element) => element.score == "");
-        completedActivities = todayActivity.activityItems
-            .where((element) => element.score != "" && element.score != "0");
-      }
-    }
 
     String getTodoTabTitle() {
       return 'To do (${todoActivities.length.toString()})';
@@ -194,20 +200,20 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       initialIndex: defaultActivityTabIndex,
       child: Scaffold(
         appBar: AppBar(
-            bottom: TabBar(
-              tabs: [
-                Tab(
-                  text: 'Missed',
-                ),
-                Tab(
-                  text: getTodoTabTitle(),
-                ),
-                Tab(
-                  text: 'Done',
-                ),
-              ],
-            ),
-            title: Text(getAppBarTitle()),
+          bottom: TabBar(
+            tabs: [
+              Tab(
+                text: 'Missed',
+              ),
+              Tab(
+                text: getTodoTabTitle(),
+              ),
+              Tab(
+                text: 'Done',
+              ),
+            ],
+          ),
+          title: Text(getAppBarTitle()),
         ),
         body: TabBarView(
           children: [
@@ -248,7 +254,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                           activityTypeBox.get(todoActivity.activityItemId);
 
                       return Dismissible(
-                          key: Key('item_${index + 1}'),
+                          key: UniqueKey(),
                           child: taskItem(
                               todayActivityItemDetail.activityName,
                               'Swipe left to skip / right to update score',
@@ -286,9 +292,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                 await todayActivity.save();
                               }
 
-                              setState(() => {defaultActivityTabIndex = 0});
-
                               // Update Box with score.
+                              splitActivitiesForTabs();
                               return true;
                             }
                           },
