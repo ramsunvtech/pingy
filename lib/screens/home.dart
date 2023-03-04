@@ -58,9 +58,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if(containsRewards && containsTypes && predictReward != '') Center(
         child: Text(
           predictReward,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 30,
+            fontSize: 20,
             fontStyle: FontStyle.italic,
             color: Colors.redAccent,
           ),
@@ -232,12 +232,18 @@ class _HomeScreenState extends State<HomeScreen> {
               if (diff.inDays < 0) {
                  predictReward = 'Already Won $predictReward Reward!';
               } else if (diff.inDays == 0) {
-                predictReward = 'Won $predictReward Reward!';
+                predictReward = 'Won $predictReward Reward, Congrats!';
               } else {
                 predictReward = '$predictReward Reward on your way!';
               }
             } else {
-              predictReward = 'Sorry, No Reward, Try again!';
+              if (diff.inDays < 0) {
+                predictReward = '${rewardDetails.title} programme Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) is over Try again!';
+              } else if (diff.inDays == 0) {
+                predictReward = 'Last day of ${rewardDetails.title} programme';
+              } else {
+                predictReward = 'Reward on your way!';
+              }
             }
           }
         }
