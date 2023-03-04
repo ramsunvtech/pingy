@@ -15,6 +15,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
+
   late final Box rewardBox;
   late final Box activityBox;
   late final Box activityTypeBox;
@@ -33,61 +36,66 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundImage: AssetImage('assets/cute.webp'),
         ),
       ),
-      if(containsRewards && containsTypes) Center(
-        child: Text(
-          'Today Score: $todayScore%',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-            fontStyle: FontStyle.italic,
-            color: Colors.blue,
-          ),
-        ),
-      ),
-      if(containsRewards && containsTypes) Center(
-        child: Text(
-          'Total Score: $totalScore%',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 34,
-            fontStyle: FontStyle.italic,
-            color: Colors.blue,
-          ),
-        ),
-      ),
-      if(containsRewards && containsTypes && predictReward != '') Center(
-        child: Text(
-          predictReward,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            fontStyle: FontStyle.italic,
-            color: Colors.redAccent,
-          ),
-        ),
-      ),
-      if(!containsRewards) ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => RewardsScreen(),
+      if (containsRewards && containsTypes)
+        Center(
+          child: Text(
+            'Today Score: $todayScore%',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
+              fontStyle: FontStyle.italic,
+              color: Colors.blue,
             ),
-          );
-        },
-        child: const Text('Add your Reward details'),
-      ),
-      if(containsRewards && !containsTypes) ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => TaskTypeScreen(),
+          ),
+        ),
+      if (containsRewards && containsTypes)
+        Center(
+          child: Text(
+            'Total Score: $totalScore%',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 34,
+              fontStyle: FontStyle.italic,
+              color: Colors.blue,
             ),
-          );
-        },
-        child: const Text('Add your Activity Types'),
-      ),
+          ),
+        ),
+      if (containsRewards && containsTypes && predictReward != '')
+        Center(
+          child: Text(
+            predictReward,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              fontStyle: FontStyle.italic,
+              color: Colors.redAccent,
+            ),
+          ),
+        ),
+      if (!containsRewards)
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (builder) => RewardsScreen(),
+              ),
+            );
+          },
+          child: const Text('Add your Reward details'),
+        ),
+      if (containsRewards && !containsTypes)
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (builder) => TaskTypeScreen(),
+              ),
+            );
+          },
+          child: const Text('Add your Activity Types'),
+        ),
     ];
 
     return homePanes;
@@ -108,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
       containsRewards = true;
     }
 
-    if(activityTypeBox.isNotEmpty) {
+    if (activityTypeBox.isNotEmpty) {
       containsTypes = true;
     }
 
@@ -125,14 +133,15 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    if(canCreateNewActivity) {
+    if (canCreateNewActivity) {
       final activityTypeKeys = activityTypeBox.keys;
       final List<ActivityItem> activityItems = [];
       for (var activityTypeKey in activityTypeKeys) {
         ActivityItem newActivityItem = ActivityItem(activityTypeKey, '');
         activityItems.add(newActivityItem);
       }
-      Activity newActivity = Activity(activityId, activityItems, '', DateTime.now());
+      Activity newActivity =
+          Activity(activityId, activityItems, '', DateTime.now());
       activityBox.put(activityId, newActivity);
     }
 
@@ -178,18 +187,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // print ('day score: $dayScore');
 
-            dynamic todayScoreValue = (((dayScore / activityTypeFullScore) * 100).ceil());
+            dynamic todayScoreValue =
+                (((dayScore / activityTypeFullScore) * 100).ceil());
             // print ('todayScoreValue: $todayScoreValue');
 
-            if (activity.activityId == todayActivityId && todayScoreValue != '') {
+            if (activity.activityId == todayActivityId &&
+                todayScoreValue != '') {
               totalActivityScore += todayScoreValue;
               todayScore = todayScoreValue.toString();
             } else if (todayScoreValue != '') {
               totalActivityScore += todayScoreValue;
             }
           }
-
-
 
           if (todayScoreValue > 0) {
             // print('dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
@@ -205,7 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
         dynamic rewardScore = 0;
 
         if (totalActivityScore > 0 && totalActivityScore > 0) {
-          rewardScore = ((totalActivityScore) / (100 * totalActivityDays) * 100).ceil();
+          rewardScore =
+              ((totalActivityScore) / (100 * totalActivityDays) * 100).ceil();
         }
 
         // print('rewardScore: $rewardScore');
@@ -224,13 +234,15 @@ class _HomeScreenState extends State<HomeScreen> {
             }
 
             List endPeriod = rewardDetails.endPeriod.split('/').toList();
-            String todayDate = '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
-            DateTime endDate = DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
+            String todayDate =
+                '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
+            DateTime endDate = DateTime.parse(
+                '${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
             Duration diff = endDate.difference(today);
 
             if (predictReward.isNotEmpty) {
               if (diff.inDays < 0) {
-                 predictReward = 'Already Won $predictReward Reward!';
+                predictReward = 'Already Won $predictReward Reward!';
               } else if (diff.inDays == 0) {
                 predictReward = 'Won $predictReward Reward, Congrats!';
               } else {
@@ -238,7 +250,8 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             } else {
               if (diff.inDays < 0) {
-                predictReward = '${rewardDetails.title} programme Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) is over Try again!';
+                predictReward =
+                    '${rewardDetails.title} programme Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) is over Try again!';
               } else if (diff.inDays == 0) {
                 predictReward = 'Last day of ${rewardDetails.title} programme';
               } else {
@@ -253,6 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    // print('initState called');
     super.initState();
     _updateScores();
   }
@@ -279,8 +293,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
-      child: const Icon(Icons.edit),
       backgroundColor: Colors.green,
+      child: const Icon(Icons.edit),
     );
   }
 
@@ -288,41 +302,82 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     List<Widget> homePanes = getHomeBlocks('100');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pingy'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.settings,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (builder) => SettingsScreen(),
+    return WillPopScope(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Pingy'),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.settings,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (builder) => SettingsScreen(),
+                  ),
+                );
+              },
+            )
+          ],
+        ),
+        body: RefreshIndicator(
+          key: _refreshIndicatorKey,
+          color: Colors.white,
+          backgroundColor: Colors.blue,
+          strokeWidth: 4.0,
+          onRefresh: () async {
+            // Replace this delay with the code to be executed during refresh
+            // and return a Future when code finish execution.
+            return Future<void>.delayed(const Duration(seconds: 3));
+          },
+          // Pull from top to show refresh indicator.
+          child: ListView.builder(
+            itemCount: homePanes.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    child: homePanes[index],
+                  ),
                 ),
               );
             },
-          )
-        ],
+          ),
+        ),
+        floatingActionButton: getFloatingButton(context),
       ),
-      body: ListView.builder(
-        itemCount: homePanes.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            child: new Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: new Container(
-                child: homePanes[index],
-              ),
-            ),
-          );
-        },
-      ),
-      floatingActionButton: getFloatingButton(context),
+      onWillPop: () async {
+        final shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Do you want to go back?'),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: const Text('Yes'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text('No'),
+                ),
+              ],
+            );
+          },
+        );
+        return shouldPop!;
+      },
+
     );
   }
 }
