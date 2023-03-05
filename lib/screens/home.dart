@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
-import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
@@ -357,12 +358,14 @@ class _HomeScreenState extends State<HomeScreen> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('Do you want to go back?'),
+              title: const Text('Want to Close Pingy?'),
               actionsAlignment: MainAxisAlignment.spaceBetween,
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context, true);
+                    Future.delayed(const Duration(milliseconds: 1000), () {
+                      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+                    });
                   },
                   child: const Text('Yes'),
                 ),
