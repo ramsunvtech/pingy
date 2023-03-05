@@ -15,9 +15,11 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
+
+  AppLifecycleState? _lastLifecycleState;
 
   late final Box rewardBox;
   late final Box activityBox;
@@ -253,7 +255,9 @@ class _HomeScreenState extends State<HomeScreen> {
             } else {
               if (diff.inDays < 0) {
                 predictReward =
-                    '${rewardDetails.title} Programme Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) is over Try again!';
+                    '${rewardDetails.title} Programme Activity Period \n'
+                        '(${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) is over.\n'
+                        ' Try again!';
               } else if (diff.inDays == 0) {
                 predictReward = 'Last day of ${rewardDetails.title} programme';
               } else {
@@ -268,8 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // print('initState called');
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _updateScores();
   }
 
@@ -278,7 +282,15 @@ class _HomeScreenState extends State<HomeScreen> {
     // Close Hive Connection.
     Hive.close();
 
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {});
+    }
   }
 
   Widget getFloatingButton(BuildContext context) {
@@ -363,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Future.delayed(const Duration(milliseconds: 1000), () {
+                    Future.delayed(const Duration(milliseconds: 250), () {
                       SystemChannels.platform.invokeMethod('SystemNavigator.pop');
                     });
                   },
