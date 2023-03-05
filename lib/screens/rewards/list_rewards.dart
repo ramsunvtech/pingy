@@ -22,8 +22,20 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
   }
 
   Widget getFloatingButton(BuildContext context) {
-    if (!rewardsBox.isEmpty) {
+    if (rewardsBox.isEmpty) {
       return Container();
+    } else if (rewardsBox.isNotEmpty) {
+      RewardsModel latestGoal = rewardsBox.values.last;
+      List endPeriod = latestGoal.endPeriod.split('/').toList();
+
+      DateTime today = DateTime.now();
+      DateTime endDate =
+          DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
+      Duration diff = endDate.difference(today);
+      print('endDate: $endDate');
+      if (diff.inDays > 0) {
+        return Container();
+      }
     }
 
     return FloatingActionButton(
