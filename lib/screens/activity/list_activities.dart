@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
+import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
 import 'package:pingy/screens/settings.dart';
+
+import '../../models/hive/activity_type.dart';
 
 class ActivitiesListScreen extends StatefulWidget {
   @override
@@ -16,6 +19,8 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
 
   late final Box activityBox;
   late final Box activityTypeBox;
+
+  set activityTypeDetail(activityTypeDetail) {}
 
   @override
   void initState() {
@@ -49,10 +54,9 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     return IconButton(
       onPressed: () {
         activityBox.delete(activityId);
-        String toastMessage =
-            'Activity removed successfully!';
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(toastMessage)));
+        String toastMessage = 'Activity removed successfully!';
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(toastMessage)));
       },
       icon: const Icon(
         Icons.delete,
@@ -120,7 +124,10 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                   });
 
                   dynamic dayScore = 0;
+                  String missedItemsCSV = '';
                   if (activityData.activityItems.isNotEmpty) {
+                    print(
+                        'activityData.activityId: ${activityData.activityId}');
                     activityData.activityItems.forEach((element) {
                       var scoreValue = int.tryParse(element.score ?? "0");
 
@@ -128,6 +135,21 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                         dayScore += scoreValue;
                       }
                     });
+
+                    Iterable<ActivityItem> missedActivityIdList = activityData
+                        .activityItems
+                        .where((element) => element.score == "0");
+                    if (missedActivityIdList.isNotEmpty) {
+                      List activityTypes = [];
+
+                      for (var activityItem in missedActivityIdList) {
+                        dynamic activityTypeDetail =
+                            activityTypeBox.get(activityItem.activityItemId);
+                        activityTypes.add(activityTypeDetail.activityName);
+                      }
+
+                      missedItemsCSV = 'Missed: ${activityTypes.join(', ')}';
+                    }
                   }
 
                   dynamic activityScoreValue =
@@ -135,16 +157,22 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
 
                   String formattedDate = '';
                   if (activityData!.activityDate != null) {
-                    DateFormat dateFormat = DateFormat("dd/MM/yyyy");
-                    formattedDate = '(${dateFormat.format(activityData!.activityDate as DateTime)})';
+                    DateFormat dateFormat = DateFormat("EEE, dd/MMM/yy");
+                    formattedDate =
+                        '(${dateFormat.format(activityData!.activityDate as DateTime)})';
                   }
 
                   return InkWell(
                     onTap: () => {},
                     child: ListTile(
-                      title: Text('Activity $formattedDate - $activityScoreValue%'),
-                      subtitle: Text('$dayScore/$activityTypeFullScore'),
-                      trailing: getListTileTrailingIconButton(activityData.activityId),
+                      title: Text(
+                          'Activity $formattedDate - $activityScoreValue%'),
+                      subtitle: Text(
+                        '$dayScore/$activityTypeFullScore\n'
+                        '$missedItemsCSV',
+                      ),
+                      trailing: getListTileTrailingIconButton(
+                          activityData.activityId),
                     ),
                   );
                 },
