@@ -91,12 +91,15 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
         ),
         body: ValueListenableBuilder(
           valueListenable: activityBox.listenable(),
-          builder: (context, Box box, widget) {
-            if (box.isEmpty) {
+          builder: (context, Box activityDataBox, widget) {
+            if (activityDataBox.isEmpty) {
               return const Center(
                 child: Text('No Activities are available.'),
               );
             } else {
+              Iterable activityDataKeyList = activityDataBox.keys.toList().reversed;
+              // TODO: fix the manual key index.
+              int keyIndex = 0;
               return RefreshIndicator(
                 key: _refreshIndicatorKey,
                 color: Colors.white,
@@ -109,11 +112,12 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                 },
                 // Pull from top to show refresh indicator.
                 child: ListView.builder(
-                  itemCount: activityBox.length,
+                  itemCount: activityDataKeyList.length,
                   physics: const AlwaysScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
-                    var currentBox = activityBox;
-                    Activity activityData = currentBox.getAt(index)!;
+                    String activityId = activityDataKeyList.elementAt(keyIndex);
+                    Activity activityData = activityDataBox.get(activityId);
+                    keyIndex++;
                     Map activityTypeBoxMap = activityTypeBox.toMap();
                     Iterable<dynamic> activityTypeBoxMapValues =
                         activityTypeBoxMap.values;
@@ -127,8 +131,6 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                     dynamic dayScore = 0;
                     String missedItemsCSV = '';
                     if (activityData.activityItems.isNotEmpty) {
-                      print(
-                          'activityData.activityId: ${activityData.activityId}');
                       activityData.activityItems.forEach((element) {
                         var scoreValue = int.tryParse(element.score ?? "0");
 
