@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/activity_type.dart';
+import 'package:pingy/screens/activity/list_activities.dart';
 import 'package:pingy/screens/activity/list_activity_type.dart';
 
 class TaskTypeScreen extends StatefulWidget {
   @override
   _TaskTypeScreenState createState() => _TaskTypeScreenState();
 }
+
 class _TaskTypeScreenState extends State<TaskTypeScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _fullScoreController = TextEditingController();
@@ -30,85 +32,99 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Pingy (Add Activity Type)')),
-      body: Container(
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            TextFormField(
-              controller: _nameController,
-              cursorColor: Theme.of(context).backgroundColor,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.label),
-                labelText: 'Activity Type Name',
-                labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
-                ),
-                helperText: 'Enter your activity type name',
-                suffixIcon: Icon(
-                  Icons.check_circle,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6200EE)),
-                ),
-              ),
-            ),
-            TextFormField(
-              controller: _fullScoreController,
-              cursorColor: Theme.of(context).backgroundColor,
-              keyboardType: TextInputType.number,
-              maxLength: 3,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.numbers),
-                labelText: 'Activity Score',
-                labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
-                ),
-                helperText: 'Enter the activity score',
-                suffixIcon: Icon(
-                  Icons.check_circle,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6200EE)),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                var today = DateTime.now();
-                var todayDate = '${today.year}${today.month}${today.day}';
-                var todayTime = '${today.hour}${today.minute}${today.second}';
-                var activityTypeId = 'type_${todayDate}${todayTime}';
-
-                ActivityTypeModel newActivityType = ActivityTypeModel(activityTypeId, _nameController.text, _fullScoreController.text);
-                activityTypeBox.put(activityTypeId, newActivityType);
-
-                String toastMessage = 'Activity Type Added!';
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(toastMessage)));
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => ActivityTypeListScreen(),
+    return WillPopScope(
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Pingy (Add Activity Type)')),
+          body: Container(
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextFormField(
+                  controller: _nameController,
+                  cursorColor: Theme.of(context).backgroundColor,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.label),
+                    labelText: 'Activity Type Name',
+                    labelStyle: TextStyle(
+                      color: Color(0xFF6200EE),
+                    ),
+                    helperText: 'Enter your activity type name',
+                    suffixIcon: Icon(
+                      Icons.check_circle,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF6200EE)),
+                    ),
                   ),
-                );
-              },
-              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-              // color: Colors.pink,
-              child: const Text(
-                'Add Activity Type',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.6),
-              ),
+                ),
+                TextFormField(
+                  controller: _fullScoreController,
+                  cursorColor: Theme.of(context).backgroundColor,
+                  keyboardType: TextInputType.number,
+                  maxLength: 3,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.numbers),
+                    labelText: 'Activity Score',
+                    labelStyle: TextStyle(
+                      color: Color(0xFF6200EE),
+                    ),
+                    helperText: 'Enter the activity score',
+                    suffixIcon: Icon(
+                      Icons.check_circle,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF6200EE)),
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    var today = DateTime.now();
+                    var todayDate = '${today.year}${today.month}${today.day}';
+                    var todayTime =
+                        '${today.hour}${today.minute}${today.second}';
+                    var activityTypeId = 'type_${todayDate}${todayTime}';
+
+                    ActivityTypeModel newActivityType = ActivityTypeModel(
+                        activityTypeId,
+                        _nameController.text,
+                        _fullScoreController.text);
+                    activityTypeBox.put(activityTypeId, newActivityType);
+
+                    String toastMessage = 'Activity Type Added!';
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(toastMessage)));
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (builder) => ActivityTypeListScreen(),
+                      ),
+                    );
+                  },
+                  // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                  // color: Colors.pink,
+                  child: const Text(
+                    'Add Activity Type',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.6),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    );
+        onWillPop: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (builder) => ActivitiesListScreen(),
+            ),
+          );
+          return true;
+        });
   }
 }

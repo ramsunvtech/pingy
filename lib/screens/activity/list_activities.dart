@@ -67,120 +67,131 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pingy (Activities)'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.settings,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (builder) => SettingsScreen(),
-                ),
-              );
-            },
-          )
-        ],
-      ),
-      body: ValueListenableBuilder(
-        valueListenable: activityBox.listenable(),
-        builder: (context, Box box, widget) {
-          if (box.isEmpty) {
-            return const Center(
-              child: Text('No Activities are available.'),
-            );
-          } else {
-            return RefreshIndicator(
-              key: _refreshIndicatorKey,
-              color: Colors.white,
-              backgroundColor: Colors.blue,
-              strokeWidth: 4.0,
-              onRefresh: () async {
-                // Replace this delay with the code to be executed during refresh
-                // and return a Future when code finish execution.
-                return Future<void>.delayed(const Duration(seconds: 3));
+    return WillPopScope(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Pingy (Activities)'),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.settings,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (builder) => SettingsScreen(),
+                  ),
+                );
               },
-              // Pull from top to show refresh indicator.
-              child: ListView.builder(
-                itemCount: activityBox.length,
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  var currentBox = activityBox;
-                  Activity activityData = currentBox.getAt(index)!;
-                  Map activityTypeBoxMap = activityTypeBox.toMap();
-                  Iterable<dynamic> activityTypeBoxMapValues =
-                      activityTypeBoxMap.values;
+            )
+          ],
+        ),
+        body: ValueListenableBuilder(
+          valueListenable: activityBox.listenable(),
+          builder: (context, Box box, widget) {
+            if (box.isEmpty) {
+              return const Center(
+                child: Text('No Activities are available.'),
+              );
+            } else {
+              return RefreshIndicator(
+                key: _refreshIndicatorKey,
+                color: Colors.white,
+                backgroundColor: Colors.blue,
+                strokeWidth: 4.0,
+                onRefresh: () async {
+                  // Replace this delay with the code to be executed during refresh
+                  // and return a Future when code finish execution.
+                  return Future<void>.delayed(const Duration(seconds: 3));
+                },
+                // Pull from top to show refresh indicator.
+                child: ListView.builder(
+                  itemCount: activityBox.length,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    var currentBox = activityBox;
+                    Activity activityData = currentBox.getAt(index)!;
+                    Map activityTypeBoxMap = activityTypeBox.toMap();
+                    Iterable<dynamic> activityTypeBoxMapValues =
+                        activityTypeBoxMap.values;
 
-                  // Activity Total Score.
-                  dynamic activityTypeFullScore = 0;
-                  activityTypeBoxMap.forEach((key, value) {
-                    activityTypeFullScore += int.tryParse(value.fullScore)!;
-                  });
-
-                  dynamic dayScore = 0;
-                  String missedItemsCSV = '';
-                  if (activityData.activityItems.isNotEmpty) {
-                    print(
-                        'activityData.activityId: ${activityData.activityId}');
-                    activityData.activityItems.forEach((element) {
-                      var scoreValue = int.tryParse(element.score ?? "0");
-
-                      if (scoreValue != null) {
-                        dayScore += scoreValue;
-                      }
+                    // Activity Total Score.
+                    dynamic activityTypeFullScore = 0;
+                    activityTypeBoxMap.forEach((key, value) {
+                      activityTypeFullScore += int.tryParse(value.fullScore)!;
                     });
 
-                    Iterable<ActivityItem> missedActivityIdList = activityData
-                        .activityItems
-                        .where((element) => element.score == "0");
-                    if (missedActivityIdList.isNotEmpty) {
-                      List activityTypes = [];
+                    dynamic dayScore = 0;
+                    String missedItemsCSV = '';
+                    if (activityData.activityItems.isNotEmpty) {
+                      print(
+                          'activityData.activityId: ${activityData.activityId}');
+                      activityData.activityItems.forEach((element) {
+                        var scoreValue = int.tryParse(element.score ?? "0");
 
-                      for (var activityItem in missedActivityIdList) {
-                        dynamic activityTypeDetail =
-                            activityTypeBox.get(activityItem.activityItemId);
-                        activityTypes.add(activityTypeDetail.activityName);
+                        if (scoreValue != null) {
+                          dayScore += scoreValue;
+                        }
+                      });
+
+                      Iterable<ActivityItem> missedActivityIdList = activityData
+                          .activityItems
+                          .where((element) => element.score == "0");
+                      if (missedActivityIdList.isNotEmpty) {
+                        List activityTypes = [];
+
+                        for (var activityItem in missedActivityIdList) {
+                          dynamic activityTypeDetail =
+                              activityTypeBox.get(activityItem.activityItemId);
+                          activityTypes.add(activityTypeDetail.activityName);
+                        }
+
+                        missedItemsCSV = 'Missed: ${activityTypes.join(', ')}';
                       }
-
-                      missedItemsCSV = 'Missed: ${activityTypes.join(', ')}';
                     }
-                  }
 
-                  dynamic activityScoreValue =
-                      (((dayScore / activityTypeFullScore) * 100).ceil());
+                    dynamic activityScoreValue =
+                        (((dayScore / activityTypeFullScore) * 100).ceil());
 
-                  String formattedDate = '';
-                  if (activityData!.activityDate != null) {
-                    DateFormat dateFormat = DateFormat("EEE, dd/MMM/yy");
-                    formattedDate =
-                        '(${dateFormat.format(activityData!.activityDate as DateTime)})';
-                  }
+                    String formattedDate = '';
+                    if (activityData!.activityDate != null) {
+                      DateFormat dateFormat = DateFormat("EEE, dd/MMM/yy");
+                      formattedDate =
+                          '(${dateFormat.format(activityData!.activityDate as DateTime)})';
+                    }
 
-                  return InkWell(
-                    onTap: () => {},
-                    child: ListTile(
-                      title: Text(
-                          'Activity $formattedDate - $activityScoreValue%'),
-                      subtitle: Text(
-                        'Score: $dayScore/$activityTypeFullScore\n'
-                        '$missedItemsCSV',
+                    return InkWell(
+                      onTap: () => {},
+                      child: ListTile(
+                        title: Text(
+                            'Activity $formattedDate - $activityScoreValue%'),
+                        subtitle: Text(
+                          'Score: $dayScore/$activityTypeFullScore\n'
+                          '$missedItemsCSV',
+                        ),
+                        trailing: getListTileTrailingIconButton(
+                            activityData.activityId),
                       ),
-                      trailing: getListTileTrailingIconButton(
-                          activityData.activityId),
-                    ),
-                  );
-                },
-              ),
-            );
-          }
-        },
+                    );
+                  },
+                ),
+              );
+            }
+          },
+        ),
       ),
+      onWillPop: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => SettingsScreen(),
+          ),
+        );
+        return true;
+      },
     );
   }
 }

@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             );
           },
-          child: const Text('Add your Reward details'),
+          child: const Text('Add your Goal details'),
         ),
       if (containsRewards && !containsTypes)
         ElevatedButton(
@@ -255,11 +255,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             } else {
               if (diff.inDays < 0) {
                 predictReward =
-                    '${rewardDetails.title} Programme Activity Period \n'
-                        '(${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) is over.\n'
+                    '${rewardDetails.title} Goal Activity Period ended \n'
+                        '(${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}).\n'
                         ' Try again!';
               } else if (diff.inDays == 0) {
-                predictReward = 'Last day of ${rewardDetails.title} programme';
+                predictReward = 'Last day of ${rewardDetails.title} Goal';
               } else {
                 predictReward = 'Reward on your way!';
               }

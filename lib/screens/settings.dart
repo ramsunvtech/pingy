@@ -104,40 +104,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pingy (Settings)'),
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (builder) => HomeScreen(),
-              ),
-            );
-          },
-          child: Icon(
-            Icons.home_rounded, // add custom icons also
+    return WillPopScope(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Pingy (Settings)'),
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (builder) => HomeScreen(),
+                ),
+              );
+            },
+            child: Icon(
+              Icons.home_rounded, // add custom icons also
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '$rewardExist Rewards exist',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.blue,
-                ),
-              ),
-              Center(
-                child: Text(
-                  '$activityCount Activity added!',
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$rewardExist Goal exist',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -145,100 +136,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: Colors.blue,
                   ),
                 ),
-              ),
-              Center(
-                child: Text(
-                  '$activityTypeCount Activity Types added!',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.blue,
-                  ),
-                ),
-              ),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await rewardBox.clear();
-                    await activityTypeBox.clear();
-                    await activityBox.clear();
-                    setState(() {
-                      rewardExist = 'No';
-                      activityCount = '0';
-                      activityTypeCount = '0';
-
-                      if (rewardBox.isNotEmpty) {
-                        rewardExist = '';
-                      }
-
-                      if (activityBox.isNotEmpty) {
-                        activityCount = activityBox.length.toString();
-                      }
-
-                      if (activityTypeBox.isNotEmpty) {
-                        activityTypeCount = activityTypeBox.length.toString();
-                      }
-                    });
-                  },
-                  child: const Text(
-                    'Clear Data',
+                Center(
+                  child: Text(
+                    '$activityCount Activity added!',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.blue,
                     ),
                   ),
                 ),
-              ),
-              // Center(
-              //   child: Text(authorized),
-              // ),
-            ],
+                Center(
+                  child: Text(
+                    '$activityTypeCount Activity Types added!',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await rewardBox.clear();
+                      await activityTypeBox.clear();
+                      await activityBox.clear();
+                      setState(() {
+                        rewardExist = 'No';
+                        activityCount = '0';
+                        activityTypeCount = '0';
+
+                        if (rewardBox.isNotEmpty) {
+                          rewardExist = '';
+                        }
+
+                        if (activityBox.isNotEmpty) {
+                          activityCount = activityBox.length.toString();
+                        }
+
+                        if (activityTypeBox.isNotEmpty) {
+                          activityTypeCount = activityTypeBox.length.toString();
+                        }
+                      });
+                    },
+                    child: const Text(
+                      'Clear Data',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ),
+                // Center(
+                //   child: Text(authorized),
+                // ),
+              ],
+            ),
           ),
         ),
+        bottomNavigationBar: BottomNavigationBar(
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add_task_sharp),
+                label: 'Activity Types',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                label: 'Goal',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                label: 'Activities',
+              ),
+            ],
+            onTap: (int index) {
+              switch (index) {
+                case 0:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (builder) => ActivityTypeListScreen(),
+                    ),
+                  );
+                  break;
+                case 1:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (builder) => RewardsListScreen(),
+                    ),
+                  );
+                  break;
+                case 2:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (builder) => ActivitiesListScreen(),
+                    ),
+                  );
+                  break;
+              }
+            }),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_task_sharp),
-              label: 'Activity Types',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: 'Rewards',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: 'Activities',
-            ),
-          ],
-          onTap: (int index) {
-            switch (index) {
-              case 0:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => ActivityTypeListScreen(),
-                  ),
-                );
-                break;
-              case 1:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => RewardsListScreen(),
-                  ),
-                );
-                break;
-              case 2:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => ActivitiesListScreen(),
-                  ),
-                );
-                break;
-            }
-          }),
+      onWillPop: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => HomeScreen(),
+          ),
+        );
+        return true;
+      },
     );
   }
 }

@@ -46,10 +46,11 @@ class _RewardsScreenState extends State<RewardsScreen> {
     setState(() {
       if (args.value is PickerDateRange) {
         startDate = DateFormat('dd/MM/yyyy').format(args.value.startDate);
-        endDate = DateFormat('dd/MM/yyyy').format(args.value.endDate ?? args.value.startDate);
+        endDate = DateFormat('dd/MM/yyyy')
+            .format(args.value.endDate ?? args.value.startDate);
 
         _range = '${DateFormat('dd/MM/yyyy').format(args.value.startDate)} -'
-        // ignore: lines_longer_than_80_chars
+            // ignore: lines_longer_than_80_chars
             ' ${DateFormat('dd/MM/yyyy').format(args.value.endDate ?? args.value.startDate)}';
         _startPeriodController.text = '${startDate} to ${endDate}';
       } else if (args.value is DateTime) {
@@ -64,49 +65,50 @@ class _RewardsScreenState extends State<RewardsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(title: const Text('Pingy (Add Rewards)')),
-      body: Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            TextFormField(
-              controller: _titleController,
-              cursorColor: Theme.of(context).backgroundColor,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.label),
-                labelText: 'Rewards Title',
-                labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
-                ),
-                helperText: 'Enter your rewards title',
-                suffixIcon: Icon(
-                  Icons.check_circle,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6200EE)),
-                ),
-              ),
-            ),
-            TextFormField(
-              controller: _startPeriodController,
-              cursorColor: Theme.of(context).backgroundColor,
-              readOnly: true,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.calendar_today),
-                labelText: 'Activity Period',
-                labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
-                ),
-                helperText: 'Choose activity period',
-                suffixIcon: Icon(
-                  Icons.calendar_month,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6200EE)),
+    return WillPopScope(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(title: const Text('Pingy (Add Goals)')),
+        body: Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextFormField(
+                controller: _titleController,
+                cursorColor: Theme.of(context).backgroundColor,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.label),
+                  labelText: 'Goals Title',
+                  labelStyle: TextStyle(
+                    color: Color(0xFF6200EE),
+                  ),
+                  helperText: 'Enter your Goal title',
+                  suffixIcon: Icon(
+                    Icons.check_circle,
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF6200EE)),
+                  ),
                 ),
               ),
+              TextFormField(
+                controller: _startPeriodController,
+                cursorColor: Theme.of(context).backgroundColor,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.calendar_today),
+                  labelText: 'Activity Period',
+                  labelStyle: TextStyle(
+                    color: Color(0xFF6200EE),
+                  ),
+                  helperText: 'Choose activity period',
+                  suffixIcon: Icon(
+                    Icons.calendar_month,
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF6200EE)),
+                  ),
+                ),
                 onTap: () async {
                   showModalBottomSheet(
                     context: context,
@@ -119,116 +121,125 @@ class _RewardsScreenState extends State<RewardsScreen> {
                             selectionMode: DateRangePickerSelectionMode.range,
                           ),
                           Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                              // color: Colors.pink,
-                              child: const Text(
-                                'Done',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.6),
-                              ),
-                            )
-                          ),
+                              child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                            // color: Colors.pink,
+                            child: const Text(
+                              'Done',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.6),
+                            ),
+                          )),
                         ],
                       );
                     },
                   );
                 },
-            ),
-            TextFormField(
-              controller: _firstPrizeController,
-              cursorColor: Theme.of(context).backgroundColor,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.numbers),
-                labelText: '1st Prize',
-                labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
-                ),
-                helperText: 'Enter First Prize those who score 95% or above',
-                suffixIcon: Icon(
-                  Icons.check_circle,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6200EE)),
-                ),
               ),
-            ),
-            TextFormField(
-              controller: _secondPrizeController,
-              cursorColor: Theme.of(context).backgroundColor,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.numbers),
-                labelText: '2nd Prize',
-                labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
-                ),
-                helperText: 'Enter Second Prize those who score 85% or above',
-                suffixIcon: Icon(
-                  Icons.check_circle,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6200EE)),
-                ),
-              ),
-            ),
-            TextFormField(
-              controller: _thirdPrizeController,
-              cursorColor: Theme.of(context).backgroundColor,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.numbers),
-                labelText: '3rd Prize',
-                labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
-                ),
-                helperText: 'Enter Third Prize those who score 75% or above',
-                suffixIcon: Icon(
-                  Icons.check_circle,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6200EE)),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                RewardsModel newRewards = RewardsModel(
-                  _titleController.text,
-                  startDate,
-                  endDate,
-                  _firstPrizeController.text,
-                  _secondPrizeController.text,
-                  _thirdPrizeController.text,
-                );
-                rewardsBox.add(newRewards);
-                String toastMessage = 'Rewards Added!';
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(toastMessage)));
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => HomeScreen(),
+              TextFormField(
+                controller: _firstPrizeController,
+                cursorColor: Theme.of(context).backgroundColor,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.numbers),
+                  labelText: '1st Prize',
+                  labelStyle: TextStyle(
+                    color: Color(0xFF6200EE),
                   ),
-                );
-              },
-              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-              // color: Colors.pink,
-              child: const Text(
-                'Add Rewards',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.6),
+                  helperText: 'Enter First Prize those who score 95% or above',
+                  suffixIcon: Icon(
+                    Icons.check_circle,
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF6200EE)),
+                  ),
+                ),
               ),
-            ),
-          ],
+              TextFormField(
+                controller: _secondPrizeController,
+                cursorColor: Theme.of(context).backgroundColor,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.numbers),
+                  labelText: '2nd Prize',
+                  labelStyle: TextStyle(
+                    color: Color(0xFF6200EE),
+                  ),
+                  helperText: 'Enter Second Prize those who score 85% or above',
+                  suffixIcon: Icon(
+                    Icons.check_circle,
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF6200EE)),
+                  ),
+                ),
+              ),
+              TextFormField(
+                controller: _thirdPrizeController,
+                cursorColor: Theme.of(context).backgroundColor,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.numbers),
+                  labelText: '3rd Prize',
+                  labelStyle: TextStyle(
+                    color: Color(0xFF6200EE),
+                  ),
+                  helperText: 'Enter Third Prize those who score 75% or above',
+                  suffixIcon: Icon(
+                    Icons.check_circle,
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF6200EE)),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  RewardsModel newRewards = RewardsModel(
+                    _titleController.text,
+                    startDate,
+                    endDate,
+                    _firstPrizeController.text,
+                    _secondPrizeController.text,
+                    _thirdPrizeController.text,
+                  );
+                  rewardsBox.add(newRewards);
+                  String toastMessage = 'Goal Added!';
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(toastMessage)));
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (builder) => HomeScreen(),
+                    ),
+                  );
+                },
+                // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                // color: Colors.pink,
+                child: const Text(
+                  'Add Goal',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.6),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+      onWillPop: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => RewardsListScreen(),
+          ),
+        );
+        return true;
+      },
     );
   }
 }

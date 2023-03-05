@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/rewards/rewards.dart';
+import 'package:pingy/screens/settings.dart';
 
 class RewardsListScreen extends StatefulWidget {
   @override
@@ -9,7 +10,8 @@ class RewardsListScreen extends StatefulWidget {
 }
 
 class _RewardsListScreenState extends State<RewardsListScreen> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
   late final Box rewardsBox;
 
   @override
@@ -40,55 +42,64 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pingy (Rewards)'),
-      ),
-      body: ValueListenableBuilder(
-        valueListenable: rewardsBox.listenable(),
-        builder: (context, Box box, widget) {
-          if (box.isEmpty) {
-            return const Center(
-              child: Text('No Rewards are available.'),
-            );
-          } else {
-            return RefreshIndicator(
-              key: _refreshIndicatorKey,
-              color: Colors.white,
-              backgroundColor: Colors.blue,
-              strokeWidth: 4.0,
-              onRefresh: () async {
-                // Replace this delay with the code to be executed during refresh
-                // and return a Future when code finish execution.
-                return Future<void>.delayed(const Duration(seconds: 3));
-              },
-              // Pull from top to show refresh indicator.
-              child: ListView.builder(
-                itemCount: rewardsBox.length,
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  var currentBox = rewardsBox;
-                  RewardsModel rewardsData = currentBox.getAt(index)!;
-                  return InkWell(
-                    onTap: () => {},
-                    child: ListTile(
-                      title: Text(rewardsData.title),
-                      subtitle: Text(
-                          '${rewardsData.startPeriod}'
-                          ' to ${rewardsData.endPeriod}\n'
-                          'First Prize (95%): ${rewardsData.firstPrice}\n'
-                          'Second Prize (85%): ${rewardsData.secondPrice}\n'
-                          'Third Prize (75%): ${rewardsData.thirdPrice}'
-                      ),
-                    ),
-                  );
+    return WillPopScope(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Pingy (Goals)'),
+        ),
+        body: ValueListenableBuilder(
+          valueListenable: rewardsBox.listenable(),
+          builder: (context, Box box, widget) {
+            if (box.isEmpty) {
+              return const Center(
+                child: Text('No Goals are available.'),
+              );
+            } else {
+              return RefreshIndicator(
+                key: _refreshIndicatorKey,
+                color: Colors.white,
+                backgroundColor: Colors.blue,
+                strokeWidth: 4.0,
+                onRefresh: () async {
+                  // Replace this delay with the code to be executed during refresh
+                  // and return a Future when code finish execution.
+                  return Future<void>.delayed(const Duration(seconds: 3));
                 },
-              ),
-            );
-          }
-        },
+                // Pull from top to show refresh indicator.
+                child: ListView.builder(
+                  itemCount: rewardsBox.length,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    var currentBox = rewardsBox;
+                    RewardsModel rewardsData = currentBox.getAt(index)!;
+                    return InkWell(
+                      onTap: () => {},
+                      child: ListTile(
+                        title: Text(rewardsData.title),
+                        subtitle: Text('${rewardsData.startPeriod}'
+                            ' to ${rewardsData.endPeriod}\n'
+                            'First Prize (95%): ${rewardsData.firstPrice}\n'
+                            'Second Prize (85%): ${rewardsData.secondPrice}\n'
+                            'Third Prize (75%): ${rewardsData.thirdPrice}'),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }
+          },
+        ),
+        floatingActionButton: getFloatingButton(context),
       ),
-      floatingActionButton: getFloatingButton(context),
+      onWillPop: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => SettingsScreen(),
+          ),
+        );
+        return true;
+      },
     );
   }
 }
