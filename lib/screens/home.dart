@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/activity.dart';
@@ -19,8 +18,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
-  AppLifecycleState? _lastLifecycleState;
-
   late final Box rewardBox;
   late final Box activityBox;
   late final Box activityTypeBox;
@@ -39,11 +36,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           backgroundImage: AssetImage('assets/cute.webp'),
         ),
       ),
-      if (containsRewards && containsTypes)
+      if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
         Center(
           child: Text(
             'Today Score: $todayScore%',
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 25,
               fontStyle: FontStyle.italic,
@@ -51,11 +48,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-      if (containsRewards && containsTypes)
+      if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
         Center(
           child: Text(
             'Total Score: $totalScore%',
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 34,
               fontStyle: FontStyle.italic,
@@ -76,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-      if (!containsRewards)
+      if (!containsRewards || getGoalEndDayCount() < 0)
         ElevatedButton(
           onPressed: () {
             Navigator.push(
@@ -105,13 +102,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return homePanes;
   }
 
+  int getGoalEndDayCount() {
+    Map rewardBoxMap = rewardBox.toMap();
+    RewardsModel rewardDetails = rewardBoxMap.values.last;
+
+    DateTime today = DateTime.now();
+    List endPeriod = rewardDetails.endPeriod.split('/').toList();
+    DateTime endDate = DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
+    Duration diff = endDate.difference(today);
+    return diff.inDays;
+  }
+
   Future<void> _updateScores() async {
     // Get reference to an already opened box
     rewardBox = Hive.box('rewards');
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
 
-    var today = DateTime.now();
+    DateTime today = DateTime.now();
     var activityId = 'activity_${today.year}${today.month}${today.day}';
     bool canCreateNewActivity = true;
 
@@ -150,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     Map activityBoxMap = activityBox.toMap();
+    // TODO: Filter with latest goal period.
     Iterable<dynamic> activityBoxMapValues = activityBoxMap.values;
 
     Map activityTypeBoxMap = activityTypeBox.toMap();
@@ -176,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         // print("activityBoxMapValues is exist");
         dynamic totalActivityScore = 0;
         activityBoxMapValues.forEach((activity) {
-          // print('Activitiy Id: ${activity.activityId}');
+          // print('Activity Id: ${activity.activityId}');
           dynamic dayScore = 0;
           if (activity.activityItems.length > 0) {
             activity.activityItems.forEach((element) {
@@ -237,28 +246,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               predictReward = rewardDetails.thirdPrice;
             }
 
-            List endPeriod = rewardDetails.endPeriod.split('/').toList();
-            String todayDate =
-                '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
-            DateTime endDate = DateTime.parse(
-                '${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
-            Duration diff = endDate.difference(today);
+            int goalEndDayCount = getGoalEndDayCount();
 
             if (predictReward.isNotEmpty) {
-              if (diff.inDays < 0) {
+              if (goalEndDayCount < 0) {
                 predictReward = 'Already Won $predictReward Reward!';
-              } else if (diff.inDays == 0) {
+              } else if (goalEndDayCount == 0) {
                 predictReward = 'Won $predictReward Reward, Congrats!';
               } else {
                 predictReward = '$predictReward Reward on your way!';
               }
             } else {
-              if (diff.inDays < 0) {
+              if (goalEndDayCount < 0) {
                 predictReward =
-                    '${rewardDetails.title} Goal Activity Period ended \n'
-                        '(${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}).\n'
-                        ' Try again!';
-              } else if (diff.inDays == 0) {
+                    '${rewardDetails.title} Goal Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) ended \n'
+                        ' Try create new Goal!';
+              } else if (goalEndDayCount == 0) {
                 predictReward = 'Last day of ${rewardDetails.title} Goal';
               } else {
                 predictReward = 'Reward on your way!';
@@ -303,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (builder) => UpdateTaskScreen(),
+            builder: (builder) => const UpdateTaskScreen(),
           ),
         );
       },
@@ -366,32 +369,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         floatingActionButton: getFloatingButton(context),
       ),
       onWillPop: () async {
-        final shouldPop = await showDialog<bool>(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('Want to Close Pingy?'),
-              actionsAlignment: MainAxisAlignment.spaceBetween,
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Future.delayed(const Duration(milliseconds: 250), () {
-                      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-                    });
-                  },
-                  child: const Text('Yes'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  child: const Text('No'),
-                ),
-              ],
-            );
-          },
-        );
-        return shouldPop!;
+        return true;
       },
 
     );
