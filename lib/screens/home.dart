@@ -64,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Center(
           child: Text(
             predictReward,
+            textAlign: TextAlign.center,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
@@ -251,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
             } else {
               if (diff.inDays < 0) {
                 predictReward =
-                    '${rewardDetails.title} programme Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) is over Try again!';
+                    '${rewardDetails.title} Programme Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) is over Try again!';
               } else if (diff.inDays == 0) {
                 predictReward = 'Last day of ${rewardDetails.title} programme';
               } else {
