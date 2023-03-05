@@ -168,7 +168,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                       title: Text(
                           'Activity $formattedDate - $activityScoreValue%'),
                       subtitle: Text(
-                        '$dayScore/$activityTypeFullScore\n'
+                        'Score: $dayScore/$activityTypeFullScore\n'
                         '$missedItemsCSV',
                       ),
                       trailing: getListTileTrailingIconButton(
