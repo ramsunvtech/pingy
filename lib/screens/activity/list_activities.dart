@@ -151,7 +151,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                           activityTypes.add(activityTypeDetail.activityName);
                         }
 
-                        missedItemsCSV = 'Missed: ${activityTypes.join(', ')}';
+                        missedItemsCSV = 'Missed: \n${activityTypes.join('\n')}';
                       }
                     }
 
