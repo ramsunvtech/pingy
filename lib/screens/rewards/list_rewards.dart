@@ -52,6 +52,10 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
     );
   }
 
+  String getPrize(String prize) {
+    return (prize == '') ? 'Not Mentioned' : prize;
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -90,9 +94,9 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
                         title: Text(rewardsData.title),
                         subtitle: Text('${rewardsData.startPeriod}'
                             ' to ${rewardsData.endPeriod}\n'
-                            'First Prize (95%): ${rewardsData.firstPrice}\n'
-                            'Second Prize (85%): ${rewardsData.secondPrice}\n'
-                            'Third Prize (75%): ${rewardsData.thirdPrice}'),
+                            'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
+                            'Second Prize (85%): ${getPrize(rewardsData.secondPrice)}\n'
+                            'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}'),
                       ),
                     );
                   },
