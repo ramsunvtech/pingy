@@ -31,6 +31,11 @@ void main() async {
     ..registerAdapter(ActivityItemAdapter())
     ..registerAdapter(RewardsModelAdapter());
 
+  // Open Activity Type, Rewards and Activity Box.
+  final activityTypeBox = await Hive.openBox('activity_type');
+  var rewardBox = await Hive.openBox('rewards');
+  var activityBox = await Hive.openBox('activity');
+
   runApp(
     PingyApp(),
   );
