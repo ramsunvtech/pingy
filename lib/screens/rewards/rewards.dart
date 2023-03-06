@@ -6,6 +6,8 @@ import 'package:pingy/screens/home.dart';
 import 'package:pingy/screens/rewards/list_rewards.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
+import 'package:pingy/utils/navigators.dart';
+
 class RewardsScreen extends StatefulWidget {
   @override
   _RewardsScreenState createState() => _RewardsScreenState();
@@ -210,12 +212,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(content: Text(toastMessage)));
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (builder) => HomeScreen(),
-                    ),
-                  );
+                  goToHomeScreen(context);
                 },
                 // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
                 // color: Colors.pink,
@@ -232,12 +229,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
         ),
       ),
       onWillPop: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => RewardsListScreen(),
-          ),
-        );
+        goToGoalsListScreen(context);
         return true;
       },
     );

@@ -4,6 +4,8 @@ import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/rewards/rewards.dart';
 import 'package:pingy/screens/settings.dart';
 
+import 'package:pingy/widgets/icons/settings.dart';
+
 class RewardsListScreen extends StatefulWidget {
   @override
   _RewardsListScreenState createState() => _RewardsListScreenState();
@@ -32,7 +34,7 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
       DateTime endDate =
           DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
       Duration diff = endDate.difference(today);
-      print('endDate: $endDate');
+
       if (diff.inDays > 0) {
         return Container();
       }
@@ -47,8 +49,8 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
           ),
         );
       },
-      child: const Icon(Icons.add),
       backgroundColor: const Color(0xFF98006D),
+      child: const Icon(Icons.add),
     );
   }
 
@@ -62,6 +64,10 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Pingy (Goals)'),
+          automaticallyImplyLeading: false,
+          actions: [
+            settingsLinkIconButton(context),
+          ],
         ),
         body: ValueListenableBuilder(
           valueListenable: rewardsBox.listenable(),

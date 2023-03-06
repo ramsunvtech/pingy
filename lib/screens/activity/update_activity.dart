@@ -5,6 +5,7 @@ import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/screens/home.dart';
+import 'package:pingy/utils/navigators.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
   final String? activityId;
@@ -218,12 +219,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             title: Text(getAppBarTitle()),
             leading: IconButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => HomeScreen(),
-                  ),
-                );
+                goToHomeScreen(context);
               },
               icon: const Icon(Icons.arrow_back),
             ),
@@ -369,13 +365,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         ),
       ),
       onWillPop: () async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => HomeScreen(),
-            ),
-          );
-          return true;
+        goToHomeScreen(context);
+        return true;
       },
     );
   }

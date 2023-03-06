@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/activity_type.dart';
-import 'package:pingy/screens/activity/list_activities.dart';
-import 'package:pingy/screens/activity/list_activity_type.dart';
+import 'package:pingy/utils/navigators.dart';
 
 class TaskTypeScreen extends StatefulWidget {
   @override
@@ -96,12 +95,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text(toastMessage)));
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (builder) => ActivityTypeListScreen(),
-                      ),
-                    );
+                    goToActivityTypeListScreen(context);
                   },
                   // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
                   // color: Colors.pink,
@@ -118,12 +112,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
           ),
         ),
         onWillPop: () async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => ActivitiesListScreen(),
-            ),
-          );
+          goToActivityTypeListScreen(context);
           return true;
         });
   }

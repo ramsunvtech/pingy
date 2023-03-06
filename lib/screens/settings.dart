@@ -1,13 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:pingy/screens/home.dart';
-import 'package:pingy/screens/rewards/list_rewards.dart';
 import 'package:pingy/screens/activity/list_activities.dart';
-import 'package:pingy/screens/activity/list_activity_type.dart';
+import 'package:pingy/utils/navigators.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -110,12 +108,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: const Text('Pingy (Settings)'),
           leading: GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (builder) => HomeScreen(),
-                ),
-              );
+              goToHomeScreen(context);
             },
             child: Icon(
               Icons.home_rounded, // add custom icons also
@@ -215,39 +208,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: (int index) {
               switch (index) {
                 case 0:
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (builder) => ActivityTypeListScreen(),
-                    ),
-                  );
+                  goToActivityTypeListScreen(context);
                   break;
                 case 1:
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (builder) => RewardsListScreen(),
-                    ),
-                  );
+                  goToGoalsListScreen(context);
                   break;
                 case 2:
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (builder) => ActivitiesListScreen(),
-                    ),
-                  );
+                  goToActivityListScreen(context);
                   break;
               }
             }),
       ),
       onWillPop: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => HomeScreen(),
-          ),
-        );
+        goToHomeScreen(context);
         return true;
       },
     );
