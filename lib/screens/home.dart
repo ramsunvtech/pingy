@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
 import 'package:pingy/screens/rewards/rewards.dart';
-import 'settings.dart';
+import 'package:pingy/widgets/icons/settings.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -108,7 +109,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     DateTime today = DateTime.now();
     List endPeriod = rewardDetails.endPeriod.split('/').toList();
-    DateTime endDate = DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
+    DateTime endDate =
+        DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
     Duration diff = endDate.difference(today);
     return diff.inDays;
   }
@@ -260,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               if (goalEndDayCount < 0) {
                 predictReward =
                     '${rewardDetails.title} Goal Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) ended \n'
-                        ' Try create new Goal!';
+                    ' Try create new Goal!';
               } else if (goalEndDayCount == 0) {
                 predictReward = 'Last day of ${rewardDetails.title} Goal';
               } else {
@@ -325,20 +327,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           title: const Text('Pingy'),
           automaticallyImplyLeading: false,
           actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.settings,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => SettingsScreen(),
-                  ),
-                );
-              },
-            )
+            settingsLinkIconButton(context),
           ],
         ),
         body: RefreshIndicator(
@@ -369,9 +358,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         floatingActionButton: getFloatingButton(context),
       ),
       onWillPop: () async {
-        return true;
+        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+        return false;
       },
-
     );
   }
 }

@@ -3,6 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/settings.dart';
 
+import 'package:pingy/widgets/icons/settings.dart';
+
 class ActivityTypeListScreen extends StatefulWidget {
   @override
   _ActivityTypeListScreenState createState() => _ActivityTypeListScreenState();
@@ -55,20 +57,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
             title: Text('Pingy (Activity Types - $activityTypeCount)'),
             automaticallyImplyLeading: false,
             actions: [
-              IconButton(
-                icon: const Icon(
-                  Icons.settings,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (builder) => SettingsScreen(),
-                    ),
-                  );
-                },
-              )
+              settingsLinkIconButton(context),
             ],
           ),
           body: ValueListenableBuilder(

@@ -6,7 +6,7 @@ import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
 import 'package:pingy/screens/settings.dart';
 
-import '../../models/hive/activity_type.dart';
+import 'package:pingy/widgets/icons/settings.dart';
 
 class ActivitiesListScreen extends StatefulWidget {
   @override
@@ -25,6 +25,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
   @override
   void initState() {
     super.initState();
+    print('init state called');
     // Get reference to an already opened box
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
@@ -73,20 +74,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
           title: const Text('Pingy (Activities)'),
           automaticallyImplyLeading: false,
           actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.settings,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (builder) => SettingsScreen(),
-                  ),
-                );
-              },
-            )
+            settingsLinkIconButton(context),
           ],
         ),
         body: ValueListenableBuilder(
