@@ -327,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           title: const Text('Pingy'),
           automaticallyImplyLeading: false,
           actions: [
-            settingsLinkIconButton(context),
+            if(containsRewards && containsTypes) settingsLinkIconButton(context),
           ],
         ),
         body: RefreshIndicator(
