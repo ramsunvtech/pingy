@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/rewards/goals.dart';
 import 'package:pingy/screens/settings.dart';
+import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
 
@@ -42,12 +43,7 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
 
     return FloatingActionButton(
       onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => RewardsScreen(),
-          ),
-        );
+        goToGoalsForm(context);
       },
       backgroundColor: const Color(0xFF98006D),
       child: const Icon(Icons.add),
@@ -114,12 +110,7 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
         floatingActionButton: getFloatingButton(context),
       ),
       onWillPop: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => SettingsScreen(),
-          ),
-        );
+        goToSettingScreen(context);
         return true;
       },
     );

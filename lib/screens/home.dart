@@ -8,6 +8,7 @@ import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
 import 'package:pingy/screens/rewards/goals.dart';
+import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -305,12 +306,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return FloatingActionButton(
       onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => const UpdateTaskScreen(),
-          ),
-        );
+        goToUpdateActivityScreen(context);
       },
       backgroundColor: Colors.green,
       child: const Icon(Icons.edit),
