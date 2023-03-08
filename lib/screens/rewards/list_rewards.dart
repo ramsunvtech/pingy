@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/rewards.dart';
-import 'package:pingy/screens/rewards/rewards.dart';
+import 'package:pingy/screens/rewards/goals.dart';
 import 'package:pingy/screens/settings.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';

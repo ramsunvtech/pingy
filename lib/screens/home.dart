@@ -7,7 +7,7 @@ import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
-import 'package:pingy/screens/rewards/rewards.dart';
+import 'package:pingy/screens/rewards/goals.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
 class HomeScreen extends StatefulWidget {
