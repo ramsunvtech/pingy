@@ -67,7 +67,15 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       key: _activateFormKey,
       child: Wrap(
         children: [
-          Center(child: Text('Update')),
+          Container(
+            height: 3,
+            width: 70,
+            margin: const EdgeInsets.symmetric(
+                vertical: 12, horizontal: 160),
+            decoration: BoxDecoration(
+                color: Colors.grey, borderRadius: BorderRadius.circular(8)),
+          ),
+          const Center(child: Text('Update')),
           Center(
             child: TextFormField(
               controller: _fullScoreController,
@@ -277,14 +285,29 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                 return await showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,
-                                  builder: (BuildContext context) {
-                                    return Padding(
-                                      padding:
-                                          MediaQuery.of(context).viewInsets,
-                                      child: getUpdateActivityForm(
-                                          context, todoActivity),
-                                    );
-                                  },
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(25),
+                                      topRight: Radius.circular(25),
+                                    ),
+                                  ),
+                                  builder: (context) =>
+                                      DraggableScrollableSheet(
+                                          initialChildSize: 0.550,
+                                          maxChildSize: 0.9,
+                                          minChildSize: 0.32,
+                                          expand: false,
+                                          builder: (context, scrollController) {
+                                            return SingleChildScrollView(
+                                              controller: scrollController,
+                                              child: Padding(
+                                                padding: MediaQuery.of(context)
+                                                    .viewInsets,
+                                                child: getUpdateActivityForm(
+                                                    context, todoActivity),
+                                              ),
+                                            );
+                                          }),
                                 );
                               } else if (direction ==
                                   DismissDirection.endToStart) {
@@ -394,12 +417,25 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         return await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (BuildContext context) {
-            return Padding(
-              padding: MediaQuery.of(context).viewInsets,
-              child: getUpdateActivityForm(context, selectActivity),
-            );
-          },
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(30),
+            ),
+          ),
+          builder: (context) => DraggableScrollableSheet(
+              initialChildSize: 0.5,
+              maxChildSize: 0.9,
+              minChildSize: 0.32,
+              expand: false,
+              builder: (context, scrollController) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: MediaQuery.of(context).viewInsets,
+                    child: getUpdateActivityForm(context, selectActivity),
+                  ),
+                );
+              }),
         );
       },
     );
