@@ -93,7 +93,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                         _fullScoreController.text);
                     activityTypeBox.put(activityTypeId, newActivityType);
 
-                    await showToast('Activity Type Added!');
+                    await showToastMessage('Activity Type Added!');
 
                     goToActivityTypeListScreen(context);
                   },

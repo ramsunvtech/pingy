@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-Future showToast(String message) async {
+Future showToastMessage(String message) async {
   if (message.isNotEmpty) {
     return await Fluttertoast.showToast(
         msg: message,
