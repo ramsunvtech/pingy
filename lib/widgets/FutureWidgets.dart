@@ -3,7 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 Future showToast(String message) async {
   if (message.isNotEmpty) {
-    await Fluttertoast.showToast(
+    return await Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
