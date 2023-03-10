@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-Future showToastMessage(String message) async {
+Future<bool?> showToastMessage(String message) {
   if (message.isNotEmpty) {
-    return await Fluttertoast.showToast(
+    return Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
@@ -12,4 +12,6 @@ Future showToastMessage(String message) async {
         textColor: Colors.white,
         fontSize: 16.0);
   }
+
+  return Future(() => null);
 }
