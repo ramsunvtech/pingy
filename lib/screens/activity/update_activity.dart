@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
-import 'package:pingy/screens/home.dart';
 import 'package:pingy/utils/navigators.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
