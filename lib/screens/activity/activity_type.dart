@@ -3,6 +3,8 @@ import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
 
+import 'package:pingy/widgets/FutureWidgets.dart';
+
 class TaskTypeScreen extends StatefulWidget {
   @override
   _TaskTypeScreenState createState() => _TaskTypeScreenState();
@@ -78,7 +80,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     var today = DateTime.now();
                     var todayDate = '${today.year}${today.month}${today.day}';
                     var todayTime =
@@ -91,9 +93,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                         _fullScoreController.text);
                     activityTypeBox.put(activityTypeId, newActivityType);
 
-                    String toastMessage = 'Activity Type Added!';
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(toastMessage)));
+                    await showToast('Activity Type Added!');
 
                     goToActivityTypeListScreen(context);
                   },
