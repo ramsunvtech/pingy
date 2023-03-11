@@ -8,6 +8,8 @@ import 'package:pingy/screens/settings.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
 
+import 'package:pingy/widgets/FutureWidgets.dart';
+
 class ActivitiesListScreen extends StatefulWidget {
   @override
   _ActivitiesListScreenState createState() => _ActivitiesListScreenState();
@@ -56,8 +58,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
       onPressed: () {
         activityBox.delete(activityId);
         String toastMessage = 'Activity removed successfully!';
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(toastMessage)));
+        showToastMessage(context, toastMessage);
       },
       icon: const Icon(
         Icons.delete,

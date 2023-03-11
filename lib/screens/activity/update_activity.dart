@@ -6,6 +6,8 @@ import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
 
+import 'package:pingy/widgets/FutureWidgets.dart';
+
 class UpdateTaskScreen extends StatefulWidget {
   final String? activityId;
 
@@ -353,8 +355,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                   toastMessage =
                                       'Activity marked as missed successfully.';
                                 }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(toastMessage)));
+                                showToastMessage(context, toastMessage);
                               }
                             });
                       },

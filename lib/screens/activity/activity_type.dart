@@ -80,12 +80,12 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     var today = DateTime.now();
                     var todayDate = '${today.year}${today.month}${today.day}';
                     var todayTime =
                         '${today.hour}${today.minute}${today.second}';
-                    var activityTypeId = 'type_${todayDate}${todayTime}';
+                    var activityTypeId = 'type_$todayDate$todayTime';
 
                     ActivityTypeModel newActivityType = ActivityTypeModel(
                         activityTypeId,
@@ -93,7 +93,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                         _fullScoreController.text);
                     activityTypeBox.put(activityTypeId, newActivityType);
 
-                    await showToastMessage('Activity Type Added!');
+                    showToastMessage(context, 'Activity Type Added!');
 
                     goToActivityTypeListScreen(context);
                   },

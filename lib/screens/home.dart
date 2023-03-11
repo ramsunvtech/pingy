@@ -318,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     List<Widget> homePanes = getHomeBlocks('100');
 
-    showToastMessage('hello test guys!');
+    showToastMessage(context, 'hello test guys!');
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
