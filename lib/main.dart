@@ -32,9 +32,9 @@ void main() async {
     ..registerAdapter(RewardsModelAdapter());
 
   // Open Activity Type, Rewards and Activity Box.
-  final activityTypeBox = await Hive.openBox('activity_type');
-  var rewardBox = await Hive.openBox('rewards');
-  var activityBox = await Hive.openBox('activity');
+  await Hive.openBox('activity_type');
+  await Hive.openBox('rewards');
+  await Hive.openBox('activity');
 
   runApp(
     PingyApp(),
@@ -43,10 +43,10 @@ void main() async {
 
 class PingyApp extends StatefulWidget {
   @override
-  _PingyAppState createState() => _PingyAppState();
+  PingyAppState createState() => PingyAppState();
 }
 
-class _PingyAppState extends State<PingyApp> {
+class PingyAppState extends State<PingyApp> {
   @override
   void dispose() {
     // Closes all Hive boxes
@@ -58,7 +58,6 @@ class _PingyAppState extends State<PingyApp> {
   Widget build(BuildContext context) {
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
-      // if (kReleaseMode) exit(1);
     };
 
     return MaterialApp(
