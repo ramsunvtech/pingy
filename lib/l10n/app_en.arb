@@ -9,5 +9,6 @@
       }
     }
   },
-  "totalScore": "Total Score: "
+  "totalScore": "Total Score: ",
+  "addGoals": "Add your Goal details"
 }

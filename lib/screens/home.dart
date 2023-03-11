@@ -11,6 +11,8 @@ import 'package:pingy/screens/rewards/goals.dart';
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
+import 'package:pingy/utils/l10n.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -85,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             );
           },
-          child: const Text('Add your Goal details'),
+          child: Text(t(context).addGoals),
         ),
       if (containsRewards && !containsTypes)
         ElevatedButton(
@@ -322,7 +324,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           title: const Text('Pingy'),
           automaticallyImplyLeading: false,
           actions: [
-            if(containsRewards && containsTypes) settingsLinkIconButton(context),
+            if (containsRewards && containsTypes)
+              settingsLinkIconButton(context),
           ],
         ),
         body: RefreshIndicator(
