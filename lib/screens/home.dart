@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
-import 'package:pingy/screens/activity/update_activity.dart';
 import 'package:pingy/screens/rewards/goals.dart';
 import 'package:pingy/utils/navigators.dart';
-import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -42,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
         Center(
           child: Text(
-            'Today Score: $todayScore%',
+            AppLocalizations.of(context).todayScore(todayScore),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 25,
@@ -166,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     Iterable<dynamic> activityBoxMapValues = activityBoxMap.values;
 
     Map activityTypeBoxMap = activityTypeBox.toMap();
-    Iterable<dynamic> activityTypeBoxMapValues = activityTypeBoxMap.values;
 
     dynamic activityTypeFullScore = 0;
     activityTypeBoxMap.forEach((key, value) {
@@ -318,7 +316,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     List<Widget> homePanes = getHomeBlocks('100');
 
-    showToastMessage(context, 'hello test guys!');
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(

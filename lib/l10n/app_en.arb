@@ -1,0 +1,13 @@
+{
+  "todayScore": "Today Score: {score}",
+  "@todayScore": {
+    "description": "A message with a single parameter",
+    "placeholders": {
+      "score": {
+        "type": "String",
+        "example": "10"
+      }
+    }
+  },
+  "totalScore": "Total Score: "
+}
