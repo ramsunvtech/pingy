@@ -10,6 +10,8 @@ import 'package:pingy/widgets/icons/settings.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
 
+import '../../utils/navigators.dart';
+
 class ActivitiesListScreen extends StatefulWidget {
   @override
   _ActivitiesListScreenState createState() => _ActivitiesListScreenState();
@@ -40,12 +42,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     if (activityId != todayActivityId) {
       return IconButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => UpdateTaskScreen(activityId: activityId),
-            ),
-          );
+          goToPastActivityEditScreen(context, activityId);
         },
         icon: const Icon(
           Icons.edit,
@@ -175,12 +172,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
         ),
       ),
       onWillPop: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => SettingsScreen(),
-          ),
-        );
+        goToSettingScreen(context);
         return true;
       },
     );

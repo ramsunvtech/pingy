@@ -7,12 +7,22 @@ import 'package:pingy/screens/rewards/list_rewards.dart';
 import 'package:pingy/screens/settings.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
 import 'package:pingy/screens/rewards/goals.dart';
+import 'package:pingy/screens/activity/activity_type.dart';
 
 void goToActivityTypeListScreen(BuildContext context) {
   Navigator.push(
     context,
     MaterialPageRoute(
       builder: (builder) => ActivityTypeListScreen(),
+    ),
+  );
+}
+
+void goToActivityTypeFormScreen(BuildContext context) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (builder) => TaskTypeScreen(),
     ),
   );
 }
@@ -49,6 +59,15 @@ void goToSettingScreen(BuildContext context) {
     context,
     MaterialPageRoute(
       builder: (builder) => SettingsScreen(),
+    ),
+  );
+}
+
+void goToPastActivityEditScreen(BuildContext context, String activityId) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (builder) => UpdateTaskScreen(activityId: activityId),
     ),
   );
 }

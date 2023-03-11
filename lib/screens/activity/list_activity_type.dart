@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 import 'package:pingy/screens/settings.dart';
+import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
 
@@ -37,15 +38,10 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
 
     return FloatingActionButton(
       onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => TaskTypeScreen(),
-          ),
-        );
+        goToActivityTypeFormScreen(context);
       },
-      child: const Icon(Icons.add),
       backgroundColor: const Color(0xFF98006D),
+      child: const Icon(Icons.add),
     );
   }
 
@@ -101,12 +97,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
           floatingActionButton: getFloatingActionButton(),
         ),
         onWillPop: () async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (builder) => SettingsScreen(),
-            ),
-          );
+          goToSettingScreen(context);
           return true;
         });
   }

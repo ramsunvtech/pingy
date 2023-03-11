@@ -78,24 +78,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (!containsRewards || getGoalEndDayCount() < 0)
         ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (builder) => RewardsScreen(),
-              ),
-            );
+            goToGoalsForm(context);
           },
           child: Text(t(context).addGoals),
         ),
       if (containsRewards && !containsTypes)
         ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (builder) => TaskTypeScreen(),
-              ),
-            );
+            goToActivityTypeFormScreen(context);
           },
           child: Text(t(context).addActivityTypes),
         ),
