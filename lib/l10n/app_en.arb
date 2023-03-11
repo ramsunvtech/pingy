@@ -10,5 +10,7 @@
     }
   },
   "totalScore": "Total Score: ",
-  "addGoals": "Add your Goal details"
+  "addGoals": "Add your Goal details",
+  "addActivityTypes": "Add your Activity Types",
+  "homePageTitle": "Home"
 }

@@ -19,8 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      GlobalKey<RefreshIndicatorState>();
 
   late final Box rewardBox;
   late final Box activityBox;
@@ -99,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             );
           },
-          child: const Text('Add your Activity Types'),
+          child: Text(t(context).addActivityTypes),
         ),
     ];
 
@@ -321,37 +319,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Pingy'),
+          title: Text(t(context).homePageTitle),
           automaticallyImplyLeading: false,
           actions: [
             if (containsRewards && containsTypes)
               settingsLinkIconButton(context),
           ],
         ),
-        body: RefreshIndicator(
-          key: _refreshIndicatorKey,
-          color: Colors.white,
-          backgroundColor: Colors.blue,
-          strokeWidth: 4.0,
-          onRefresh: () async {
-            // Replace this delay with the code to be executed during refresh
-            // and return a Future when code finish execution.
-            return Future<void>.delayed(const Duration(seconds: 3));
-          },
-          // Pull from top to show refresh indicator.
-          child: ListView.builder(
-            itemCount: homePanes.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    child: homePanes[index],
-                  ),
+        body: ListView.builder(
+          itemCount: homePanes.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  child: homePanes[index],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
         floatingActionButton: getFloatingButton(context),
       ),
