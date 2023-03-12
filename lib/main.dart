@@ -2,16 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 
-import 'package:pingy/screens/home.dart';
+import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,42 +39,4 @@ void main() async {
   runApp(
     PingyApp(),
   );
-}
-
-class PingyApp extends StatefulWidget {
-  @override
-  PingyAppState createState() => PingyAppState();
-}
-
-class PingyAppState extends State<PingyApp> {
-  @override
-  void dispose() {
-    // Closes all Hive boxes
-    Hive.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    FlutterError.onError = (details) {
-      FlutterError.presentError(details);
-    };
-
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
-      home: HomeScreen(),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        DefaultCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en'), // English
-      ],
-    );
-  }
 }
