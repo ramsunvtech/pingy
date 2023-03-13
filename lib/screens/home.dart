@@ -12,6 +12,7 @@ import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
 import 'package:pingy/utils/l10n.dart';
+import 'package:pingy/utils/color.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -35,7 +36,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       const Center(
         child: CircleAvatar(
           radius: 160,
-          backgroundImage: AssetImage('assets/cute.webp'),
+          backgroundColor: Colors.grey,
+          child: Icon(
+            Icons.camera_alt,
+            size: 100.0,
+            color: Colors.white,
+          ),
         ),
       ),
       if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
