@@ -38,19 +38,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool containsTypes = false;
 
   Future getGoalImage() async {
-    final pickedGoalImage = await goalPicturePicker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 100.0,
-      maxHeight: 100.0,
-      imageQuality: 100,
-    );
-    // Image.file(_goalPicture);
+    try {
+      final pickedGoalImage = await goalPicturePicker.pickImage(
+        source: ImageSource.camera,
+        // maxWidth: 100.0,
+        // maxHeight: 100.0,
+        // imageQuality: 100,
+      );
+      if(pickedGoalImage == null) return;
 
-    String filePath = pickedGoalImage!.path;
+      String filePath = pickedGoalImage!.path;
 
-    setState(() {
-      _goalPicture = File(filePath);
-    });
+      setState(() {
+        _goalPicture = File(filePath);
+      });
+    } on PlatformException catch(e) {
+      print('Failed to pick image: $e');
+    }
   }
 
   Widget getAvatarWidget() {
