@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
@@ -21,6 +24,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
+  late File _goalPicture;
+  final ImagePicker goalPicturePicker = ImagePicker();
+
   late final Box rewardBox;
   late final Box activityBox;
   late final Box activityTypeBox;
@@ -31,17 +37,46 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool containsRewards = false;
   bool containsTypes = false;
 
+  Future getGoalImage() async {
+    final pickedGoalImage = await goalPicturePicker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 100.0,
+      maxHeight: 100.0,
+      imageQuality: 100,
+    );
+    // Image.file(_goalPicture);
+
+    String filePath = pickedGoalImage!.path;
+
+    setState(() {
+      _goalPicture = File(filePath);
+    });
+  }
+
+  Widget getAvatarWidget() {
+    // if(_goalPicture.existsSync()) {
+    //   return Image.file(_goalPicture);
+    // }
+
+    return IconButton(
+      icon: const Icon(
+        Icons.camera_alt,
+        size: 100.0,
+        color: Colors.white,
+      ),
+      onPressed: () async {
+        await getGoalImage();
+      },
+    );
+  }
+
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
-      const Center(
+      Center(
         child: CircleAvatar(
           radius: 160,
           backgroundColor: Colors.grey,
-          child: Icon(
-            Icons.camera_alt,
-            size: 100.0,
-            color: Colors.white,
-          ),
+          child: getAvatarWidget(),
         ),
       ),
       if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
