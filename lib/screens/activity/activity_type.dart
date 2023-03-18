@@ -35,7 +35,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
         child: Scaffold(
-          appBar: AppBar(title: const Text('Pingy (Add Activity Type)')),
+          appBar: AppBar(title: const Text('Add Activity Type')),
           body: Container(
             alignment: Alignment.center,
             child: Column(
