@@ -110,7 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               goToHomeScreen(context);
             },
-            child: Icon(
+            child: const Icon(
               Icons.home_rounded, // add custom icons also
             ),
           ),
@@ -122,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Text(
                   '$rewardExist Goal exist',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     fontStyle: FontStyle.italic,
@@ -132,7 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Center(
                   child: Text(
                     '$activityCount Activity added!',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       fontStyle: FontStyle.italic,
@@ -143,7 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Center(
                   child: Text(
                     '$activityTypeCount Activity Types added!',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       fontStyle: FontStyle.italic,
