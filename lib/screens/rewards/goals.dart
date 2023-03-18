@@ -197,6 +197,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
             ),
             ElevatedButton(
               onPressed: () {
+                String emptyPicture = '';
                 RewardsModel newRewards = RewardsModel(
                   _titleController.text,
                   startDate,
@@ -204,6 +205,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   _firstPrizeController.text,
                   _secondPrizeController.text,
                   _thirdPrizeController.text,
+                  emptyPicture,
                 );
                 rewardsBox.add(newRewards);
                 String toastMessage = 'Goal Added!';
