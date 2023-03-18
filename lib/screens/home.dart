@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future getGoalImage() async {
     try {
       final pickedGoalImage = await goalPicturePicker.pickImage(
-        source: ImageSource.camera,
+        source: ImageSource.gallery,
         // maxWidth: 100.0,
         // maxHeight: 100.0,
         // imageQuality: 100,
@@ -282,12 +282,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ((totalActivityScore) / (100 * totalActivityDays) * 100).ceil();
         }
 
-        // print('rewardScore: $rewardScore');
         if (rewardScore > 0) {
           totalScore = rewardScore.toString();
 
           if (rewardBoxMap.isNotEmpty) {
+            // TODO: Fix to get iterated / active Reward details instead of first one.
             RewardsModel rewardDetails = rewardBoxMap.values.first;
+
+            if (rewardDetails.rewardPicture != '') {
+              // _goalPicture = File(rewardDetails.rewardPicture);
+            }
 
             if (rewardScore >= 95) {
               predictReward = rewardDetails.firstPrice;
