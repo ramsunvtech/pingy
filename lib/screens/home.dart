@@ -23,8 +23,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-
   late File _goalPicture;
+  bool _goalPictureSelected = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
   late final Box rewardBox;
@@ -45,48 +45,56 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         // maxHeight: 100.0,
         // imageQuality: 100,
       );
-      if(pickedGoalImage == null) return;
+      if (pickedGoalImage == null) return;
 
       String filePath = pickedGoalImage!.path;
 
       setState(() {
         _goalPicture = File(filePath);
+        _goalPictureSelected = true;
       });
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       print('Failed to pick image: $e');
     }
   }
 
-  Widget getAvatarWidget() {
-    // if(_goalPicture.existsSync()) {
-    //   return Image.file(_goalPicture);
-    // }
+  Widget getSelectedImage() {
+    if (_goalPictureSelected && _goalPicture.existsSync()) {
+      return CircleAvatar(
+          radius: 160 - 5,
+          backgroundImage: Image.file(
+            _goalPicture,
+            fit: BoxFit.cover,
+          ).image);
+    }
 
-    return IconButton(
-      icon: const Icon(
-        Icons.camera_alt,
-        size: 100.0,
-        color: Colors.white,
+    return SizedBox(
+      width: double.infinity,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        icon: const Icon(
+          Icons.camera_alt,
+          size: 100.0,
+          color: Colors.white,
+        ),
+        tooltip: 'Capture Picture for your Goal',
+        onPressed: () async {
+          await getGoalImage();
+        },
       ),
-      onPressed: () async {
-        await getGoalImage();
-      },
     );
   }
 
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
-      ElevatedButton(
-        onPressed: () async {
-          await getGoalImage();
-        },
-        child: const Text('show camera'),
-      ),
+      // Center(
+      //   child: getSelectedImage(),
+      // ),
       Center(
         child: CircleAvatar(
-          radius: 160,
           backgroundColor: Colors.grey,
-          child: getAvatarWidget(),
+          radius: 160,
+          child: getSelectedImage(),
         ),
       ),
       if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
