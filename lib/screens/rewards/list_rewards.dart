@@ -54,12 +54,16 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
     return (prize == '') ? 'Not Mentioned' : prize;
   }
 
+  String isPictureExist(RewardsModel rewardDetails) {
+    return (rewardDetails.rewardPicture == '') ? 'No' : 'Yes';
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Pingy (Goals)'),
+          title: const Text('Goals'),
           automaticallyImplyLeading: false,
           actions: [
             settingsLinkIconButton(context),
@@ -91,16 +95,18 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
                     var currentBox = rewardsBox;
                     RewardsModel rewardsData = currentBox.getAt(index)!;
                     return InkWell(
-                      onTap: () => {},
-                      child: ListTile(
-                        title: Text(rewardsData.title),
-                        subtitle: Text('${rewardsData.startPeriod}'
-                            ' to ${rewardsData.endPeriod}\n'
-                            'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
-                            'Second Prize (85%): ${getPrize(rewardsData.secondPrice)}\n'
-                            'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}'),
-                      ),
-                    );
+                        onTap: () => {},
+                        child: ListTile(
+                          title: Text(rewardsData.title),
+                          subtitle: Text(
+                            '${rewardsData.startPeriod}'
+                                ' to ${rewardsData.endPeriod}\n'
+                                'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
+                                'Second Prize (85%): ${getPrize(rewardsData.secondPrice)}\n'
+                                'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}\n'
+                                'Goal Picture: ${isPictureExist(rewardsData)}\n'
+                          ),
+                        ));
                   },
                 ),
               );
