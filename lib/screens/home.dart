@@ -76,6 +76,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
+      ElevatedButton(
+        onPressed: () async {
+          await getGoalImage();
+        },
+        child: const Text('show camera'),
+      ),
       Center(
         child: CircleAvatar(
           radius: 160,
