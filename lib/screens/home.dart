@@ -23,7 +23,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  late File _goalPicture;
+  late String _goalPicture;
   bool _goalPictureSelected = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
@@ -40,17 +40,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future getGoalImage() async {
     try {
       final pickedGoalImage = await goalPicturePicker.pickImage(
-        source: ImageSource.gallery,
+        source: ImageSource.camera,
         // maxWidth: 100.0,
         // maxHeight: 100.0,
         // imageQuality: 100,
       );
       if (pickedGoalImage == null) return;
 
-      String filePath = pickedGoalImage!.path;
+      String filePath = pickedGoalImage!.path.toString();
+
+      RewardsModel goalDetails = rewardBox.values.first;
+      RewardsModel editedGoalDetails = RewardsModel(
+          goalDetails.title,
+          goalDetails.startPeriod,
+          goalDetails.endPeriod,
+          goalDetails.firstPrice,
+          goalDetails.secondPrice,
+          goalDetails.thirdPrice,
+          filePath);
+      rewardBox.putAt(rewardBox.keys.first, editedGoalDetails);
 
       setState(() {
-        _goalPicture = File(filePath);
+        _goalPicture = pickedGoalImage!.path;
         _goalPictureSelected = true;
       });
     } on PlatformException catch (e) {
@@ -59,13 +70,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget getSelectedImage() {
-    if (_goalPictureSelected && _goalPicture.existsSync()) {
-      return CircleAvatar(
-          radius: 160 - 5,
-          backgroundImage: Image.file(
-            _goalPicture,
-            fit: BoxFit.cover,
-          ).image);
+    if (_goalPictureSelected) {
+      File _goalPictureFile = File(_goalPicture);
+      if (_goalPictureFile.existsSync()) {
+        return CircleAvatar(
+            radius: 160 - 5,
+            backgroundImage: Image.file(
+              _goalPictureFile,
+              fit: BoxFit.cover,
+            ).image);
+      }
     }
 
     return SizedBox(
@@ -87,14 +101,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
-      // Center(
-      //   child: getSelectedImage(),
-      // ),
       Center(
-        child: CircleAvatar(
-          backgroundColor: Colors.grey,
-          radius: 160,
-          child: getSelectedImage(),
+        child: GestureDetector(
+          onTap: () async {
+            await getGoalImage();
+          },
+          child: CircleAvatar(
+            backgroundColor: Colors.grey,
+            radius: 160,
+            child: getSelectedImage(),
+          ),
         ),
       ),
       if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
@@ -163,6 +179,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
     Duration diff = endDate.difference(today);
     return diff.inDays;
+  }
+
+  void setGoalPicturePath(RewardsModel rewardDetails) {
+    if (rewardDetails.rewardPicture != '') {
+      _goalPicture = rewardDetails.rewardPicture;
+    }
   }
 
   Future<void> _updateScores() async {
@@ -290,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             RewardsModel rewardDetails = rewardBoxMap.values.first;
 
             if (rewardDetails.rewardPicture != '') {
-              // _goalPicture = File(rewardDetails.rewardPicture);
+              setGoalPicturePath(rewardDetails);
             }
 
             if (rewardScore >= 95) {
@@ -323,6 +345,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               }
             }
           }
+        } else {
+          predictReward = 'Start update your Activities';
         }
       }
     }
