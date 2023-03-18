@@ -69,7 +69,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
     return WillPopScope(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(title: const Text('Pingy (Add Goals)')),
+        appBar: AppBar(title: const Text('Add Goals')),
         body: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
