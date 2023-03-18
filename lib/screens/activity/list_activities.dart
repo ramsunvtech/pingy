@@ -69,7 +69,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Pingy (Activities)'),
+          title: const Text('Activities'),
           automaticallyImplyLeading: false,
           actions: [
             settingsLinkIconButton(context),
