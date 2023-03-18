@@ -105,7 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Pingy (Settings)'),
+          title: const Text('Settings'),
           leading: GestureDetector(
             onTap: () {
               goToHomeScreen(context);
