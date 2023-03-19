@@ -40,9 +40,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     try {
       final pickedGoalImage = await goalPicturePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 100.0,
-        maxHeight: 100.0,
-        imageQuality: 100,
       );
       if (pickedGoalImage == null) return;
 
@@ -69,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget getSelectedImage() {
-    if (_goalPictureSelected) {
+    if (_goalPictureSelected || _goalPicture.isNotEmpty) {
       File goalPictureFile = File(_goalPicture);
       if (goalPictureFile.existsSync()) {
         return CircleAvatar(
@@ -113,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
         Center(
           child: Text(
-            AppLocalizations.of(context).todayScore(todayScore),
+            '${AppLocalizations.of(context).todayScore(todayScore)}%',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 25,
