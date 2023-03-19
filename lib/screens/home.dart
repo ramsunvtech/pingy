@@ -311,9 +311,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             // TODO: Fix to get iterated / active Reward details instead of first one.
             RewardsModel rewardDetails = rewardBoxMap.values.first;
 
-            if (rewardDetails.rewardPicture != '') {
-              setGoalPicturePath(rewardDetails);
-            }
+            setGoalPicturePath(rewardDetails);
 
             if (rewardScore >= 95) {
               predictReward = rewardDetails.firstPrice;
