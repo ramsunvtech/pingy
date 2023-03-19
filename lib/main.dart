@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/hive/activity.dart';
@@ -35,6 +37,11 @@ void main() async {
   await Hive.openBox('activity_type');
   await Hive.openBox('rewards');
   await Hive.openBox('activity');
+
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    if (kReleaseMode) exit(1);
+  };
 
   runApp(
     PingyApp(),

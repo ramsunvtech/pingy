@@ -22,10 +22,6 @@ class PingyAppState extends State<PingyApp> {
 
   @override
   Widget build(BuildContext context) {
-    FlutterError.onError = (details) {
-      FlutterError.presentError(details);
-    };
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: purpleColor),

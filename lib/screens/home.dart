@@ -9,8 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
-import 'package:pingy/screens/activity/activity_type.dart';
-import 'package:pingy/screens/rewards/goals.dart';
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
