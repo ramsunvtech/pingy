@@ -15,7 +15,6 @@ import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
 import 'package:pingy/utils/l10n.dart';
-import 'package:pingy/utils/color.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -41,15 +40,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     try {
       final pickedGoalImage = await goalPicturePicker.pickImage(
         source: ImageSource.camera,
-        // maxWidth: 100.0,
-        // maxHeight: 100.0,
-        // imageQuality: 100,
+        maxWidth: 100.0,
+        maxHeight: 100.0,
+        imageQuality: 100,
       );
       if (pickedGoalImage == null) return;
 
-      String filePath = pickedGoalImage!.path.toString();
+      String filePath = pickedGoalImage!.path;
 
-      RewardsModel goalDetails = rewardBox.values.first;
+      RewardsModel goalDetails = rewardBox.values.last;
       RewardsModel editedGoalDetails = RewardsModel(
           goalDetails.title,
           goalDetails.startPeriod,
@@ -58,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           goalDetails.secondPrice,
           goalDetails.thirdPrice,
           filePath);
-      rewardBox.putAt(rewardBox.keys.first, editedGoalDetails);
+      rewardBox.putAt(rewardBox.keys.last, editedGoalDetails);
 
       setState(() {
         _goalPicture = pickedGoalImage!.path;
@@ -71,12 +70,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Widget getSelectedImage() {
     if (_goalPictureSelected) {
-      File _goalPictureFile = File(_goalPicture);
-      if (_goalPictureFile.existsSync()) {
+      File goalPictureFile = File(_goalPicture);
+      if (goalPictureFile.existsSync()) {
         return CircleAvatar(
             radius: 160 - 5,
             backgroundImage: Image.file(
-              _goalPictureFile,
+              goalPictureFile,
               fit: BoxFit.cover,
             ).image);
       }
@@ -92,16 +91,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           color: Colors.white,
         ),
         tooltip: 'Capture Picture for your Goal',
-        onPressed: () async {
-          await getGoalImage();
-        },
+        onPressed: () {  },
       ),
     );
   }
 
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
-      Center(
+      if (containsRewards && containsTypes && getGoalEndDayCount() > 0) Center(
         child: GestureDetector(
           onTap: () async {
             await getGoalImage();
@@ -183,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void setGoalPicturePath(RewardsModel rewardDetails) {
     if (rewardDetails.rewardPicture != '') {
-      _goalPicture = rewardDetails.rewardPicture;
+      _goalPicture = rewardDetails.rewardPicture!;
     }
   }
 
@@ -309,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
           if (rewardBoxMap.isNotEmpty) {
             // TODO: Fix to get iterated / active Reward details instead of first one.
-            RewardsModel rewardDetails = rewardBoxMap.values.first;
+            RewardsModel rewardDetails = rewardBoxMap.values.last;
 
             setGoalPicturePath(rewardDetails);
 
