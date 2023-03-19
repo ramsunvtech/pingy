@@ -27,12 +27,14 @@ class _RewardsScreenState extends State<RewardsScreen> {
   String endDate = '';
 
   late final Box rewardsBox;
+  late final Box activityBox;
 
   @override
   void initState() {
     super.initState();
     // Get reference to an already opened box
     rewardsBox = Hive.box('rewards');
+    activityBox = Hive.box('activity');
   }
 
   @override
@@ -69,7 +71,10 @@ class _RewardsScreenState extends State<RewardsScreen> {
     return WillPopScope(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(title: const Text('Add Goals')),
+        appBar: AppBar(
+          title: const Text('Add Goals'),
+          automaticallyImplyLeading: true,
+        ),
         body: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -226,6 +231,11 @@ class _RewardsScreenState extends State<RewardsScreen> {
         ),
       ),
       onWillPop: () async {
+        if (activityBox.values.isEmpty) {
+          goToHomeScreen(context);
+          return true;
+        }
+
         goToGoalsListScreen(context);
         return true;
       },

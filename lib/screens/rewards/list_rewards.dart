@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pingy/models/hive/rewards.dart';
-import 'package:pingy/screens/rewards/goals.dart';
-import 'package:pingy/screens/settings.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
+import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 
 class RewardsListScreen extends StatefulWidget {
   @override
@@ -114,6 +113,7 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
           },
         ),
         floatingActionButton: getFloatingButton(context),
+        bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
       onWillPop: () async {
         goToSettingScreen(context);

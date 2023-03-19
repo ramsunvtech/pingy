@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:pingy/screens/activity/activity_type.dart';
-import 'package:pingy/screens/settings.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
+import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 
 class ActivityTypeListScreen extends StatefulWidget {
   @override
@@ -95,6 +94,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
             },
           ),
           floatingActionButton: getFloatingActionButton(),
+          bottomNavigationBar: settingsBottomNavigationBar(context),
         ),
         onWillPop: () async {
           goToSettingScreen(context);

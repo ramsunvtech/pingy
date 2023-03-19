@@ -5,7 +5,7 @@ import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/widgets/FutureWidgets.dart';
-import 'package:pingy/widgets/SettingsBottomNavigations.dart';
+import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 
 import 'package:pingy/utils/navigators.dart';
 
@@ -26,7 +26,6 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
   @override
   void initState() {
     super.initState();
-    print('init state called');
     // Get reference to an already opened box
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');

@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:pingy/utils/navigators.dart';
 
-import 'package:pingy/widgets/SettingsBottomNavigations.dart';
+import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
