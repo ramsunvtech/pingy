@@ -23,7 +23,7 @@ class RewardsModel extends HiveObject {
   final String thirdPrice;
 
   @HiveField(6)
-  final String rewardPicture;
+  final String? rewardPicture;
 
   RewardsModel(
     this.title,
