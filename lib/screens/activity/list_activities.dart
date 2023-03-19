@@ -3,14 +3,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
-import 'package:pingy/screens/activity/update_activity.dart';
-import 'package:pingy/screens/settings.dart';
-
 import 'package:pingy/widgets/icons/settings.dart';
-
 import 'package:pingy/widgets/FutureWidgets.dart';
+import 'package:pingy/widgets/SettingsBottomNavigations.dart';
 
-import '../../utils/navigators.dart';
+import 'package:pingy/utils/navigators.dart';
 
 class ActivitiesListScreen extends StatefulWidget {
   @override
@@ -170,6 +167,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
             }
           },
         ),
+        bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
       onWillPop: () async {
         goToSettingScreen(context);

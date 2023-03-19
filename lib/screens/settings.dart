@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:pingy/screens/home.dart';
-import 'package:pingy/screens/activity/list_activities.dart';
 import 'package:pingy/utils/navigators.dart';
+
+import 'package:pingy/widgets/SettingsBottomNavigations.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -190,34 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.add_task_sharp),
-                label: 'Activity Types',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.add),
-                label: 'Goal',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.add),
-                label: 'Activities',
-              ),
-            ],
-            onTap: (int index) {
-              switch (index) {
-                case 0:
-                  goToActivityTypeListScreen(context);
-                  break;
-                case 1:
-                  goToGoalsListScreen(context);
-                  break;
-                case 2:
-                  goToActivityListScreen(context);
-                  break;
-              }
-            }),
+        bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
       onWillPop: () async {
         goToHomeScreen(context);
