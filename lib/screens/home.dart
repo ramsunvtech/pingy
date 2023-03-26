@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
+import 'package:pingy/services/notfication.dart';
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
@@ -20,6 +21,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  NotificationService notificationService = NotificationService();
+
   String _goalPicture = '';
   bool _goalPictureSelected = false;
   final ImagePicker goalPicturePicker = ImagePicker();
@@ -93,6 +96,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
+      ElevatedButton(
+        onPressed: () {
+          notificationService.sendNotification();
+        },
+        child: const Text('Show Notification'),
+      ),
       if (containsRewards && containsTypes && getGoalEndDayCount() > 0) Center(
         child: GestureDetector(
           onTap: () async {
@@ -346,6 +355,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    notificationService.initialiseNotifications();
     _updateScores();
   }
 
