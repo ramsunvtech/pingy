@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,7 +11,7 @@ import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
-
+import 'package:pingy/services/notification.dart';
 import 'package:pingy/utils/l10n.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,7 +20,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   String _goalPicture = '';
   bool _goalPictureSelected = false;
   final ImagePicker goalPicturePicker = ImagePicker();
@@ -159,8 +157,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           child: Text(t(context).addActivityTypes),
         ),
       ElevatedButton(
-        onPressed: () async {
-          await showNotification();
+        onPressed: () {
+          NotificationService.display();
         },
         child: const Text('Test Notification'),
       ),
@@ -185,22 +183,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (rewardDetails.rewardPicture != '') {
       _goalPicture = rewardDetails.rewardPicture!;
     }
-  }
-
-  Future<void> _initializeNotifications() async {
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  Future<void> showNotification() async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'channel id', 'channel NAME',
-        priority: Priority.high,importance: Importance.max
-    );
-    var notificationDetails = const NotificationDetails(android: androidDetails);
-    await flutterLocalNotificationsPlugin.show(0, 'New Video is out', 'Flutter Local Notification', notificationDetails);
   }
 
   Future<void> _updateScores() async {
@@ -371,7 +353,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _updateScores();
-    _initializeNotifications();
   }
 
   @override
