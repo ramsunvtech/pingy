@@ -10,7 +10,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
-import 'package:pingy/services/notfication.dart';
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
 
@@ -96,12 +95,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
-      ElevatedButton(
-        onPressed: () {
-          showNotification();
-        },
-        child: const Text('Show Notification'),
-      ),
       if (containsRewards && containsTypes && getGoalEndDayCount() > 0) Center(
         child: GestureDetector(
           onTap: () async {
@@ -165,6 +158,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           },
           child: Text(t(context).addActivityTypes),
         ),
+      ElevatedButton(
+        onPressed: () async {
+          await showNotification();
+        },
+        child: const Text('Test Notification'),
+      ),
     ];
 
     return homePanes;
