@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,14 +16,35 @@ import 'package:pingy/widgets/icons/settings.dart';
 
 import 'package:pingy/utils/l10n.dart';
 
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+const AndroidInitializationSettings initializationSettingsAndroid =
+AndroidInitializationSettings('background');
+
+const InitializationSettings initializationSettings = InitializationSettings(
+  android: initializationSettingsAndroid,
+);
+
+Future<void> _postNotification() async {
+  const AndroidNotificationDetails androidNotificationDetails =
+  AndroidNotificationDetails(
+    'default_notification_channel_id',
+    'Default',
+    importance: Importance.max,
+    priority: Priority.max,
+  );
+  const NotificationDetails notificationDetails =
+  NotificationDetails(android: androidNotificationDetails);
+  await flutterLocalNotificationsPlugin.show(
+      0, 'Hello Pingy', '', notificationDetails);
+}
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  NotificationService notificationService = NotificationService();
-
   String _goalPicture = '';
   bool _goalPictureSelected = false;
   final ImagePicker goalPicturePicker = ImagePicker();
@@ -98,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final List<Widget> homePanes = [
       ElevatedButton(
         onPressed: () {
-          notificationService.sendNotification();
+          _postNotification();
         },
         child: const Text('Show Notification'),
       ),
@@ -186,6 +208,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (rewardDetails.rewardPicture != '') {
       _goalPicture = rewardDetails.rewardPicture!;
     }
+  }
+
+  Future<void> _initializeNotifications() async {
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onDidReceiveNotificationResponse: (NotificationResponse response) {});
   }
 
   Future<void> _updateScores() async {
@@ -355,8 +382,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    notificationService.initialiseNotifications();
     _updateScores();
+    _initializeNotifications();
   }
 
   @override

@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart' show PlatformDispatcher, kIsWeb, kReleaseMode;
+import 'package:flutter/foundation.dart'
+    show PlatformDispatcher, kIsWeb, kReleaseMode;
 
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/hive/activity.dart';
