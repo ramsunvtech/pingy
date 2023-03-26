@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:notification_permissions/notification_permissions.dart';
 
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
@@ -28,11 +29,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late final Box activityBox;
   late final Box activityTypeBox;
 
+  late Future<String> permissionStatusFuture;
+
   String todayScore = '0';
   String totalScore = '0';
   String predictReward = '';
   bool containsRewards = false;
   bool containsTypes = false;
+
+  /// Checks the notification permission status
+  Future<String> getCheckNotificationPermStatus() {
+    return NotificationPermissions.getNotificationPermissionStatus()
+        .then((status) {
+      switch (status) {
+        case PermissionStatus.denied:
+          return 'denied';
+        case PermissionStatus.granted:
+          return 'granted';
+        case PermissionStatus.unknown:
+          return 'unknown';
+        case PermissionStatus.provisional:
+          return 'provisional';
+        default:
+          return '';
+      }
+    });
+  }
 
   Future getGoalImage() async {
     try {
@@ -352,6 +374,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    // set up the notification permissions class
+    // set up the future to fetch the notification data
+    permissionStatusFuture = getCheckNotificationPermStatus();
+
     _updateScores();
   }
 
@@ -367,7 +394,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      setState(() {});
+      setState(() {
+        permissionStatusFuture = getCheckNotificationPermStatus();
+      });
     }
   }
 
