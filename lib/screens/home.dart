@@ -16,35 +16,13 @@ import 'package:pingy/widgets/icons/settings.dart';
 
 import 'package:pingy/utils/l10n.dart';
 
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
-const AndroidInitializationSettings initializationSettingsAndroid =
-AndroidInitializationSettings('background');
-
-const InitializationSettings initializationSettings = InitializationSettings(
-  android: initializationSettingsAndroid,
-);
-
-Future<void> _postNotification() async {
-  const AndroidNotificationDetails androidNotificationDetails =
-  AndroidNotificationDetails(
-    'default_notification_channel_id',
-    'Default',
-    importance: Importance.max,
-    priority: Priority.max,
-  );
-  const NotificationDetails notificationDetails =
-  NotificationDetails(android: androidNotificationDetails);
-  await flutterLocalNotificationsPlugin.show(
-      0, 'Hello Pingy', '', notificationDetails);
-}
-
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   String _goalPicture = '';
   bool _goalPictureSelected = false;
   final ImagePicker goalPicturePicker = ImagePicker();
@@ -120,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final List<Widget> homePanes = [
       ElevatedButton(
         onPressed: () {
-          _postNotification();
+          showNotification();
         },
         child: const Text('Show Notification'),
       ),
@@ -211,8 +189,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeNotifications() async {
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: (NotificationResponse response) {});
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> showNotification() async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'channel id', 'channel NAME',
+        priority: Priority.high,importance: Importance.max
+    );
+    var notificationDetails = const NotificationDetails(android: androidDetails);
+    await flutterLocalNotificationsPlugin.show(0, 'New Video is out', 'Flutter Local Notification', notificationDetails);
   }
 
   Future<void> _updateScores() async {
