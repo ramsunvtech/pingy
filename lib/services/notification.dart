@@ -8,7 +8,10 @@ class NotificationService {
   static void initialize() {
     const InitializationSettings initializationSettings =
         InitializationSettings(
-            android: AndroidInitializationSettings('@mipmap/ic_launcher'));
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      iOS: DarwinInitializationSettings(),
+    );
+
     _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -16,15 +19,22 @@ class NotificationService {
     try {
       Random random = Random();
       int id = random.nextInt(1000);
+      const AndroidNotificationDetails androidNotificationDetails =
+          AndroidNotificationDetails('my-channel', 'my chanel',
+              importance: Importance.max,
+              priority: Priority.high,
+              autoCancel: false,
+              enableVibration: true,
+              playSound: true);
+      const iOSChannelSpecifics = DarwinNotificationDetails();
+
       const NotificationDetails notificationDetails = NotificationDetails(
-          android: AndroidNotificationDetails('mychannel', 'my chanel',
-              importance: Importance.max, priority: Priority.high));
+        android: androidNotificationDetails,
+        iOS: iOSChannelSpecifics,
+      );
 
       await _flutterLocalNotificationsPlugin.show(
-          id,
-          'message.notification.title',
-          'message.notification.body',
-          notificationDetails);
+          id, 'your title', 'your body', notificationDetails);
     } catch (e) {
       print('Error>>>$e');
     }
