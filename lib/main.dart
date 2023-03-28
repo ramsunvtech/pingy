@@ -21,11 +21,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   NotificationService.initialize();
   tz.initializeTimeZones();
+
+  // Evening Reminder
   NotificationService().scheduleNotification(
       title: 'Pingy Reminder',
       body: 'Good Evening, Time to update your activities :)',
       scheduledNotificationDateTime:
-          NotificationService().nextInstanceOfTenAM());
+          NotificationService().nextInstanceOfTenAM(19, 29));
 
   var path = "/assets/db";
   if (!kIsWeb) {

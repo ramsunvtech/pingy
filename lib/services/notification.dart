@@ -9,9 +9,9 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  DateTime nextInstanceOfTenAM() {
+  DateTime nextInstanceOfTenAM(int hour, int minutes) {
     final DateTime now = DateTime.now();
-    final DateTime tenAM = DateTime(now.year, now.month, now.day, 19,15);
+    final DateTime tenAM = DateTime(now.year, now.month, now.day, hour, minutes);
     return tenAM.isBefore(now) ? tenAM.add(const Duration(days: 1)) : tenAM;
   }
 
