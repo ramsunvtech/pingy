@@ -22,12 +22,19 @@ void main() async {
   NotificationService.initialize();
   tz.initializeTimeZones();
 
+  // Morning Reminder
+  NotificationService().scheduleNotification(
+      title: 'Pingy Reminder',
+      body: 'Good Morning, Time to update your activities :)',
+      scheduledNotificationDateTime:
+      NotificationService().nextInstanceOfTenAM(08, 00));
+
   // Evening Reminder
   NotificationService().scheduleNotification(
       title: 'Pingy Reminder',
       body: 'Good Evening, Time to update your activities :)',
       scheduledNotificationDateTime:
-          NotificationService().nextInstanceOfTenAM(19, 29));
+          NotificationService().nextInstanceOfTenAM(20, 00));
 
   var path = "/assets/db";
   if (!kIsWeb) {

@@ -12,7 +12,7 @@ import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
-import 'package:pingy/services/notification.dart';
+// import 'package:pingy/services/notification.dart';
 import 'package:pingy/utils/l10n.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -178,12 +178,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           },
           child: Text(t(context).addActivityTypes),
         ),
-      ElevatedButton(
-        onPressed: () {
-          NotificationService().display();
-        },
-        child: const Text('Test Notification'),
-      ),
+      // ElevatedButton(
+      //   onPressed: () {
+      //     NotificationService().display();
+      //   },
+      //   child: const Text('Test Notification'),
+      // ),
     ];
 
     return homePanes;
