@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/foundation.dart'
     show PlatformDispatcher, kIsWeb, kReleaseMode;
 
@@ -17,9 +17,15 @@ import 'package:pingy/services/notification.dart';
 import 'app.dart';
 
 void main() async {
+  // Initialize.
   WidgetsFlutterBinding.ensureInitialized();
-
   NotificationService.initialize();
+  tz.initializeTimeZones();
+  NotificationService().scheduleNotification(
+      title: 'Pingy Reminder',
+      body: 'Good Evening, Time to update your activities :)',
+      scheduledNotificationDateTime:
+          NotificationService().nextInstanceOfTenAM());
 
   var path = "/assets/db";
   if (!kIsWeb) {

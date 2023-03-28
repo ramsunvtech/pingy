@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       ElevatedButton(
         onPressed: () {
-          NotificationService.display();
+          NotificationService().display();
         },
         child: const Text('Test Notification'),
       ),

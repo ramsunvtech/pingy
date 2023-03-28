@@ -2,10 +2,18 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  DateTime nextInstanceOfTenAM() {
+    final DateTime now = DateTime.now();
+    final DateTime tenAM = DateTime(now.year, now.month, now.day, 19,15);
+    return tenAM.isBefore(now) ? tenAM.add(const Duration(days: 1)) : tenAM;
+  }
 
   static void initialize() {
     DarwinInitializationSettings initializationSettingsIOS =
@@ -26,28 +34,54 @@ class NotificationService {
             (NotificationResponse notificationResponse) async {});
   }
 
-  static void display() async {
+  NotificationDetails getNotificationDetails() {
+    const AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails('my-channel', 'my chanel',
+            importance: Importance.max,
+            priority: Priority.high,
+            autoCancel: false,
+            enableVibration: true,
+            playSound: true);
+    const iOSChannelSpecifics = DarwinNotificationDetails();
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+      iOS: iOSChannelSpecifics,
+    );
+
+    return notificationDetails;
+  }
+
+  void display() async {
     try {
       Random random = Random();
       int id = random.nextInt(1000);
-      const AndroidNotificationDetails androidNotificationDetails =
-          AndroidNotificationDetails('my-channel', 'my chanel',
-              importance: Importance.max,
-              priority: Priority.high,
-              autoCancel: false,
-              enableVibration: true,
-              playSound: true);
-      const iOSChannelSpecifics = DarwinNotificationDetails();
-
-      const NotificationDetails notificationDetails = NotificationDetails(
-        android: androidNotificationDetails,
-        iOS: iOSChannelSpecifics,
-      );
 
       await _flutterLocalNotificationsPlugin.show(
-          id, 'your title', 'your body', notificationDetails);
+          id, 'your title', 'your body', getNotificationDetails());
     } catch (e) {
       print('Error>>>$e');
     }
+  }
+
+  void scheduleNotification({
+    id = 0,
+    String? title,
+    String? body,
+    String? payload,
+    required DateTime scheduledNotificationDateTime,
+  }) async {
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(
+          scheduledNotificationDateTime,
+          tz.local,
+        ),
+        getNotificationDetails(),
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        androidAllowWhileIdle: true);
   }
 }
