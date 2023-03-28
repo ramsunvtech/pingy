@@ -12,11 +12,14 @@ import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/models/hive/activity_item.dart';
+import 'package:pingy/services/notification.dart';
 
 import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  NotificationService.initialize();
 
   var path = "/assets/db";
   if (!kIsWeb) {
