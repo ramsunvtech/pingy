@@ -27,7 +27,7 @@ void main() async {
       title: 'Pingy Reminder',
       body: 'Good Morning, Time to update your activities :)',
       scheduledNotificationDateTime:
-      NotificationService().nextInstanceOfTenAM(10, 30));
+      NotificationService().nextInstanceOfTenAM(11, 30));
 
   // Evening Reminder
   NotificationService().scheduleNotification(
