@@ -49,7 +49,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     return WillPopScope(
         child: Scaffold(
           appBar: AppBar(
-            title: Text('Activity Types - ($activityTypeCount)'),
+            title: Text('Activity Types ($activityTypeCount)'),
             automaticallyImplyLeading: false,
             actions: [
               settingsLinkIconButton(context),
