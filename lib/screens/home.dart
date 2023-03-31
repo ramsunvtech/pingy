@@ -115,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
-      if (containsRewards && containsTypes && getGoalEndDayCount() > 0) Center(
+      if (containsRewards && containsTypes) Center(
         child: GestureDetector(
           onTap: () async {
             await getGoalImage();
@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
       ),
-      if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
+      if (containsRewards && containsTypes)
         Center(
           child: Text(
             '${AppLocalizations.of(context).todayScore(todayScore)}%',
@@ -139,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-      if (containsRewards && containsTypes && getGoalEndDayCount() > 0)
+      if (containsRewards && containsTypes)
         Center(
           child: Text(
             'Total Score: $totalScore%',
