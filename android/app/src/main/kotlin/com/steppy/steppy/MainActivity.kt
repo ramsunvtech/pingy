@@ -1,4 +1,4 @@
-package com.pingy.pingy
+package com.steppy.steppy
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
