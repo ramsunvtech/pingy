@@ -11,3 +11,5 @@ Color todayScoreColor = const Color(0xffD6B81C);
 Color totalScoreColor = const Color(0xffD6B81C);
 
 Color whiteColor = const Color(0xffFFFFFF);
+
+Color rewardColor = const Color(0xff32864E);
