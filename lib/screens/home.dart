@@ -15,6 +15,8 @@ import 'package:pingy/widgets/icons/settings.dart';
 // import 'package:pingy/services/notification.dart';
 import 'package:pingy/utils/l10n.dart';
 
+import '../widgets/FutureWidgets.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -260,6 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       // print('Today ActivityId: $todayActivityId');
       // print('Activity Count: ${activityBoxMapValues.length}');
+      // print('Activity Type is empty: ${activityBoxMapValues.isNotEmpty}');
 
       dynamic todayScoreValue = 0;
 
@@ -374,6 +377,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       Activity newActivity =
       Activity(activityId, activityItems, '', DateTime.now());
       activityBox.put(activityId, newActivity);
+      showToastMessage(context, 'Today Activity created');
     }
   }
 
@@ -408,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget getFloatingButton(BuildContext context) {
-    if (_isGoalEnded == true || !containsRewards || !containsTypes || activityBox.length == 0) {
+    if (!containsRewards || !containsTypes || activityBox.length == 0) {
       return Container();
     }
 
