@@ -175,6 +175,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
+      if (containsRewards && containsTypes)
+        greyCard(percentageIndicator(50.0, todayScore, 'Today Score'),
+            percentageIndicator(70.0, totalScore, 'Total Score')),
       // if (containsRewards && containsTypes)
       //   Center(
       //     child: Text(
@@ -228,9 +231,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       // if (containsRewards && containsTypes) percentageIndicator(todayScore, 'Today Score'),
       // if (containsRewards && containsTypes) percentageIndicator(totalScore, 'Total Score'),
-      if (containsRewards && containsTypes)
-        greyCard(percentageIndicator(50.0, todayScore, 'Today Score'),
-            percentageIndicator(70.0, totalScore, 'Total Score')),
       // ElevatedButton(
       //   onPressed: () {
       //     NotificationService().display();
