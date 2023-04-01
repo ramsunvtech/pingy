@@ -362,18 +362,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           predictReward = 'Start update your Activities';
         }
       }
+    }
 
-      if (canCreateNewActivity) {
-        final activityTypeKeys = activityTypeBox.keys;
-        final List<ActivityItem> activityItems = [];
-        for (var activityTypeKey in activityTypeKeys) {
-          ActivityItem newActivityItem = ActivityItem(activityTypeKey, '');
-          activityItems.add(newActivityItem);
-        }
-        Activity newActivity =
-        Activity(activityId, activityItems, '', DateTime.now());
-        activityBox.put(activityId, newActivity);
+    if (canCreateNewActivity) {
+      final activityTypeKeys = activityTypeBox.keys;
+      final List<ActivityItem> activityItems = [];
+      for (var activityTypeKey in activityTypeKeys) {
+        ActivityItem newActivityItem = ActivityItem(activityTypeKey, '');
+        activityItems.add(newActivityItem);
       }
+      Activity newActivity =
+      Activity(activityId, activityItems, '', DateTime.now());
+      activityBox.put(activityId, newActivity);
     }
   }
 
