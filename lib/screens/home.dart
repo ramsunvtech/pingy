@@ -103,18 +103,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     return SizedBox(
-      width: double.infinity,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        icon: Icon(
-          Icons.camera_alt,
-          size: 100.0,
-          color: darkGreyColor,
-        ),
-        tooltip: 'Capture Picture for your Goal',
-        onPressed: () {},
-      ),
-    );
+        width: double.infinity,
+        child: CircleAvatar(
+          radius: 150,
+          backgroundColor: greyColor,
+          child: Icon(
+            Icons.camera_alt,
+            size: 100.0,
+            color: darkGreyColor,
+          ),
+        ));
   }
 
   String getGoalDetails(goalFieldName) {
@@ -138,8 +136,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               await getGoalImage();
             },
             child: CircleAvatar(
-              backgroundColor: greyColor,
-              radius: 160,
+              backgroundColor: Colors.white,
+              radius: 160, // (155+5)
               child: getSelectedImage(),
             ),
           ),
