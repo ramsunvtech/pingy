@@ -15,7 +15,8 @@ import 'package:pingy/widgets/icons/settings.dart';
 // import 'package:pingy/services/notification.dart';
 import 'package:pingy/utils/l10n.dart';
 
-import '../widgets/FutureWidgets.dart';
+import 'package:pingy/utils/color.dart';
+import 'package:pingy/widgets/FutureWidgets.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -105,15 +106,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       width: double.infinity,
       child: IconButton(
         padding: EdgeInsets.zero,
-        icon: const Icon(
+        icon: Icon(
           Icons.camera_alt,
           size: 100.0,
-          color: Colors.white,
+          color: darkGreyColor,
         ),
         tooltip: 'Capture Picture for your Goal',
         onPressed: () {},
       ),
     );
+  }
+
+  String getGoalDetails(goalFieldName) {
+    RewardsModel goalDetails = rewardBox.values.last;
+    switch (goalFieldName) {
+      case 'title':
+        return goalDetails.title;
+      case 'period':
+        return '${goalDetails.startPeriod} to ${goalDetails.endPeriod}';
+      default:
+        return '';
+    }
   }
 
   List<Widget> getHomeBlocks(String score) {
@@ -125,9 +138,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               await getGoalImage();
             },
             child: CircleAvatar(
-              backgroundColor: Colors.grey,
+              backgroundColor: greyColor,
               radius: 160,
               child: getSelectedImage(),
+            ),
+          ),
+        ),
+      if (containsRewards)
+        Center(
+          child: Text(
+            getGoalDetails('title'),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 34,
+              fontStyle: FontStyle.italic,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+      if (containsRewards)
+        Center(
+          child: Text(
+            getGoalDetails('period'),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              fontStyle: FontStyle.italic,
+              color: greyColor,
             ),
           ),
         ),
@@ -199,8 +236,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     DateTime today = DateTime.now();
     List endPeriod = rewardDetails.endPeriod.split('/').toList();
-    DateTime endDate =
-        DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
+    DateTime endDate = DateTime.parse(
+        '${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]} 23:59:59');
     Duration diff = endDate.difference(today);
     return diff.inDays;
   }
@@ -416,7 +453,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget getFloatingButton(BuildContext context) {
-    if (!containsRewards || !containsTypes || activityBox.length == 0) {
+    if (_isGoalEnded && !containsRewards ||
+        !containsTypes ||
+        activityBox.length == 0) {
       return Container();
     }
 

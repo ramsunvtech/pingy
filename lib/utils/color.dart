@@ -1,4 +1,7 @@
 import 'dart:ui';
 
-Color purpleColor = const Color(0xff6750a4);
+Color purpleColor = const Color(0xff32864E);
 
+Color greyColor = const Color(0xffC2CCC5);
+
+Color darkGreyColor = const Color(0xff818883);
