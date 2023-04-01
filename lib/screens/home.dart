@@ -111,25 +111,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           color: Colors.white,
         ),
         tooltip: 'Capture Picture for your Goal',
-        onPressed: () {  },
+        onPressed: () {},
       ),
     );
   }
 
   List<Widget> getHomeBlocks(String score) {
     final List<Widget> homePanes = [
-      if (containsRewards && containsTypes) Center(
-        child: GestureDetector(
-          onTap: () async {
-            await getGoalImage();
-          },
-          child: CircleAvatar(
-            backgroundColor: Colors.grey,
-            radius: 160,
-            child: getSelectedImage(),
+      if (containsRewards && containsTypes)
+        Center(
+          child: GestureDetector(
+            onTap: () async {
+              await getGoalImage();
+            },
+            child: CircleAvatar(
+              backgroundColor: Colors.grey,
+              radius: 160,
+              child: getSelectedImage(),
+            ),
           ),
         ),
-      ),
       if (containsRewards && containsTypes)
         Center(
           child: Text(
@@ -289,11 +290,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 (((dayScore / activityTypeFullScore) * 100).ceil());
             // print ('todayScoreValue: $todayScoreValue');
 
-            // if (activity.activityId == todayActivityId &&
-            //     todayScoreValue != '') {
-            //   totalActivityScore += todayScoreValue;
-            //   todayScore = todayScoreValue.toString();
-            if (activity.activityId != todayActivityId && todayScoreValue != '') {
+            if (activity.activityId == todayActivityId &&
+                todayScoreValue != '') {
+              totalActivityScore += todayScoreValue;
+              // todayScore = todayScoreValue.toString();
+            }
+
+            if (activity.activityId != todayActivityId &&
+                todayScoreValue != '') {
               totalActivityScore += todayScoreValue;
             }
           }
@@ -375,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         activityItems.add(newActivityItem);
       }
       Activity newActivity =
-      Activity(activityId, activityItems, '', DateTime.now());
+          Activity(activityId, activityItems, '', DateTime.now());
       activityBox.put(activityId, newActivity);
       showToastMessage(context, 'Today Activity created');
     }
