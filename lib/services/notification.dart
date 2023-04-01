@@ -64,7 +64,7 @@ class NotificationService {
     }
   }
 
-  void scheduleNotification({
+  scheduleNotification({
     id = 0,
     String? title,
     String? body,
