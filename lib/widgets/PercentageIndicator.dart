@@ -1,32 +1,28 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
-dynamic doughnutChart() {
-  final List<ChartData> chartData = [
-    ChartData('David', 25, const Color.fromRGBO(9,0,136,1)),
-    ChartData('Steve', 38, const Color.fromRGBO(147,0,119,1)),
-    ChartData('Jack', 34, const Color.fromRGBO(228,0,124,1)),
-    ChartData('Others', 52, const Color.fromRGBO(255,189,57,1))
-  ];
+import 'package:pingy/utils/color.dart';
 
-  return SfCircularChart(
-      series: <CircularSeries>[
-        // Renders doughnut chart
-        DoughnutSeries<ChartData, String>(
-            dataSource: chartData,
-            pointColorMapper:(ChartData data,  _) => data.color,
-            xValueMapper: (ChartData data, _) => data.x,
-            yValueMapper: (ChartData data, _) => data.y
-        )
-      ]
+dynamic percentageIndicator(double radius, String score, String label) {
+  double percentValue = (int.tryParse(score ?? '0')! / 100);
+
+  return Padding(
+    padding: const EdgeInsets.only(left: 16.0, top: 10, bottom: 10),
+    child: CircularPercentIndicator(
+      radius: radius,
+      lineWidth: 13.0,
+      animation: true,
+      percent: percentValue,
+      center: Text(
+        '$score%',
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+      ),
+      footer: Text(
+        label,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17.0),
+      ),
+      circularStrokeCap: CircularStrokeCap.round,
+      progressColor: totalScoreColor,
+    ),
   );
-}
-
-class ChartData {
-  ChartData(this.x, this.y, [this.color = Colors.black]);
-  final String x;
-  final double y;
-  final Color color;
 }

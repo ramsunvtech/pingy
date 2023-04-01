@@ -17,6 +17,10 @@ import 'package:pingy/utils/l10n.dart';
 import 'package:pingy/utils/color.dart';
 import 'package:pingy/widgets/FutureWidgets.dart';
 
+import 'package:pingy/widgets/PercentageIndicator.dart';
+
+import 'package:pingy/widgets/GreyCard.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -43,25 +47,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Checks the notification permission status
   Future<String> getCheckNotificationPermStatus() async {
     if (await Permission.notification.request().isGranted) {
-      String notificationPermissionStatus = Permission.notification.status as String;
+      String notificationPermissionStatus =
+          Permission.notification.status as String;
 
       return notificationPermissionStatus;
     }
 
     return '';
 
-      // switch (status) {
-      //   case PermissionStatus.denied:
-      //     return 'denied';
-      //   case PermissionStatus.granted:
-      //     return 'granted';
-      //   case PermissionStatus.unknown:
-      //     return 'unknown';
-      //   case PermissionStatus.provisional:
-      //     return 'provisional';
-      //   default:
-      //     return '';
-      // }
+    // switch (status) {
+    //   case PermissionStatus.denied:
+    //     return 'denied';
+    //   case PermissionStatus.granted:
+    //     return 'granted';
+    //   case PermissionStatus.unknown:
+    //     return 'unknown';
+    //   case PermissionStatus.provisional:
+    //     return 'provisional';
+    //   default:
+    //     return '';
+    // }
   }
 
   Future getGoalImage() async {
@@ -170,30 +175,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-      if (containsRewards && containsTypes)
-        Center(
-          child: Text(
-            '${AppLocalizations.of(context).todayScore(todayScore)}%',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 25,
-              fontStyle: FontStyle.italic,
-              color: Colors.blue,
-            ),
-          ),
-        ),
-      if (containsRewards && containsTypes)
-        Center(
-          child: Text(
-            'Total Score: $totalScore%',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 34,
-              fontStyle: FontStyle.italic,
-              color: Colors.blue,
-            ),
-          ),
-        ),
+      // if (containsRewards && containsTypes)
+      //   Center(
+      //     child: Text(
+      //       '${AppLocalizations.of(context).todayScore(todayScore)}%',
+      //       style: const TextStyle(
+      //         fontWeight: FontWeight.bold,
+      //         fontSize: 25,
+      //         fontStyle: FontStyle.italic,
+      //         color: Colors.blue,
+      //       ),
+      //     ),
+      //   ),
+      // if (containsRewards && containsTypes)
+      //   Center(
+      //     child: Text(
+      //       'Total Score: $totalScore%',
+      //       style: const TextStyle(
+      //         fontWeight: FontWeight.bold,
+      //         fontSize: 34,
+      //         fontStyle: FontStyle.italic,
+      //         color: Colors.blue,
+      //       ),
+      //     ),
+      //   ),
       if (containsRewards && containsTypes && predictReward != '')
         Center(
           child: Text(
@@ -221,6 +226,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           },
           child: Text(t(context).addActivityTypes),
         ),
+      // if (containsRewards && containsTypes) percentageIndicator(todayScore, 'Today Score'),
+      // if (containsRewards && containsTypes) percentageIndicator(totalScore, 'Total Score'),
+      if (containsRewards && containsTypes)
+        greyCard(percentageIndicator(50.0, todayScore, 'Today Score'),
+            percentageIndicator(70.0, totalScore, 'Total Score')),
       // ElevatedButton(
       //   onPressed: () {
       //     NotificationService().display();
@@ -425,10 +435,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future askCameraPermission() async {
-    if (await Permission.camera.request().isGranted) {
-
-    }
+    if (await Permission.camera.request().isGranted) {}
   }
+
   @override
   void initState() {
     super.initState();
