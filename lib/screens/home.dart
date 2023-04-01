@@ -5,14 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:notification_permissions/notification_permissions.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/icons/settings.dart';
-// import 'package:pingy/services/notification.dart';
 import 'package:pingy/utils/l10n.dart';
 
 import 'package:pingy/utils/color.dart';
@@ -42,22 +41,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool containsTypes = false;
 
   /// Checks the notification permission status
-  Future<String> getCheckNotificationPermStatus() {
-    return NotificationPermissions.getNotificationPermissionStatus()
-        .then((status) {
-      switch (status) {
-        case PermissionStatus.denied:
-          return 'denied';
-        case PermissionStatus.granted:
-          return 'granted';
-        case PermissionStatus.unknown:
-          return 'unknown';
-        case PermissionStatus.provisional:
-          return 'provisional';
-        default:
-          return '';
-      }
-    });
+  Future<String> getCheckNotificationPermStatus() async {
+    if (await Permission.notification.request().isGranted) {
+      String notificationPermissionStatus = Permission.notification.status as String;
+
+      return notificationPermissionStatus;
+    }
+
+    return '';
+
+      // switch (status) {
+      //   case PermissionStatus.denied:
+      //     return 'denied';
+      //   case PermissionStatus.granted:
+      //     return 'granted';
+      //   case PermissionStatus.unknown:
+      //     return 'unknown';
+      //   case PermissionStatus.provisional:
+      //     return 'provisional';
+      //   default:
+      //     return '';
+      // }
   }
 
   Future getGoalImage() async {
@@ -420,6 +424,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future askCameraPermission() async {
+    if (await Permission.camera.request().isGranted) {
+
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -429,6 +438,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // set up the future to fetch the notification data
     permissionStatusFuture = getCheckNotificationPermStatus();
 
+    askCameraPermission();
     _updateScores();
   }
 
