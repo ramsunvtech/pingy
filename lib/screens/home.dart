@@ -23,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _goalPicture = '';
   bool _goalPictureSelected = false;
+  bool _isGoalEnded = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
   late final Box rewardBox;
@@ -346,8 +347,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             if (predictReward.isNotEmpty) {
               if (goalEndDayCount < 0) {
                 predictReward = 'Already Won $predictReward Reward!';
+                _isGoalEnded = true;
               } else if (goalEndDayCount == 0) {
                 predictReward = 'Won $predictReward Reward, Congrats!';
+                _isGoalEnded = true;
               } else {
                 predictReward = '$predictReward Reward on your way!';
               }
@@ -356,6 +359,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 predictReward =
                     '${rewardDetails.title} Goal Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) ended \n'
                     ' Try create new Goal!';
+                _isGoalEnded = true;
               } else if (goalEndDayCount == 0) {
                 predictReward = 'Last day of ${rewardDetails.title} Goal';
               } else {
@@ -401,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget getFloatingButton(BuildContext context) {
-    if (!containsRewards || !containsTypes || activityBox.length == 0) {
+    if (_isGoalEnded == true || !containsRewards || !containsTypes || activityBox.length == 0) {
       return Container();
     }
 
@@ -424,7 +428,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           title: Text(t(context).homePageTitle),
           automaticallyImplyLeading: false,
           actions: [
-            if (containsRewards && containsTypes)
+            if (containsRewards && containsTypes && _isGoalEnded == false)
               settingsLinkIconButton(context),
           ],
         ),
