@@ -23,15 +23,15 @@ void main() async {
   tz.initializeTimeZones();
 
   // Morning Reminder
-  NotificationService().scheduleNotification(
-      title: 'Pingy Reminder',
+  await NotificationService().scheduleNotification(
+      title: 'Steppy Reminder',
       body: 'Good Morning, Time to update your activities :)',
       scheduledNotificationDateTime:
-      NotificationService().nextInstanceOfTenAM(11, 30));
+      NotificationService().nextInstanceOfTenAM(10, 00));
 
   // Evening Reminder
-  NotificationService().scheduleNotification(
-      title: 'Pingy Reminder',
+  await NotificationService().scheduleNotification(
+      title: 'Steppy Reminder',
       body: 'Good Evening, Time to update your activities :)',
       scheduledNotificationDateTime:
           NotificationService().nextInstanceOfTenAM(20, 00));
