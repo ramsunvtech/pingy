@@ -176,9 +176,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       });
                     },
                     child: const Text(
-                      'Clear Data',
+                      'Clear All Data',
                       style: TextStyle(
                         fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await activityBox.clear();
+                      setState(() {
+                        activityCount = '0';
+
+                        if (activityBox.isNotEmpty) {
+                          activityCount = activityBox.length.toString();
+                        }
+                      });
+                    },
+                    child: const Text(
+                      'Clear Only Activity',
+                      style: TextStyle(
+                        fontSize: 20,
+
                       ),
                     ),
                   ),
