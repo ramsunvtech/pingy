@@ -207,11 +207,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           child: Text(
             predictReward,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              fontStyle: FontStyle.italic,
-              color: Colors.redAccent,
+            style: TextStyle(
+              fontSize: 16,
+              color: rewardColor,
             ),
           ),
         ),
