@@ -240,18 +240,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
 
-    if (canCreateNewActivity) {
-      final activityTypeKeys = activityTypeBox.keys;
-      final List<ActivityItem> activityItems = [];
-      for (var activityTypeKey in activityTypeKeys) {
-        ActivityItem newActivityItem = ActivityItem(activityTypeKey, '');
-        activityItems.add(newActivityItem);
-      }
-      Activity newActivity =
-          Activity(activityId, activityItems, '', DateTime.now());
-      activityBox.put(activityId, newActivity);
-    }
-
     Map activityBoxMap = activityBox.toMap();
     // TODO: Filter with latest goal period.
     Iterable<dynamic> activityBoxMapValues = activityBoxMap.values;
@@ -298,11 +286,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 (((dayScore / activityTypeFullScore) * 100).ceil());
             // print ('todayScoreValue: $todayScoreValue');
 
-            if (activity.activityId == todayActivityId &&
-                todayScoreValue != '') {
-              totalActivityScore += todayScoreValue;
-              todayScore = todayScoreValue.toString();
-            } else if (todayScoreValue != '') {
+            // if (activity.activityId == todayActivityId &&
+            //     todayScoreValue != '') {
+            //   totalActivityScore += todayScoreValue;
+            //   todayScore = todayScoreValue.toString();
+            if (activity.activityId != todayActivityId && todayScoreValue != '') {
               totalActivityScore += todayScoreValue;
             }
           }
@@ -348,9 +336,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               if (goalEndDayCount < 0) {
                 predictReward = 'Already Won $predictReward Reward!';
                 _isGoalEnded = true;
+                canCreateNewActivity = false;
               } else if (goalEndDayCount == 0) {
                 predictReward = 'Won $predictReward Reward, Congrats!';
                 _isGoalEnded = true;
+                canCreateNewActivity = false;
               } else {
                 predictReward = '$predictReward Reward on your way!';
               }
@@ -360,6 +350,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     '${rewardDetails.title} Goal Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) ended \n'
                     ' Try create new Goal!';
                 _isGoalEnded = true;
+                canCreateNewActivity = false;
               } else if (goalEndDayCount == 0) {
                 predictReward = 'Last day of ${rewardDetails.title} Goal';
               } else {
@@ -370,6 +361,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         } else {
           predictReward = 'Start update your Activities';
         }
+      }
+
+      if (canCreateNewActivity) {
+        final activityTypeKeys = activityTypeBox.keys;
+        final List<ActivityItem> activityItems = [];
+        for (var activityTypeKey in activityTypeKeys) {
+          ActivityItem newActivityItem = ActivityItem(activityTypeKey, '');
+          activityItems.add(newActivityItem);
+        }
+        Activity newActivity =
+        Activity(activityId, activityItems, '', DateTime.now());
+        activityBox.put(activityId, newActivity);
       }
     }
   }
