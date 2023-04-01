@@ -12,6 +12,7 @@ dynamic percentageIndicator(double radius, String score, String label) {
       radius: radius,
       lineWidth: 13.0,
       animation: true,
+      animationDuration: 700,
       percent: percentValue,
       center: Text(
         '$score%',
