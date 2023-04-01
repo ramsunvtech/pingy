@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'package:pingy/utils/color.dart';
+
 Widget greyCard(Widget leftBlock, Widget rightBlock) {
   return Center(
     child: Card(
-
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
         side: BorderSide(
-          color: Colors.grey,
+          color: greyColor,
         ),
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
       ),
       child: Row(
         children: [

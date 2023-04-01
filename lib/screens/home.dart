@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       File goalPictureFile = File(_goalPicture);
       if (goalPictureFile.existsSync()) {
         return CircleAvatar(
-            radius: 160 - 5,
+            radius: 120 - 5,
             backgroundImage: Image.file(
               goalPictureFile,
               fit: BoxFit.cover,
@@ -114,11 +114,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return SizedBox(
         width: double.infinity,
         child: CircleAvatar(
-          radius: 150,
+          radius: 110,
           backgroundColor: greyColor,
           child: Icon(
             Icons.camera_alt,
-            size: 100.0,
+            size: 70.0,
             color: darkGreyColor,
           ),
         ));
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             },
             child: CircleAvatar(
               backgroundColor: Colors.white,
-              radius: 160, // (155+5)
+              radius: 120, // (115+5)
               child: getSelectedImage(),
             ),
           ),
@@ -358,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         // print('totalActivityScore: $totalActivityScore');
 
-        dynamic totalActivityDays = activityBoxMapValues.length;
+        dynamic totalActivityDays = activityBoxMapValues.length - 1;
 
         // print('totalActivityDays: $totalActivityDays');
 
