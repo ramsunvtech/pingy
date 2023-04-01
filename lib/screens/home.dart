@@ -150,9 +150,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             getGoalDetails('title'),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 34,
+              fontSize: 20,
               fontStyle: FontStyle.italic,
-              color: Colors.blue,
+              color: Colors.black,
             ),
           ),
         ),
