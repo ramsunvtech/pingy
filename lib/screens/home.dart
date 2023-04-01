@@ -292,8 +292,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
             if (activity.activityId == todayActivityId &&
                 todayScoreValue != '') {
-              totalActivityScore += todayScoreValue;
-              // todayScore = todayScoreValue.toString();
+              // totalActivityScore += todayScoreValue;
+              todayScore = todayScoreValue.toString();
             }
 
             if (activity.activityId != todayActivityId &&
