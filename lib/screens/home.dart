@@ -258,6 +258,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  bool isTodayActivityExist() {
+    DateTime today = DateTime.now();
+    String todayActivityId = 'activity_${today.year}${today.month}${today.day}';
+    return activityBox.containsKey(todayActivityId);
+  }
+
   Future<void> _updateScores() async {
     // Get reference to an already opened box
     rewardBox = Hive.box('rewards');
@@ -476,10 +482,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return FloatingActionButton(
       onPressed: () {
-        goToUpdateActivityScreen(context);
+        if (isTodayActivityExist()) {
+          goToUpdateActivityScreen(context);
+          return;
+        }
+        goToGoalsForm(context);
       },
       backgroundColor: Colors.green,
-      child: const Icon(Icons.edit),
+      child: Icon(isTodayActivityExist() ? Icons.edit : Icons.add),
     );
   }
 
