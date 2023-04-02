@@ -6,16 +6,16 @@ BottomNavigationBar settingsBottomNavigationBar(BuildContext context) {
   return BottomNavigationBar(
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.add_task_sharp),
-          label: 'Activity Types',
+          icon: Icon(Icons.directions_walk_outlined),
+          label: 'Activities',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.add),
+          icon: Icon(Icons.flag_outlined),
           label: 'Goal',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.add),
-          label: 'Activities',
+          icon: Icon(Icons.military_tech),
+          label: 'Scores',
         ),
       ],
       onTap: (int index) {
