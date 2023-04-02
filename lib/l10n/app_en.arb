@@ -1,4 +1,5 @@
 {
+  "appName": "Steppy",
   "todayScore": "Today Score: {score}",
   "@todayScore": {
     "description": "A message with a single parameter",

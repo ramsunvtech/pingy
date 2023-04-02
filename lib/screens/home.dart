@@ -490,8 +490,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(t(context).homePageTitle),
+          elevation: 0,
+          backgroundColor: Colors.white,
+          foregroundColor: iconColor,
           automaticallyImplyLeading: false,
+          title: Text(t(context).appName),
           actions: [
             if (containsRewards && containsTypes && _isGoalEnded == false)
               settingsLinkIconButton(context),

@@ -24,7 +24,7 @@ class PingyAppState extends State<PingyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: purpleColor),
+      theme: ThemeData(colorSchemeSeed: purpleColor, scaffoldBackgroundColor: whiteColor),
       home: HomeScreen(),
       localizationsDelegates: const [
         AppLocalizations.delegate,
