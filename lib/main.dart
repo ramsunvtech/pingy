@@ -24,13 +24,15 @@ void main() async {
 
   // Morning Reminder
   await NotificationService().scheduleNotification(
+      id: 1,
       title: 'Steppy Reminder',
       body: 'Good Morning, Time to update your activities :)',
       scheduledNotificationDateTime:
-      NotificationService().nextInstanceOfTenAM(10, 00));
+          NotificationService().nextInstanceOfTenAM(10, 00));
 
   // Evening Reminder
   await NotificationService().scheduleNotification(
+      id: 2,
       title: 'Steppy Reminder',
       body: 'Good Evening, Time to update your activities :)',
       scheduledNotificationDateTime:
