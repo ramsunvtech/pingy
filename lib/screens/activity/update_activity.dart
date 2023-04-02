@@ -7,6 +7,7 @@ import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
+import 'package:pingy/utils/color.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
   final String? activityId;
@@ -116,49 +117,55 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             ),
           ),
           Center(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-              // color: Colors.pink,
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.6),
+            child: FractionallySizedBox(
+              widthFactor: 0.9,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                // color: Colors.pink,
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.6),
+                ),
               ),
             ),
           ),
           Center(
-            child: ElevatedButton(
-              onPressed: () async {
-                if (_activateFormKey.currentState!.validate()) {
-                  var updatedMissedActivity = ActivityItem(
-                      todoActivity.activityItemId, _fullScoreController.text);
-                  var activityItemIndex = todayActivity.activityItems
-                      .indexWhere((element) =>
-                          element.activityItemId ==
-                          todoActivity.activityItemId);
-                  if (todayActivity.isInBox) {
-                    todayActivity.activityItems
-                        .setAll(activityItemIndex, [updatedMissedActivity]);
-                    await todayActivity.save();
+            child: FractionallySizedBox(
+              widthFactor: 0.9,
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (_activateFormKey.currentState!.validate()) {
+                    var updatedMissedActivity = ActivityItem(
+                        todoActivity.activityItemId, _fullScoreController.text);
+                    var activityItemIndex = todayActivity.activityItems
+                        .indexWhere((element) =>
+                    element.activityItemId ==
+                        todoActivity.activityItemId);
+                    if (todayActivity.isInBox) {
+                      todayActivity.activityItems
+                          .setAll(activityItemIndex, [updatedMissedActivity]);
+                      await todayActivity.save();
+                    }
+                    _fullScoreController.text = '';
+                    setState(() => {defaultActivityTabIndex = 2});
+                    Navigator.of(context).pop(true);
                   }
-                  _fullScoreController.text = '';
-                  setState(() => {defaultActivityTabIndex = 2});
-                  Navigator.of(context).pop(true);
-                }
-              },
-              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-              // color: Colors.pink,
-              child: const Text(
-                'Completed',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.6),
+                },
+                // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                // color: Colors.pink,
+                child: const Text(
+                  'Update',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.6),
+                ),
               ),
             ),
           ),
@@ -179,7 +186,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
       return 'Edit Activity';
     }
-    return 'Activity Today';
+    return 'Activities Today';
   }
 
   // TODO: fix this optional value.
@@ -212,15 +219,22 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         initialIndex: defaultActivityTabIndex,
         child: Scaffold(
           appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.white,
+            foregroundColor: iconColor,
             bottom: TabBar(
+              unselectedLabelColor: greyColor,
+              labelColor: purpleColor,
+              dividerColor: purpleColor,
+              indicatorColor: purpleColor,
               tabs: [
-                Tab(
+                const Tab(
                   text: 'Missed',
                 ),
                 Tab(
                   text: getTodoTabTitle(),
                 ),
-                Tab(
+                const Tab(
                   text: 'Done',
                 ),
               ],
@@ -248,6 +262,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                             activityTypeBox.get(missedActivity.activityItemId);
 
                         return taskItem(
+                          'missed',
                           missedActivityItemDetail.activityName,
                           missedActivity.score ?? '0',
                           missedActivity,
@@ -274,6 +289,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                         return Dismissible(
                             key: UniqueKey(),
                             child: taskItem(
+                              'todo',
                                 todayActivityItemDetail.activityName,
                                 'Swipe left to skip / right to update score',
                                 todoActivity,
@@ -375,6 +391,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                 .get(completedActivity.activityItemId);
 
                         return taskItem(
+                          'completed',
                           completedActivityItemDetail.activityName,
                           completedActivity.score,
                           completedActivity,
@@ -394,16 +411,24 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
-  Widget taskItem(String taskName, String? mark, ActivityItem selectActivity,
+  Widget taskItem(String taskType, String taskName, String? mark, ActivityItem selectActivity,
       bool isSelected, int index) {
     var enabled = true;
+    IconData taskIcon = Icons.content_paste;
+
+    if (taskType == 'missed') {
+      taskIcon = Icons.content_paste_off;
+    } else if (taskType == 'completed') {
+      taskIcon = Icons.assignment_turned_in_outlined;
+    }
 
     return ListTile(
       enabled: enabled,
       leading: CircleAvatar(
-        child: const Icon(
-          Icons.task_outlined,
-          color: Colors.white,
+        backgroundColor: lightGreenColor,
+        child: Icon(
+          taskIcon,
+          color: iconColor,
         ),
       ),
       title: Text(
@@ -423,7 +448,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             ),
           ),
           builder: (context) => DraggableScrollableSheet(
-              initialChildSize: 0.5,
+              initialChildSize: 0.7,
               maxChildSize: 0.9,
               minChildSize: 0.32,
               expand: false,
