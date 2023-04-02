@@ -5,7 +5,7 @@
    <application
         android:label="pingy"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/icons">
         <activity
             android:name=".MainActivity"
             android:exported="true"
