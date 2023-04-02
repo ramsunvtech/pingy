@@ -67,7 +67,7 @@ dev_dependencies:
 flutter_icons:
   android: "icons"
   ios: true
-  image_path: "assets/icons/1024.png"
+  image_path: "assets/icons/steppy.png"
 
 
 # For information on the generic Dart part of this file, see the
