@@ -65,7 +65,7 @@ class NotificationService {
   }
 
   scheduleNotification({
-    id = 0,
+    required int id,
     String? title,
     String? body,
     String? payload,
