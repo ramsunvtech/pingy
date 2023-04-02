@@ -36,7 +36,7 @@ class NotificationService {
 
   NotificationDetails getNotificationDetails() {
     const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails('my-channel', 'my chanel',
+        AndroidNotificationDetails('my-channel', 'Steppy Notifications',
             importance: Importance.max,
             priority: Priority.high,
             autoCancel: false,
