@@ -6,6 +6,11 @@ import 'package:pingy/utils/color.dart';
 dynamic percentageIndicator(double radius, String score, String label) {
   double percentValue = (int.tryParse(score ?? '0')! / 100);
 
+  // TODO - this line need to be removed later.
+  if (percentValue > 1) {
+    percentValue = 1.0;
+  }
+
   return Padding(
     padding: const EdgeInsets.only(left: 45.0, top: 20, bottom: 10),
     child: CircularPercentIndicator(
