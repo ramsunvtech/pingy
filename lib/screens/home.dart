@@ -369,8 +369,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         dynamic rewardScore = 0;
 
         if (totalActivityScore > 0) {
+          // TODO - this days multiplies by 100, so need formatting.
           rewardScore =
-              ((totalActivityScore) / (100 * totalActivityDays) * 100).ceil();
+              ((totalActivityScore / (100 * totalActivityDays)) * 100).ceil();
         }
 
         if (rewardScore > 0) {
