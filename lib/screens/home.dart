@@ -54,19 +54,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     return '';
-
-    // switch (status) {
-    //   case PermissionStatus.denied:
-    //     return 'denied';
-    //   case PermissionStatus.granted:
-    //     return 'granted';
-    //   case PermissionStatus.unknown:
-    //     return 'unknown';
-    //   case PermissionStatus.provisional:
-    //     return 'provisional';
-    //   default:
-    //     return '';
-    // }
   }
 
   Future getGoalImage() async {
@@ -190,18 +177,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       //       ),
       //     ),
       //   ),
-      // if (containsRewards && containsTypes)
-      //   Center(
-      //     child: Text(
-      //       'Total Score: $totalScore%',
-      //       style: const TextStyle(
-      //         fontWeight: FontWeight.bold,
-      //         fontSize: 34,
-      //         fontStyle: FontStyle.italic,
-      //         color: Colors.blue,
-      //       ),
-      //     ),
-      //   ),
       if (containsRewards && containsTypes && predictReward != '')
         Center(
           child: Text(
@@ -227,8 +202,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           },
           child: Text(t(context).addActivityTypes),
         ),
-      // if (containsRewards && containsTypes) percentageIndicator(todayScore, 'Today Score'),
-      // if (containsRewards && containsTypes) percentageIndicator(totalScore, 'Total Score'),
       // ElevatedButton(
       //   onPressed: () {
       //     NotificationService().display();
