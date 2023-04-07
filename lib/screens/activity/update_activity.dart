@@ -344,6 +344,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
                                 // Update Box with score.
                                 splitActivitiesForTabs();
+                                setState(() {});
                                 return true;
                               }
                             },
