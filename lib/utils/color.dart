@@ -14,6 +14,6 @@ Color whiteColor = const Color(0xffFFFFFF);
 
 Color rewardColor = const Color(0xff32864E);
 
-Color iconColor = const Color(0xff0A150E);
-
 Color lightGreenColor = const Color(0xffD7EADD);
+
+const Color iconColor = Color(0xff0A150E);

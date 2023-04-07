@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/rewards.dart';
-import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+
+import 'package:pingy/widgets/FutureWidgets.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
 
 import 'package:pingy/utils/navigators.dart';
 
@@ -71,8 +73,8 @@ class _RewardsScreenState extends State<RewardsScreen> {
     return WillPopScope(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: const Text('Add Goals'),
+        appBar: customAppBar(
+          title: 'Add Goals',
           automaticallyImplyLeading: true,
         ),
         body: Column(

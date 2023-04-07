@@ -5,6 +5,7 @@ import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
 
 class RewardsListScreen extends StatefulWidget {
   @override
@@ -61,9 +62,8 @@ class _RewardsListScreenState extends State<RewardsListScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Goals'),
-          automaticallyImplyLeading: false,
+        appBar: customAppBar(
+          title: 'Goals',
           actions: [
             settingsLinkIconButton(context),
           ],

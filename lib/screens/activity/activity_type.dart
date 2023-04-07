@@ -4,6 +4,7 @@ import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
 
 class TaskTypeScreen extends StatefulWidget {
   @override
@@ -35,7 +36,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
         child: Scaffold(
-          appBar: AppBar(title: const Text('Add Activity Type')),
+          appBar: customAppBar(title: 'Add Activity Type'),
           body: Container(
             alignment: Alignment.center,
             child: Column(

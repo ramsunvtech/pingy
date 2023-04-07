@@ -3,9 +3,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
+
 import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
 
 import 'package:pingy/utils/navigators.dart';
 
@@ -64,9 +66,8 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Activities'),
-          automaticallyImplyLeading: false,
+        appBar: customAppBar(
+          title: 'Activities',
           actions: [
             settingsLinkIconButton(context),
           ],

@@ -6,6 +6,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -104,8 +105,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Settings'),
+        appBar: customAppBar(
+          title: 'Settings',
           leading: GestureDetector(
             onTap: () {
               goToHomeScreen(context);

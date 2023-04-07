@@ -7,6 +7,8 @@ import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
+
 import 'package:pingy/utils/color.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
@@ -218,10 +220,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         length: 3,
         initialIndex: defaultActivityTabIndex,
         child: Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            backgroundColor: Colors.white,
-            foregroundColor: iconColor,
+          appBar: customAppBar(
             bottom: TabBar(
               unselectedLabelColor: greyColor,
               labelColor: purpleColor,
@@ -239,7 +238,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 ),
               ],
             ),
-            title: Text(getAppBarTitle()),
+            title: getAppBarTitle(),
             leading: IconButton(
               onPressed: () {
                 goToHomeScreen(context);

@@ -4,6 +4,7 @@ import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
 
 class ActivityTypeListScreen extends StatefulWidget {
   @override
@@ -48,9 +49,8 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
         child: Scaffold(
-          appBar: AppBar(
-            title: Text('Activity Types ($activityTypeCount)'),
-            automaticallyImplyLeading: false,
+          appBar: customAppBar(
+            title: 'Activity Types ($activityTypeCount)',
             actions: [
               settingsLinkIconButton(context),
             ],

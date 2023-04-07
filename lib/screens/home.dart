@@ -16,10 +16,9 @@ import 'package:pingy/utils/l10n.dart';
 
 import 'package:pingy/utils/color.dart';
 import 'package:pingy/widgets/FutureWidgets.dart';
-
 import 'package:pingy/widgets/PercentageIndicator.dart';
-
 import 'package:pingy/widgets/GreyCard.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -473,12 +472,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return WillPopScope(
       child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: iconColor,
-          automaticallyImplyLeading: false,
-          title: Text(t(context).appName),
+        appBar: customAppBar(
+          title: t(context).appName,
           actions: [
             if (containsRewards && containsTypes && _isGoalEnded == false)
               settingsLinkIconButton(context),
@@ -506,3 +501,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 }
+
+/**
+ * Goal Picture
+ * Goal Info
+ * Goal Status
+ */
