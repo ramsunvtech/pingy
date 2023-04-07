@@ -7,12 +7,12 @@ import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 
-class RewardsListScreen extends StatefulWidget {
+class GoalListScreen extends StatefulWidget {
   @override
-  _RewardsListScreenState createState() => _RewardsListScreenState();
+  _GoalListScreenState createState() => _GoalListScreenState();
 }
 
-class _RewardsListScreenState extends State<RewardsListScreen> {
+class _GoalListScreenState extends State<GoalListScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   late final Box rewardsBox;

@@ -9,12 +9,12 @@ import 'package:pingy/widgets/CustomAppBar.dart';
 
 import 'package:pingy/utils/navigators.dart';
 
-class RewardsScreen extends StatefulWidget {
+class GoalScreen extends StatefulWidget {
   @override
-  _RewardsScreenState createState() => _RewardsScreenState();
+  _GoalScreenState createState() => _GoalScreenState();
 }
 
-class _RewardsScreenState extends State<RewardsScreen> {
+class _GoalScreenState extends State<GoalScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _startPeriodController = TextEditingController();
   final TextEditingController _firstPrizeController = TextEditingController();

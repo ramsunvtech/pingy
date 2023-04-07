@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:pingy/screens/activity/list_activity_type.dart';
 import 'package:pingy/screens/activity/list_activities.dart';
 import 'package:pingy/screens/home.dart';
-import 'package:pingy/screens/rewards/list_rewards.dart';
+import 'package:pingy/screens/goals/list_goals.dart';
 import 'package:pingy/screens/settings.dart';
 import 'package:pingy/screens/activity/update_activity.dart';
-import 'package:pingy/screens/rewards/goals.dart';
+import 'package:pingy/screens/goals/goals.dart';
 import 'package:pingy/screens/activity/activity_type.dart';
 
 void goToActivityTypeListScreen(BuildContext context) {
@@ -31,7 +31,7 @@ void goToGoalsListScreen(BuildContext context) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (builder) => RewardsListScreen(),
+      builder: (builder) => GoalListScreen(),
     ),
   );
 }
@@ -85,7 +85,7 @@ void goToGoalsForm(BuildContext context) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (builder) => RewardsScreen(),
+      builder: (builder) => GoalScreen(),
     ),
   );
 }
