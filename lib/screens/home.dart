@@ -5,20 +5,22 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
+
+import 'package:pingy/widgets/icons/settings.dart';
+import 'package:pingy/widgets/FutureWidgets.dart';
+import 'package:pingy/widgets/PercentageIndicator.dart';
+import 'package:pingy/widgets/GreyCard.dart';
+import 'package:pingy/widgets/CustomAppBar.dart';
 
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/utils/navigators.dart';
-import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/utils/l10n.dart';
-
 import 'package:pingy/utils/color.dart';
-import 'package:pingy/widgets/FutureWidgets.dart';
-import 'package:pingy/widgets/PercentageIndicator.dart';
-import 'package:pingy/widgets/GreyCard.dart';
-import 'package:pingy/widgets/CustomAppBar.dart';
+import 'package:pingy/utils/permissions.dart';
+
+import 'package:pingy/services/goals.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -42,18 +44,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String predictReward = '';
   bool containsRewards = false;
   bool containsTypes = false;
-
-  /// Checks the notification permission status
-  Future<String> getCheckNotificationPermStatus() async {
-    if (await Permission.notification.request().isGranted) {
-      String notificationPermissionStatus =
-          Permission.notification.status as String;
-
-      return notificationPermissionStatus;
-    }
-
-    return '';
-  }
 
   Future getGoalImage() async {
     try {
@@ -123,6 +113,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   List<Widget> getHomeBlocks(String score) {
+    Widget todayScoreIndicator = (getGoalEndDayCount() < 0)
+        ? const Padding(padding: EdgeInsets.only(left: 75.0))
+        : percentageIndicator(50.0, todayScore, 'Today Score');
+    Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
+        (getGoalEndDayCount() < 0) ? 'Your Last Score' : 'Total Score');
+
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
         Center(
@@ -162,12 +158,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
       if (containsRewards && containsTypes)
-        greyCard(percentageIndicator(50.0, todayScore, 'Today Score'),
-            percentageIndicator(70.0, totalScore, 'Total Score')),
+        greyCard(todayScoreIndicator, totalScoreIndicator),
       // if (containsRewards && containsTypes)
       //   Center(
       //     child: Text(
-      //       '${AppLocalizations.of(context).todayScore(todayScore)}%',
+      //       '${AppLocalizations.of(context).todayScore(todayScore)}%', // Example for dynamic string locale
       //       style: const TextStyle(
       //         fontWeight: FontWeight.bold,
       //         fontSize: 25,
@@ -187,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-      if (!containsRewards || getGoalEndDayCount() < 0)
+      if (!containsRewards)
         ElevatedButton(
           onPressed: () {
             goToGoalsForm(context);
@@ -218,8 +213,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     DateTime today = DateTime.now();
     List endPeriod = rewardDetails.endPeriod.split('/').toList();
-    DateTime endDate = DateTime.parse(
-        '${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]} 23:59:59');
+
+    // Example: Date 2023-04-07
+    String endDateString = '${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}';
+    DateTime endDate = DateTime.parse(endDateString);
     Duration diff = endDate.difference(today);
     return diff.inDays;
   }
@@ -267,6 +264,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         canCreateNewActivity = false;
       }
     }
+
+    int goalEndDayCount = getGoalEndDayCount();
 
     Map activityBoxMap = activityBox.toMap();
     // TODO: Filter with latest goal period.
@@ -336,15 +335,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         dynamic totalActivityDays = activityBoxMapValues.length - 1;
 
-        // print('totalActivityDays: $totalActivityDays');
-
         dynamic rewardScore = 0;
 
-        if (totalActivityScore > 0) {
+        if (totalActivityScore > 0 && totalActivityDays > 0) {
           // TODO - this days multiplies by 100, so need formatting.
           rewardScore =
               ((totalActivityScore / (100 * totalActivityDays)) * 100).ceil();
         }
+
+        predictReward = 'Start update your Activities';
 
         if (rewardScore > 0) {
           totalScore = rewardScore.toString();
@@ -355,44 +354,42 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
             setGoalPicturePath(rewardDetails);
 
-            if (rewardScore >= 95) {
-              predictReward = rewardDetails.firstPrice;
-            } else if (rewardScore >= 85) {
-              predictReward = rewardDetails.secondPrice;
-            } else if (rewardScore >= 75) {
-              predictReward = rewardDetails.thirdPrice;
-            }
-
-            int goalEndDayCount = getGoalEndDayCount();
+            predictReward = findGoalPrize(rewardScore);
 
             if (predictReward.isNotEmpty) {
-              if (goalEndDayCount < 0) {
-                predictReward = 'Already Won $predictReward Reward!';
+              predictReward = '$predictReward Reward on your way!';
+
+              if (goalEndDayCount < -1) {
+                predictReward = 'You did a nice job by getting $predictReward Reward! Try create new Goal!';
+                _isGoalEnded = true;
+                canCreateNewActivity = false;
+              } else if (goalEndDayCount == -1) {
                 _isGoalEnded = true;
                 canCreateNewActivity = false;
               } else if (goalEndDayCount == 0) {
-                predictReward = 'Won $predictReward Reward, Congrats!';
-                _isGoalEnded = true;
-                canCreateNewActivity = false;
-              } else {
-                predictReward = '$predictReward Reward on your way!';
+                predictReward =
+                'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
               }
+
             } else {
-              if (goalEndDayCount < 0) {
+              predictReward = 'Reward on your way!';
+              if (goalEndDayCount < -1) {
                 predictReward =
                     '${rewardDetails.title} Goal Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) ended \n'
                     ' Try create new Goal!';
                 _isGoalEnded = true;
                 canCreateNewActivity = false;
-              } else if (goalEndDayCount == 0) {
-                predictReward = 'Last day of ${rewardDetails.title} Goal';
-              } else {
-                predictReward = 'Reward on your way!';
+              } else if (goalEndDayCount == -1) {
+                predictReward = 'Goal Almost done! Today is the last day set for your goal (${rewardDetails.title}). Complete your activities to achieve your goal!';
               }
             }
           }
         } else {
-          predictReward = 'Start update your Activities';
+          if (goalEndDayCount < 0) {
+            predictReward = 'Your Goal is past due. You could not meet up with your Goal.';
+            _isGoalEnded = true;
+            canCreateNewActivity = false;
+          }
         }
       }
     }
@@ -409,10 +406,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       activityBox.put(activityId, newActivity);
       showToastMessage(context, 'Today Activity created');
     }
-  }
-
-  Future askCameraPermission() async {
-    if (await Permission.camera.request().isGranted) {}
   }
 
   @override
@@ -501,9 +494,3 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 }
-
-/**
- * Goal Picture
- * Goal Info
- * Goal Status
- */
