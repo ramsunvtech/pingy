@@ -209,8 +209,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   int getGoalEndDayCount() {
     Map rewardBoxMap = rewardBox.toMap();
-    RewardsModel rewardDetails = rewardBoxMap.values.last;
 
+    if (rewardBoxMap.isEmpty) return 0;
+    RewardsModel rewardDetails = rewardBoxMap.values.last;
     DateTime today = DateTime.now();
     List endPeriod = rewardDetails.endPeriod.split('/').toList();
 
