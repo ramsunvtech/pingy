@@ -415,12 +415,23 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       bool isSelected, int index) {
     var enabled = true;
     IconData taskIcon = Icons.content_paste;
+    dynamic taskScore = '';
 
     if (taskType == 'missed') {
       taskIcon = Icons.content_paste_off;
+      taskScore = 'You missed this task';
+    } else if (taskType == 'todo') {
+      taskScore = mark;
     } else if (taskType == 'completed') {
       taskIcon = Icons.assignment_turned_in_outlined;
+      String activityItemId = selectActivity.activityItemId;
+      if (mark != '' && activityItemId.isNotEmpty) {
+        ActivityTypeModel activityTypeDetails = activityTypeBox.get(activityItemId);
+        taskScore = 'You scored $mark out of ${activityTypeDetails.fullScore}';
+      }
     }
+
+    Widget subtitle = Text(taskScore);
 
     return ListTile(
       enabled: enabled,
@@ -437,7 +448,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           fontWeight: FontWeight.w500,
         ),
       ),
-      subtitle: Text(mark ?? '0'),
+      subtitle: subtitle,
       onTap: () async {
         return await showModalBottomSheet(
           context: context,
