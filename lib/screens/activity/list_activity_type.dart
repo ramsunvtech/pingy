@@ -6,6 +6,8 @@ import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 
+import 'package:pingy/models/hive/rewards.dart';
+
 class ActivityTypeListScreen extends StatefulWidget {
   @override
   _ActivityTypeListScreenState createState() => _ActivityTypeListScreenState();
@@ -14,6 +16,8 @@ class ActivityTypeListScreen extends StatefulWidget {
 class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
+
+  late final Box rewardBox;
   late final Box activityTypeBox;
   late final Box activityBox;
 
@@ -23,6 +27,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   void initState() {
     super.initState();
     // Get reference to an already opened box
+    rewardBox = Hive.box('rewards');
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
 
@@ -31,8 +36,23 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     }
   }
 
+  int getGoalEndDayCount() {
+    Map rewardBoxMap = rewardBox.toMap();
+
+    if (rewardBoxMap.isEmpty) return 0;
+    RewardsModel rewardDetails = rewardBoxMap.values.last;
+    DateTime today = DateTime.now();
+    List endPeriod = rewardDetails.endPeriod.split('/').toList();
+
+    // Example: Date 2023-04-07
+    String endDateString = '${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}';
+    DateTime endDate = DateTime.parse(endDateString);
+    Duration diff = endDate.difference(today);
+    return diff.inDays;
+  }
+
   Widget getFloatingActionButton() {
-    if (activityBox.isNotEmpty) {
+    if (activityBox.isNotEmpty && getGoalEndDayCount() > -1) {
       return Container();
     }
 
