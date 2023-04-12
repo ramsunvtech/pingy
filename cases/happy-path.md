@@ -1,5 +1,7 @@
 ### Future Goal: User Creating Goal for Next Week, Next Month or Next Year.
 
+### Current Goal: User created goal start from today.
+
 ### Current Goal: User Completing it tomorrow.
 
 ### Current Goal: User Completing it today.
