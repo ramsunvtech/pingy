@@ -21,13 +21,14 @@ class ActivityAdapter extends TypeAdapter<Activity> {
       (fields[1] as List).cast<ActivityItem>(),
       fields[2] as String,
       fields[3] as DateTime?,
+      fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Activity obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.activityId)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class ActivityAdapter extends TypeAdapter<Activity> {
       ..writeByte(2)
       ..write(obj.score)
       ..writeByte(3)
-      ..write(obj.activityDate);
+      ..write(obj.activityDate)
+      ..writeByte(4)
+      ..write(obj.goalId);
   }
 
   @override
