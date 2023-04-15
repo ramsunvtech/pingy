@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
@@ -34,6 +35,14 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     if (activityTypeBox.isNotEmpty) {
       activityTypeCount = activityTypeBox.length.toString();
     }
+  }
+
+  int getGoalActivitiesCount() {
+    Map rewardBoxMap = rewardBox.toMap();
+
+    if (rewardBoxMap.isEmpty) return 0;
+    // RewardsModel rewardDetails = rewardBoxMap.values.last;
+    return 1;
   }
 
   int getGoalEndDayCount() {
