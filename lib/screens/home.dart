@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       String filePath = pickedGoalImage!.path;
 
       RewardsModel goalDetails = rewardBox.values.last;
+      String rewardId = goalDetails?.rewardId?.toString() ?? '';
       RewardsModel editedGoalDetails = RewardsModel(
           goalDetails.title,
           goalDetails.startPeriod,
@@ -62,7 +63,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           goalDetails.firstPrice,
           goalDetails.secondPrice,
           goalDetails.thirdPrice,
-          filePath);
+          filePath,
+          rewardId);
       rewardBox.putAt(rewardBox.keys.last, editedGoalDetails);
 
       setState(() {
@@ -263,6 +265,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (todayActivity.activityItems.isNotEmpty) {
         // print('Log: Today Activity Type is not empty');
         canCreateNewActivity = false;
+        Iterable<ActivityItem> todayNonEmptyActivityItems =
+            todayActivity.activityItems.where((element) => element.score != '');
+        if (todayNonEmptyActivityItems.isNotEmpty) {}
       }
     }
 
@@ -361,7 +366,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               predictReward = '$predictReward Reward on your way!';
 
               if (goalEndDayCount < -1) {
-                predictReward = 'You did a nice job by getting $predictReward Reward! Try create new Goal!';
+                predictReward =
+                    'You did a nice job by getting $predictReward Reward! Try create new Goal!';
                 _isGoalEnded = true;
                 canCreateNewActivity = false;
               } else if (goalEndDayCount == -1) {
@@ -369,9 +375,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 canCreateNewActivity = false;
               } else if (goalEndDayCount == 0) {
                 predictReward =
-                'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
+                    'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
               }
-
             } else {
               predictReward = 'Reward on your way!';
               if (goalEndDayCount < -1) {
@@ -381,13 +386,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 _isGoalEnded = true;
                 canCreateNewActivity = false;
               } else if (goalEndDayCount == -1) {
-                predictReward = 'Goal Almost done! Today is the last day set for your goal (${rewardDetails.title}). Complete your activities to achieve your goal!';
+                predictReward =
+                    'Goal Almost done! Today is the last day set for your goal (${rewardDetails.title}). Complete your activities to achieve your goal!';
               }
             }
           }
         } else {
           if (goalEndDayCount < 0) {
-            predictReward = 'Your Goal is past due. You could not meet up with your Goal.';
+            predictReward =
+                'Your Goal is past due. You could not meet up with your Goal.';
             _isGoalEnded = true;
             canCreateNewActivity = false;
           }
@@ -396,6 +403,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     if (canCreateNewActivity) {
+      RewardsModel rewardDetails = rewardBoxMap.values.last;
+      String rewardId = rewardDetails.rewardId?.toString() ?? '';
+
       final activityTypeKeys = activityTypeBox.keys;
       final List<ActivityItem> activityItems = [];
       for (var activityTypeKey in activityTypeKeys) {
@@ -403,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         activityItems.add(newActivityItem);
       }
       Activity newActivity =
-          Activity(activityId, activityItems, '', DateTime.now());
+          Activity(activityId, activityItems, '', DateTime.now(), rewardId);
       activityBox.put(activityId, newActivity);
       showToastMessage(context, 'Today Activity created');
     }
