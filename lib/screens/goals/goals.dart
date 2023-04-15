@@ -204,16 +204,21 @@ class _GoalScreenState extends State<GoalScreen> {
             ),
             ElevatedButton(
               onPressed: () {
+                var today = DateTime.now();
+                var todayDate = '${today.year}${today.month}${today.day}';
+                var todayTime = '${today.hour}${today.minute}${today.second}';
+                var rewardId = 'goal_$todayDate$todayTime';
+
                 String emptyPicture = '';
                 RewardsModel newRewards = RewardsModel(
-                  _titleController.text,
-                  startDate,
-                  endDate,
-                  _firstPrizeController.text,
-                  _secondPrizeController.text,
-                  _thirdPrizeController.text,
-                  emptyPicture,
-                );
+                    _titleController.text,
+                    startDate,
+                    endDate,
+                    _firstPrizeController.text,
+                    _secondPrizeController.text,
+                    _thirdPrizeController.text,
+                    emptyPicture,
+                    rewardId);
                 rewardsBox.add(newRewards);
                 String toastMessage = 'Goal Added!';
                 showToastMessage(context, toastMessage);
