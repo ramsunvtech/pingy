@@ -28,14 +28,17 @@ class RewardsModel extends HiveObject {
   @HiveField(7)
   final String? rewardId;
 
+  @HiveField(8)
+  final String? won;
+
   RewardsModel(
-    this.title,
-    this.startPeriod,
-    this.endPeriod,
-    this.firstPrice,
-    this.secondPrice,
-    this.thirdPrice,
-    this.rewardPicture,
-    this.rewardId
-  );
+      this.title,
+      this.startPeriod,
+      this.endPeriod,
+      this.firstPrice,
+      this.secondPrice,
+      this.thirdPrice,
+      this.rewardPicture,
+      this.rewardId,
+      this.won);
 }
