@@ -45,6 +45,8 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     RewardsModel rewardDetails = rewardBoxMap.values.last;
     String rewardId = rewardDetails?.rewardId?.toString() ?? '';
 
+    if (rewardId.isEmpty) return 0;
+
     Map activityBoxMap = activityBox.toMap();
     if (activityBoxMap.isNotEmpty) {
       Iterable<dynamic> activitiesByGoalId = activityBoxMap.values.where((element) => element.goalId == rewardId);
@@ -70,7 +72,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   }
 
   Widget getFloatingActionButton() {
-    if (activityBox.isNotEmpty && (getGoalEndDayCount() > -1 || getActivitiesCountByGoalId() == 0)) {
+    if (activityBox.isNotEmpty && getGoalEndDayCount() > -1 && getActivitiesCountByGoalId() > 0) {
       return Container();
     }
 

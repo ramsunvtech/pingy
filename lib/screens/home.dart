@@ -56,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       RewardsModel goalDetails = rewardBox.values.last;
       String rewardId = goalDetails?.rewardId?.toString() ?? '';
+      String yetToWin = '';
       RewardsModel editedGoalDetails = RewardsModel(
           goalDetails.title,
           goalDetails.startPeriod,
@@ -64,7 +65,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           goalDetails.secondPrice,
           goalDetails.thirdPrice,
           filePath,
-          rewardId);
+          rewardId,
+          yetToWin);
       rewardBox.putAt(rewardBox.keys.last, editedGoalDetails);
 
       setState(() {

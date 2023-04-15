@@ -208,7 +208,7 @@ class _GoalScreenState extends State<GoalScreen> {
                 var todayDate = '${today.year}${today.month}${today.day}';
                 var todayTime = '${today.hour}${today.minute}${today.second}';
                 var rewardId = 'goal_$todayDate$todayTime';
-
+          String yetToWin = '';
                 String emptyPicture = '';
                 RewardsModel newRewards = RewardsModel(
                     _titleController.text,
@@ -218,7 +218,9 @@ class _GoalScreenState extends State<GoalScreen> {
                     _secondPrizeController.text,
                     _thirdPrizeController.text,
                     emptyPicture,
-                    rewardId);
+                    rewardId,
+                    yetToWin
+                );
                 rewardsBox.add(newRewards);
                 String toastMessage = 'Goal Added!';
                 showToastMessage(context, toastMessage);
