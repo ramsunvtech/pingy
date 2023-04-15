@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
@@ -37,12 +38,20 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     }
   }
 
-  int getGoalActivitiesCount() {
+  int getActivitiesCountByGoalId() {
     Map rewardBoxMap = rewardBox.toMap();
 
     if (rewardBoxMap.isEmpty) return 0;
-    // RewardsModel rewardDetails = rewardBoxMap.values.last;
-    return 1;
+    RewardsModel rewardDetails = rewardBoxMap.values.last;
+    String rewardId = rewardDetails?.rewardId?.toString() ?? '';
+
+    Map activityBoxMap = activityBox.toMap();
+    if (activityBoxMap.isNotEmpty) {
+      Iterable<dynamic> activitiesByGoalId = activityBoxMap.values.where((element) => element.goalId == rewardId);
+      return activitiesByGoalId.length;
+    }
+
+    return 0;
   }
 
   int getGoalEndDayCount() {
