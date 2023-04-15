@@ -70,7 +70,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   }
 
   Widget getFloatingActionButton() {
-    if (activityBox.isNotEmpty && getGoalEndDayCount() > -1) {
+    if (activityBox.isNotEmpty && (getGoalEndDayCount() > -1 || getActivitiesCountByGoalId() == 0)) {
       return Container();
     }
 
