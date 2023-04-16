@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/activity.dart';
+import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/icons/settings.dart';
@@ -38,6 +39,18 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     }
   }
 
+  Widget getListTileTrailingIconButton(String activityTypeId) {
+    return IconButton(
+      onPressed: () {
+        goToPastActivityEditScreen(context, activityTypeId);
+      },
+      icon: const Icon(
+        Icons.edit,
+        color: Colors.red,
+      ),
+    );
+  }
+
   int getActivitiesCountByGoalId() {
     Map rewardBoxMap = rewardBox.toMap();
 
@@ -49,7 +62,8 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
 
     Map activityBoxMap = activityBox.toMap();
     if (activityBoxMap.isNotEmpty) {
-      Iterable<dynamic> activitiesByGoalId = activityBoxMap.values.where((element) => element.goalId == rewardId);
+      Iterable<dynamic> activitiesByGoalId =
+          activityBoxMap.values.where((element) => element.goalId == rewardId);
       return activitiesByGoalId.length;
     }
 
@@ -72,7 +86,9 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   }
 
   Widget getFloatingActionButton() {
-    if (activityBox.isNotEmpty && getGoalEndDayCount() > -1 && getActivitiesCountByGoalId() > 0) {
+    if (activityBox.isNotEmpty &&
+        getGoalEndDayCount() > -1 &&
+        getActivitiesCountByGoalId() > 0) {
       return Container();
     }
 
@@ -119,12 +135,16 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       var currentBox = activityTypeBox;
-                      var activityTypeData = currentBox.getAt(index)!;
+                      ActivityTypeModel activityTypeData =
+                          currentBox.getAt(index)!;
+
                       return InkWell(
                         onTap: () => {},
                         child: ListTile(
                           title: Text(activityTypeData.activityName),
                           subtitle: Text(activityTypeData.fullScore),
+                          trailing: getListTileTrailingIconButton(
+                              activityTypeData.activityTypeId),
                         ),
                       );
                     },
