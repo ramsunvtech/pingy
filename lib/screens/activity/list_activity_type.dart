@@ -120,7 +120,15 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                 );
               } else {
                 var activityTypeList = activityTypeBox.values.toList();
-                activityTypeList.sort((a, b) => a.rank.compareTo(b.rank));
+                activityTypeList.sort((a, b) {
+                  if (a.rank == null || a.rank.isEmpty) {
+                    return 1; // put empty/null values at the end
+                  } else if (b.rank == null || b.rank.isEmpty) {
+                    return -1; // put empty/null values at the end
+                  }
+
+                  return a.rank.compareTo(b.rank);
+                });
 
                 return RefreshIndicator(
                   key: _refreshIndicatorKey,
