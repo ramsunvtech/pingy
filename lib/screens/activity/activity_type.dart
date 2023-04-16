@@ -7,6 +7,10 @@ import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 
 class TaskTypeScreen extends StatefulWidget {
+  final String? activityTypeId;
+
+  const TaskTypeScreen({this.activityTypeId = ""});
+
   @override
   _TaskTypeScreenState createState() => _TaskTypeScreenState();
 }
@@ -14,6 +18,9 @@ class TaskTypeScreen extends StatefulWidget {
 class _TaskTypeScreenState extends State<TaskTypeScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _fullScoreController = TextEditingController();
+  final TextEditingController _rankController = TextEditingController();
+
+  String formMode = 'add';
 
   late final Box activityTypeBox;
 
@@ -22,6 +29,21 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
     super.initState();
     // Get reference to an already opened box
     activityTypeBox = Hive.box('activity_type');
+  }
+
+  // TODO: fix this optional value.
+  String? getActivityTypeId() {
+    if (widget.activityTypeId != '') {
+      formMode = 'edit';
+      return widget.activityTypeId;
+    }
+    return '';
+  }
+
+  ActivityTypeModel getActivityTypeDetails() {
+    String? activityTypeId = getActivityTypeId();
+    ActivityTypeModel activityType = activityTypeBox.get(activityTypeId);
+    return activityType;
   }
 
   @override
@@ -34,6 +56,15 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String activityTypeName = '';
+    String activityTypeScore = '';
+
+    if (formMode == 'edit') {
+      ActivityTypeModel editingActivityType = getActivityTypeDetails();
+      _nameController.text = editingActivityType.activityName;
+      _fullScoreController.text = editingActivityType.fullScore;
+    }
+
     return WillPopScope(
         child: Scaffold(
           appBar: customAppBar(title: 'Add Activity Type'),
@@ -44,7 +75,6 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
               children: <Widget>[
                 TextFormField(
                   controller: _nameController,
-                  cursorColor: Theme.of(context).backgroundColor,
                   decoration: const InputDecoration(
                     icon: Icon(Icons.label),
                     labelText: 'Activity Type Name',
@@ -62,7 +92,6 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                 ),
                 TextFormField(
                   controller: _fullScoreController,
-                  cursorColor: Theme.of(context).backgroundColor,
                   keyboardType: TextInputType.number,
                   maxLength: 3,
                   decoration: const InputDecoration(
@@ -80,6 +109,25 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                     ),
                   ),
                 ),
+                TextFormField(
+                  controller: _rankController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 3,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.numbers),
+                    labelText: 'Activity Rank',
+                    labelStyle: TextStyle(
+                      color: Color(0xFF6200EE),
+                    ),
+                    helperText: 'Enter the activity rank',
+                    suffixIcon: Icon(
+                      Icons.check_circle,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF6200EE)),
+                    ),
+                  ),
+                ),
                 ElevatedButton(
                   onPressed: () {
                     var today = DateTime.now();
@@ -87,12 +135,22 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                     var todayTime =
                         '${today.hour}${today.minute}${today.second}';
                     var activityTypeId = 'type_$todayDate$todayTime';
+                    String toastMessage = 'Activity Type added!';
 
-                    ActivityTypeModel newActivityType = ActivityTypeModel(
+                    if (formMode == 'edit') {
+                      ActivityTypeModel editingActivityType =
+                          getActivityTypeDetails();
+                      activityTypeId = editingActivityType.activityTypeId;
+                      toastMessage = 'Activity Type edited!';
+                    }
+
+                    ActivityTypeModel updatingActivityType = ActivityTypeModel(
                         activityTypeId,
                         _nameController.text,
-                        _fullScoreController.text);
-                    activityTypeBox.put(activityTypeId, newActivityType);
+                        _fullScoreController.text,
+                        _rankController.text);
+                    activityTypeBox.put(activityTypeId, updatingActivityType);
+
 
                     showToastMessage(context, 'Activity Type Added!');
 
