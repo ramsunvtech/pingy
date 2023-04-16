@@ -63,6 +63,15 @@ void goToSettingScreen(BuildContext context) {
   );
 }
 
+void goToActivityTypeEditScreen(BuildContext context, String activityTypeId) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (builder) => TaskTypeScreen(activityTypeId: activityTypeId),
+    ),
+  );
+}
+
 void goToPastActivityEditScreen(BuildContext context, String activityId) {
   Navigator.push(
     context,
