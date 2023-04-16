@@ -42,7 +42,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
   Widget getListTileTrailingIconButton(String activityTypeId) {
     return IconButton(
       onPressed: () {
-        goToPastActivityEditScreen(context, activityTypeId);
+        goToActivityTypeEditScreen(context, activityTypeId);
       },
       icon: const Icon(
         Icons.edit,
@@ -119,6 +119,9 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                   child: Text('Add your first Activity Type and have Fun!'),
                 );
               } else {
+                var activityTypeList = activityTypeBox.values.toList();
+                activityTypeList.sort((a, b) => a.rank.compareTo(b.rank));
+
                 return RefreshIndicator(
                   key: _refreshIndicatorKey,
                   color: Colors.white,
@@ -131,12 +134,12 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                   },
                   // Pull from top to show refresh indicator.
                   child: ListView.builder(
-                    itemCount: activityTypeBox.length,
+                    itemCount: activityTypeList.length,
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
-                      var currentBox = activityTypeBox;
+                      var currentBox = activityTypeList;
                       ActivityTypeModel activityTypeData =
-                          currentBox.getAt(index)!;
+                          currentBox.elementAt(index)!;
 
                       return InkWell(
                         onTap: () => {},

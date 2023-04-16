@@ -29,6 +29,10 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
     super.initState();
     // Get reference to an already opened box
     activityTypeBox = Hive.box('activity_type');
+
+    if (widget.activityTypeId != '') {
+      formMode = 'edit';
+    }
   }
 
   // TODO: fix this optional value.
@@ -56,18 +60,19 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String activityTypeName = '';
-    String activityTypeScore = '';
-
     if (formMode == 'edit') {
       ActivityTypeModel editingActivityType = getActivityTypeDetails();
       _nameController.text = editingActivityType.activityName;
       _fullScoreController.text = editingActivityType.fullScore;
+      _rankController.text =  '0';
+      if (editingActivityType.rank != null) {
+        _rankController.text =  editingActivityType.rank!;
+      }
     }
 
     return WillPopScope(
         child: Scaffold(
-          appBar: customAppBar(title: 'Add Activity Type'),
+          appBar: customAppBar(title: (formMode == 'edit') ? 'Edit Activity Type' : 'Add Activity Type'),
           body: Container(
             alignment: Alignment.center,
             child: Column(

@@ -72,11 +72,11 @@ void goToActivityTypeEditScreen(BuildContext context, String activityTypeId) {
   );
 }
 
-void goToPastActivityEditScreen(BuildContext context, String activityId) {
+void goToPastActivityEditScreen(BuildContext context, String activityTypeId) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (builder) => UpdateTaskScreen(activityId: activityId),
+      builder: (builder) => UpdateTaskScreen(activityId: activityTypeId),
     ),
   );
 }
