@@ -277,7 +277,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     Map activityBoxMap = activityBox.toMap();
     // TODO: Filter with latest goal period.
-    Iterable<dynamic> activityBoxMapValues = activityBoxMap.values;
+    String lastRewardId = = rewardBoxMap.values.last.rewardId;
+    Iterable<dynamic> activityBoxMapValues = activityBoxMap.values.where((element) => element.goalId == lastRewardId);
 
     Map activityTypeBoxMap = activityTypeBox.toMap();
 
