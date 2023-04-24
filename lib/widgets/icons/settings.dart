@@ -6,7 +6,7 @@ import 'package:pingy/utils/color.dart';
 
 Widget settingsLinkIconButton(BuildContext context) {
   return IconButton(
-    icon: Icon(
+    icon: const Icon(
       Icons.settings,
       color: iconColor,
     ),
