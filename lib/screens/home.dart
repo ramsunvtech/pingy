@@ -211,21 +211,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return homePanes;
   }
 
-  int getGoalEndDayCount() {
-    Map rewardBoxMap = rewardBox.toMap();
-
-    if (rewardBoxMap.isEmpty) return 0;
-    RewardsModel rewardDetails = rewardBoxMap.values.last;
-    DateTime today = DateTime.now();
-    List endPeriod = rewardDetails.endPeriod.split('/').toList();
-
-    // Example: Date 2023-04-07
-    String endDateString = '${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}';
-    DateTime endDate = DateTime.parse(endDateString);
-    Duration diff = endDate.difference(today);
-    return diff.inDays;
-  }
-
   void setGoalPicturePath(RewardsModel rewardDetails) {
     if (rewardDetails.rewardPicture != '') {
       _goalPicture = rewardDetails.rewardPicture!;
@@ -277,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     Map activityBoxMap = activityBox.toMap();
     // TODO: Filter with latest goal period.
-    String lastRewardId = = rewardBoxMap.values.last.rewardId;
+    String lastRewardId = rewardBoxMap.values.last.rewardId;
     Iterable<dynamic> activityBoxMapValues = activityBoxMap.values.where((element) => element.goalId == lastRewardId);
 
     Map activityTypeBoxMap = activityTypeBox.toMap();
@@ -354,6 +339,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         predictReward = 'Start update your Activities';
 
+        // TODO: Need a better reusable function to generate prize and message.
         if (rewardScore > 0) {
           totalScore = rewardScore.toString();
 
@@ -373,12 +359,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     'You did a nice job by getting $predictReward Reward! Try create new Goal!';
                 _isGoalEnded = true;
                 canCreateNewActivity = false;
+              } else if (goalEndDayCount == 0) {
+                predictReward =
+                'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
               } else if (goalEndDayCount == -1) {
                 _isGoalEnded = true;
+                predictReward =
+                'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
                 canCreateNewActivity = false;
               } else if (goalEndDayCount == 0) {
                 predictReward =
-                    'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
+                'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
               }
             } else {
               predictReward = 'Reward on your way!';
