@@ -337,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ((totalActivityScore / (100 * totalActivityDays)) * 100).ceil();
         }
 
-        predictReward = 'Start update your Activities';
+        predictReward = findGoalPrize(rewardScore);
 
         // TODO: Need a better reusable function to generate prize and message.
         if (rewardScore > 0) {
@@ -349,46 +349,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
             setGoalPicturePath(rewardDetails);
 
-            predictReward = findGoalPrize(rewardScore);
-
             if (predictReward.isNotEmpty) {
-              predictReward = '$predictReward Reward on your way!';
+              // predictReward = '$predictReward Reward on your way!';
 
               if (goalEndDayCount < -1) {
-                predictReward =
-                    'You did a nice job by getting $predictReward Reward! Try create new Goal!';
+                // predictReward = 'You did a nice job by getting $predictReward Reward! Try create new Goal!';
                 _isGoalEnded = true;
                 canCreateNewActivity = false;
               } else if (goalEndDayCount == 0) {
-                predictReward =
-                'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
+                // predictReward = 'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
               } else if (goalEndDayCount == -1) {
                 _isGoalEnded = true;
-                predictReward =
-                'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
+                // predictReward = 'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
                 canCreateNewActivity = false;
               } else if (goalEndDayCount == 0) {
-                predictReward =
-                'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
+                // predictReward = 'Almost done! Today is the last day set for your goal. Complete your activities to achieve your goal!';
               }
             } else {
-              predictReward = 'Reward on your way!';
+              // predictReward = 'Reward on your way!';
               if (goalEndDayCount < -1) {
-                predictReward =
-                    '${rewardDetails.title} Goal Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) ended \n'
-                    ' Try create new Goal!';
+                // predictReward =
+                //     '${rewardDetails.title} Goal Activity Period (${rewardDetails.startPeriod} to ${rewardDetails.endPeriod}) ended \n'
+                //     ' Try create new Goal!';
                 _isGoalEnded = true;
                 canCreateNewActivity = false;
               } else if (goalEndDayCount == -1) {
-                predictReward =
-                    'Goal Almost done! Today is the last day set for your goal (${rewardDetails.title}). Complete your activities to achieve your goal!';
+                // predictReward = 'Goal Almost done! Today is the last day set for your goal (${rewardDetails.title}). Complete your activities to achieve your goal!';
               }
             }
           }
         } else {
           if (goalEndDayCount < 0) {
-            predictReward =
-                'Your Goal is past due. You could not meet up with your Goal.';
+            // predictReward = 'Your Goal is past due. You could not meet up with your Goal.';
             _isGoalEnded = true;
             canCreateNewActivity = false;
           }
