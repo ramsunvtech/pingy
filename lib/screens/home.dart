@@ -434,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         appBar: customAppBar(
           title: t(context).appName,
           actions: [
-            if (containsRewards && containsTypes)
+            // if (containsRewards && containsTypes && _isGoalEnded == false)
               settingsLinkIconButton(context),
           ],
         ),
