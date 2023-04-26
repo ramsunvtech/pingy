@@ -1,0 +1,42 @@
+Target dependency graph (12 targets)
+Flutter in Pods, no dependencies
+Toast in Pods, no dependencies
+flutter_local_notifications in Pods, depends on:
+Flutter in Pods (explicit)
+flutter_native_splash in Pods, depends on:
+Flutter in Pods (explicit)
+fluttertoast in Pods, depends on:
+Flutter in Pods (explicit)
+Toast in Pods (explicit)
+image_picker_ios in Pods, depends on:
+Flutter in Pods (explicit)
+local_auth_ios in Pods, depends on:
+Flutter in Pods (explicit)
+notification_permissions in Pods, depends on:
+Flutter in Pods (explicit)
+path_provider_foundation in Pods, depends on:
+Flutter in Pods (explicit)
+permission_handler_apple in Pods, depends on:
+Flutter in Pods (explicit)
+Pods-Runner in Pods, depends on:
+Flutter in Pods (explicit)
+Toast in Pods (explicit)
+flutter_local_notifications in Pods (explicit)
+flutter_native_splash in Pods (explicit)
+fluttertoast in Pods (explicit)
+image_picker_ios in Pods (explicit)
+local_auth_ios in Pods (explicit)
+notification_permissions in Pods (explicit)
+path_provider_foundation in Pods (explicit)
+permission_handler_apple in Pods (explicit)
+Runner in Runner, depends on:
+Pods-Runner in Pods (implicit dependency via file 'Pods_Runner.framework' in build phase 'Link Binary')
+Toast in Pods (implicit dependency via options '-framework Toast' in build setting 'OTHER_LDFLAGS')
+flutter_local_notifications in Pods (implicit dependency via options '-framework flutter_local_notifications' in build setting 'OTHER_LDFLAGS')
+flutter_native_splash in Pods (implicit dependency via options '-framework flutter_native_splash' in build setting 'OTHER_LDFLAGS')
+fluttertoast in Pods (implicit dependency via options '-framework fluttertoast' in build setting 'OTHER_LDFLAGS')
+image_picker_ios in Pods (implicit dependency via options '-framework image_picker_ios' in build setting 'OTHER_LDFLAGS')
+local_auth_ios in Pods (implicit dependency via options '-framework local_auth_ios' in build setting 'OTHER_LDFLAGS')
+notification_permissions in Pods (implicit dependency via options '-framework notification_permissions' in build setting 'OTHER_LDFLAGS')
+path_provider_foundation in Pods (implicit dependency via options '-framework path_provider_foundation' in build setting 'OTHER_LDFLAGS')
+permission_handler_apple in Pods (implicit dependency via options '-framework permission_handler_apple' in build setting 'OTHER_LDFLAGS')

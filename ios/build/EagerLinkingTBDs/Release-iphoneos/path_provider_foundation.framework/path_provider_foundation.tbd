@@ -1,0 +1,19 @@
+--- !tapi-tbd
+tbd-version:     4
+targets:         [ arm64-ios ]
+flags:           [ not_app_extension_safe ]
+install-name:    '@rpath/path_provider_foundation.framework/path_provider_foundation'
+swift-abi-version: 7
+exports:
+  - targets:         [ arm64-ios ]
+    symbols:         [ '_$s24path_provider_foundation18PathProviderPluginC8register4withySo07FlutterF9Registrar_p_tFZ', 
+                       '_$s24path_provider_foundation18PathProviderPluginCACycfC', 
+                       '_$s24path_provider_foundation18PathProviderPluginCACycfc', 
+                       '_$s24path_provider_foundation18PathProviderPluginCMa', '_$s24path_provider_foundation18PathProviderPluginCMn', 
+                       '_$s24path_provider_foundation18PathProviderPluginCN', '_$s24path_provider_foundation18PathProviderPluginCfD', 
+                       _Swift50Overrides, _Swift51Overrides, __Z34_swiftoverride_class_getSuperclassPKN5swift14TargetMetadataINS_9InProcessEEE, 
+                       __ZN5swift34swift50override_conformsToProtocolEPKNS_14TargetMetadataINS_9InProcessEEEPKNS_24TargetProtocolDescriptorIS1_EEPFPKNS_18TargetWitnessTableIS1_EES4_S8_E, 
+                       __ZN5swift39swift51override_conformsToSwiftProtocolEPKNS_14TargetMetadataINS_9InProcessEEEPKNS_24TargetProtocolDescriptorIS1_EEN7__swift9__runtime4llvm9StringRefEPFPKNS_35TargetProtocolConformanceDescriptorIS1_EES4_S8_SC_E, 
+                       _path_provider_foundationVersionNumber, _path_provider_foundationVersionString ]
+    objc-classes:    [ PodsDummy_path_provider_foundation, _TtC24path_provider_foundation18PathProviderPlugin ]
+...

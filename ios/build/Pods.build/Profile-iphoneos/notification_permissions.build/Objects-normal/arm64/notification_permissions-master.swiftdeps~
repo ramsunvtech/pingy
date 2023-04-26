@@ -1,0 +1,6 @@
+version: "Apple Swift version 5.8 (swiftlang-5.8.0.124.2 clang-1403.0.22.11.100)"
+options: "97d89006f246e9c7f4acbc2ba9d3562d6fcf91cc234c69b2ede510bf8615639c"
+build_start_time: [1682340266, 88715000]
+build_end_time: [1682340266, 354837000]
+inputs:
+  "/Users/alamelu/.pub-cache/hosted/pub.dev/notification_permissions-0.6.1/ios/Classes/SwiftNotificationPermissionsPlugin.swift": !dirty [1680255505, 719516947]

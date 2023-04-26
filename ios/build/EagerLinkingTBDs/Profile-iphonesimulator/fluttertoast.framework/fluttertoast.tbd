@@ -1,0 +1,10 @@
+--- !tapi-tbd
+tbd-version:     4
+targets:         [ x86_64-ios-simulator ]
+flags:           [ not_app_extension_safe ]
+install-name:    '@rpath/fluttertoast.framework/fluttertoast'
+exports:
+  - targets:         [ x86_64-ios-simulator ]
+    symbols:         [ _fluttertoastVersionNumber, _fluttertoastVersionString ]
+    objc-classes:    [ FluttertoastPlugin, PodsDummy_fluttertoast ]
+...

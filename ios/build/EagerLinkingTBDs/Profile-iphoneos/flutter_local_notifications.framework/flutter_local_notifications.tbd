@@ -1,0 +1,31 @@
+--- !tapi-tbd
+tbd-version:     4
+targets:         [ arm64-ios ]
+flags:           [ not_app_extension_safe ]
+install-name:    '@rpath/flutter_local_notifications.framework/flutter_local_notifications'
+exports:
+  - targets:         [ arm64-ios ]
+    symbols:         [ _ACTION_ID, _ALERT_PERMISSION, _ATTACHMENTS, _ATTACHMENT_FILE_PATH, 
+                       _ATTACHMENT_HIDE_THUMBNAIL, _ATTACHMENT_IDENTIFIER, _ATTACHMENT_THUMBNAIL_CLIPPING_RECT, 
+                       _BADGE_NUMBER, _BADGE_PERMISSION, _BODY, _CALLBACK_CHANNEL, 
+                       _CALLBACK_DISPATCHER, _CANCEL_ALL_METHOD, _CANCEL_METHOD, 
+                       _CHANNEL, _CRITICAL_PERMISSION, _DAY, _DEFAULT_PRESENT_ALERT, 
+                       _DEFAULT_PRESENT_BADGE, _DEFAULT_PRESENT_SOUND, _DID_RECEIVE_LOCAL_NOTIFICATION, 
+                       _FOREGROUND_ACTION_IDENTIFIERS, _GET_ACTIVE_NOTIFICATIONS_ERROR_MESSAGE, 
+                       _GET_ACTIVE_NOTIFICATIONS_METHOD, _GET_CALLBACK_METHOD, _GET_NOTIFICATION_APP_LAUNCH_DETAILS_METHOD, 
+                       _HOUR, _ID, _INITIALIZE_METHOD, _INTERRUPTION_LEVEL, _MATCH_DATE_TIME_COMPONENTS, 
+                       _MILLISECONDS_SINCE_EPOCH, _MINUTE, _NOTIFICATION_ID, _NOTIFICATION_LAUNCHED_APP, 
+                       _NOTIFICATION_RESPONSE_TYPE, _ON_NOTIFICATION_CALLBACK_DISPATCHER, 
+                       _ON_NOTIFICATION_METHOD, _PAYLOAD, _PENDING_NOTIFICATIONS_REQUESTS_METHOD, 
+                       _PERIODICALLY_SHOW_METHOD, _PLATFORM_SPECIFICS, _PRESENT_ALERT, 
+                       _PRESENT_BADGE, _PRESENT_SOUND, _REPEAT_INTERVAL, _REPEAT_TIME, 
+                       _REQUEST_ALERT_PERMISSION, _REQUEST_BADGE_PERMISSION, _REQUEST_CRITICAL_PERMISSION, 
+                       _REQUEST_PERMISSIONS_METHOD, _REQUEST_SOUND_PERMISSION, _SCHEDULED_DATE_TIME, 
+                       _SCHEDULE_METHOD, _SECOND, _SHOW_DAILY_AT_TIME_METHOD, _SHOW_METHOD, 
+                       _SHOW_WEEKLY_AT_DAY_AND_TIME_METHOD, _SOUND, _SOUND_PERMISSION, 
+                       _SUBTITLE, _THREAD_IDENTIFIER, _TIME_ZONE_NAME, _TITLE, _UILOCALNOTIFICATION_DATE_INTERPRETATION, 
+                       _UNSUPPORTED_OS_VERSION_ERROR_CODE, _ZONED_SCHEDULE_METHOD, 
+                       _flutter_local_notificationsVersionNumber, _flutter_local_notificationsVersionString ]
+    objc-classes:    [ ActionEventSink, Converters, FlutterEngineManager, FlutterLocalNotificationsPlugin, 
+                       PodsDummy_flutter_local_notifications ]
+...

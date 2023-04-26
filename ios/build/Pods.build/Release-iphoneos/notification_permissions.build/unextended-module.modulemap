@@ -1,0 +1,10 @@
+framework module notification_permissions {
+  umbrella header "notification_permissions-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module notification_permissions.__Swift {
+  exclude header "notification_permissions-Swift.h"
+}

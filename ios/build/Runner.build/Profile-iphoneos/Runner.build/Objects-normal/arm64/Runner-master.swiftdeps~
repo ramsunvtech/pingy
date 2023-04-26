@@ -1,0 +1,6 @@
+version: "Apple Swift version 5.8 (swiftlang-5.8.0.124.2 clang-1403.0.22.11.100)"
+options: "020bc23c11bb9c1971ff2a52e7a0d7231a96a30db6d631108ffaae5d4a888c77"
+build_start_time: [1682340329, 771021000]
+build_end_time: [1682340329, 931394000]
+inputs:
+  "/Users/alamelu/workspace/pingy/ios/Runner/AppDelegate.swift": !private [1680253815, 483745485]

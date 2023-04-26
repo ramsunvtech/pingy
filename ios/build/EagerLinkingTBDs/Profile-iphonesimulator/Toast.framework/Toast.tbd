@@ -1,0 +1,11 @@
+--- !tapi-tbd
+tbd-version:     4
+targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
+flags:           [ not_app_extension_safe ]
+install-name:    '@rpath/Toast.framework/Toast'
+exports:
+  - targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
+    symbols:         [ _CSToastPositionBottom, _CSToastPositionCenter, _CSToastPositionTop, 
+                       _ToastVersionNumber, _ToastVersionString ]
+    objc-classes:    [ CSToastManager, CSToastStyle, PodsDummy_Toast ]
+...

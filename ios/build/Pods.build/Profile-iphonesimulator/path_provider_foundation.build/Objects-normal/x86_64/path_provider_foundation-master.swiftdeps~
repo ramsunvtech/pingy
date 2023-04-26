@@ -1,0 +1,7 @@
+version: "Apple Swift version 5.8 (swiftlang-5.8.0.124.2 clang-1403.0.22.11.100)"
+options: "44ac73ec5e945e24cbe65def4aaa6bb7a99a6690eefa6da9013ff74bdb9cc623"
+build_start_time: [1682339944, 487557000]
+build_end_time: [1682339944, 573644000]
+inputs:
+  "/Users/alamelu/.pub-cache/hosted/pub.dev/path_provider_foundation-2.2.0/ios/Classes/PathProviderPlugin.swift": !dirty [1680255510, 388666717]
+  "/Users/alamelu/.pub-cache/hosted/pub.dev/path_provider_foundation-2.2.0/ios/Classes/messages.g.swift": !dirty [1680255510, 456535176]

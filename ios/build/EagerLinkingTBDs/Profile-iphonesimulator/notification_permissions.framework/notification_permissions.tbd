@@ -1,0 +1,29 @@
+--- !tapi-tbd
+tbd-version:     4
+targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
+flags:           [ not_app_extension_safe ]
+install-name:    '@rpath/notification_permissions.framework/notification_permissions'
+swift-abi-version: 7
+exports:
+  - targets:         [ x86_64-ios-simulator ]
+    symbols:         [ _Swift50Overrides, _Swift51Overrides, __Z34_swiftoverride_class_getSuperclassPKN5swift14TargetMetadataINS_9InProcessEEE, 
+                       __ZN5swift34swift50override_conformsToProtocolEPKNS_14TargetMetadataINS_9InProcessEEEPKNS_24TargetProtocolDescriptorIS1_EEPFPKNS_18TargetWitnessTableIS1_EES4_S8_E, 
+                       __ZN5swift39swift51override_conformsToSwiftProtocolEPKNS_14TargetMetadataINS_9InProcessEEEPKNS_24TargetProtocolDescriptorIS1_EEN7__swift9__runtime4llvm9StringRefEPFPKNS_35TargetProtocolConformanceDescriptorIS1_EES4_S8_SC_E ]
+  - targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
+    symbols:         [ '_$s24notification_permissions34SwiftNotificationPermissionsPluginC16permissionDeniedSSvpfi', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginC17permissionGrantedSSvpfi', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginC17permissionUnknownSSvpfi', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginC21permissionProvisionalSSvpfi', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginC6handle_6resultySo17FlutterMethodCallC_yypSgctF', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginC6handle_6resultySo17FlutterMethodCallC_yypSgctFTq', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginC8register4withySo07FlutterF9Registrar_p_tFZ', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginCACycfC', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginCACycfc', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginCMa', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginCMn', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginCN', 
+                       '_$s24notification_permissions34SwiftNotificationPermissionsPluginCfD', 
+                       _notification_permissionsVersionNumber, _notification_permissionsVersionString ]
+    objc-classes:    [ NotificationPermissionsPlugin, PodsDummy_notification_permissions, 
+                       _TtC24notification_permissions34SwiftNotificationPermissionsPlugin ]
+...

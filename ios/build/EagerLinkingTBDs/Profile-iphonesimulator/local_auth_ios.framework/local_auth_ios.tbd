@@ -1,0 +1,10 @@
+--- !tapi-tbd
+tbd-version:     4
+targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
+flags:           [ not_app_extension_safe ]
+install-name:    '@rpath/local_auth_ios.framework/local_auth_ios'
+exports:
+  - targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
+    symbols:         [ _local_auth_iosVersionNumber, _local_auth_iosVersionString ]
+    objc-classes:    [ FLTLocalAuthPlugin, PodsDummy_local_auth_ios ]
+...

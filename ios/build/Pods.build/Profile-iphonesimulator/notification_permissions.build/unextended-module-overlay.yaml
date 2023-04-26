@@ -1,0 +1,23 @@
+{
+  'version': 0,
+  'use-external-names': 'false',
+  'case-sensitive': 'false',
+  'roots': [{
+    'type': 'directory',
+    'name': "/Users/alamelu/workspace/pingy/ios/build/Profile-iphonesimulator/notification_permissions/notification_permissions.framework/Modules"
+    'contents': [{
+      'type': 'file',
+      'name': "module.modulemap",
+      'external-contents': "/Users/alamelu/workspace/pingy/ios/build/Pods.build/Profile-iphonesimulator/notification_permissions.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    'type': 'directory',
+    'name': "/Users/alamelu/workspace/pingy/ios/build/Profile-iphonesimulator/notification_permissions/notification_permissions.framework/Headers"
+    'contents': [{
+      'type': 'file',
+      'name': "notification_permissions-Swift.h",
+      'external-contents': "/Users/alamelu/workspace/pingy/ios/build/Pods.build/Profile-iphonesimulator/notification_permissions.build/unextended-interface-header.h",
+    }]
+    }]
+}
