@@ -54,6 +54,14 @@ class _GoalListScreenState extends State<GoalListScreen> {
     return (prize == '') ? 'Not Mentioned' : prize;
   }
 
+  String getGoalResult(RewardsModel rewardDetails) {
+    if (rewardDetails.won != '') {
+      return 'Won: ${rewardDetails.won}\n';
+    }
+
+    return '';
+  }
+
   String isPictureExist(RewardsModel rewardDetails) {
     return (rewardDetails.rewardPicture == '') ? 'No' : 'Yes';
   }
@@ -103,6 +111,7 @@ class _GoalListScreenState extends State<GoalListScreen> {
                                 'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
                                 'Second Prize (85%): ${getPrize(rewardsData.secondPrice)}\n'
                                 'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}\n'
+                                '${getGoalResult(rewardsData)}'
                                 'Goal Picture: ${isPictureExist(rewardsData)}\n'
                           ),
                         ));
