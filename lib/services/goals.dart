@@ -17,7 +17,7 @@ int getThirdPricePercentage() {
 }
 
 RewardsModel getCurrentGoal() {
-  RewardsModel rewardBox = Hive.box('rewards') as RewardsModel;
+  var rewardBox = Hive.box('rewards');
   Map rewardBoxMap = rewardBox.toMap();
   RewardsModel rewardDetails = rewardBoxMap.values.last;
   return rewardDetails;
@@ -110,7 +110,7 @@ String getNoPrizeMessage(String prize) {
 }
 
 String setRewardResult(prize) {
-  RewardsModel rewardBox = Hive.box('rewards') as RewardsModel;
+  var rewardBox = Hive.box('rewards');
   RewardsModel rewardDetails = getCurrentGoal();
   rewardDetails.won = prize;
   rewardBox.put(rewardDetails.rewardId, rewardDetails);
@@ -152,5 +152,5 @@ String findGoalPrize(int rewardScore) {
     return getNoPrizeMessage('No Prize for $rewardScore');
   }
 
-  return getNoPrizeMessage();
+  return getNoPrizeMessage('No Prize for $rewardScore');
 }
