@@ -41,8 +41,4 @@ class RewardsModel extends HiveObject {
       this.rewardPicture,
       this.rewardId,
       this.won);
-
-  Map toMap() {}
-
-  void put(String? rewardId, RewardsModel rewardDetails) {}
 }
