@@ -29,7 +29,7 @@ class RewardsModel extends HiveObject {
   final String? rewardId;
 
   @HiveField(8)
-  final String? won;
+  late final String? won;
 
   RewardsModel(
       this.title,
@@ -41,4 +41,8 @@ class RewardsModel extends HiveObject {
       this.rewardPicture,
       this.rewardId,
       this.won);
+
+  Map toMap() {}
+
+  void put(String? rewardId, RewardsModel rewardDetails) {}
 }

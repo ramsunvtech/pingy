@@ -1,4 +1,6 @@
 
+import 'dart:ffi';
+
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
@@ -14,12 +16,18 @@ int getThirdPricePercentage() {
   return 75;
 }
 
-int getGoalEndDayCount() {
-  var rewardBox = Hive.box('rewards');
+RewardsModel getCurrentGoal() {
+  RewardsModel rewardBox = Hive.box('rewards') as RewardsModel;
   Map rewardBoxMap = rewardBox.toMap();
-
-  if (rewardBoxMap.isEmpty) return 0;
   RewardsModel rewardDetails = rewardBoxMap.values.last;
+  return rewardDetails;
+}
+
+int getGoalEndDayCount() {
+  RewardsModel rewardDetails = getCurrentGoal();
+  String rewardId = rewardDetails.rewardId ?? '';
+  if (rewardId.isEmpty) return 0;
+
   DateTime today = DateTime.now();
   List endPeriod = rewardDetails.endPeriod.split('/').toList();
 
@@ -49,8 +57,10 @@ String getFirstPrizeMessage(prize) {
   if (isGoalLastDay()) {
     return "Goal ends tomorrow, first milestones reached! Keep up the momentum for your next big win!";
   } else if (isGoalEndedYesterday()) {
+    setRewardResult(prize);
     return "Congratulations! You've reached your $prize (1st prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
   } else if (isGoalEndedMoreThanADay()) {
+    setRewardResult(prize);
     return "Great job on winning $prize (1st Prize) last time! Begin your next goal to keep consistency.";
   }
 
@@ -61,36 +71,50 @@ String getSecondPrizeMessage(prize) {
   if (isGoalLastDay()) {
     return "Goal ends tomorrow, second milestones reached! Keep up the momentum for your next big win!";
   } else if (isGoalEndedYesterday()) {
+    setRewardResult(prize);
     return "Congratulations! You've reached your $prize (2nd prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
   } else if (isGoalEndedMoreThanADay()) {
+    setRewardResult(prize);
     return "Great job on winning $prize (2nd Prize) last time! Begin your next goal to focus for 1st Prize.";
   }
 
   return 'Getting there! Keep going, You are close to get $prize.';
 }
 
-String geThirdPrizeMessage(prize) {
+String geThirdPrizeMessage(String prize) {
   if (isGoalLastDay()) {
     return "Goal ends tomorrow, third milestones reached! Keep up the momentum for your next big win!";
   } else if (isGoalEndedYesterday()) {
+    setRewardResult(prize);
     return "Congratulations! You've reached your $prize (3rd prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
   } else if (isGoalEndedMoreThanADay()) {
+    setRewardResult(prize);
     return "Great job on winning $prize (3rd Prize) last time! Begin your next goal to for focus for 2nd / 1st Prize.";
   }
 
   return 'Getting there! Keep going, You are close to get $prize.';
 }
 
-String getNoPrizeMessage() {
+String getNoPrizeMessage(String prize) {
   if (isGoalLastDay()) {
     return "Goal ends tomorrow, keep going! Celebrate your progress even if you didn't reach a milestone.";
   } else if (isGoalEndedYesterday()) {
+    setRewardResult(prize);
     return "Great effort! Even though you couldn't hit any milestone, keep celebrating the steps you've taken so far. You're making great strides towards your success";
   } else if (isGoalEndedMoreThanADay()) {
+    setRewardResult(prize);
     return "Great job on last time! Begin your next goal to for focus on milestone prizes.";
   }
 
   return 'Getting there! still not late, Work hard to reach the milestone.';
+}
+
+String setRewardResult(prize) {
+  RewardsModel rewardBox = Hive.box('rewards') as RewardsModel;
+  RewardsModel rewardDetails = getCurrentGoal();
+  rewardDetails.won = prize;
+  rewardBox.put(rewardDetails.rewardId, rewardDetails);
+  return '';
 }
 
 String findGoalPrize(int rewardScore) {
@@ -125,7 +149,7 @@ String findGoalPrize(int rewardScore) {
       return geThirdPrizeMessage(prize);
     }
 
-    return getNoPrizeMessage();
+    return getNoPrizeMessage('No Prize for $rewardScore');
   }
 
   return getNoPrizeMessage();
