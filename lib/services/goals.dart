@@ -24,9 +24,13 @@ RewardsModel getCurrentGoal() {
 }
 
 int getGoalEndDayCount() {
-  RewardsModel rewardDetails = getCurrentGoal();
+  var rewardBox = Hive.box('rewards');
+  Map rewardBoxMap = rewardBox.toMap();
+
+  if (rewardBoxMap.isEmpty) return 0;
+
+  RewardsModel rewardDetails = rewardBoxMap.values.last;
   String rewardId = rewardDetails.rewardId ?? '';
-  if (rewardId.isEmpty) return 0;
 
   DateTime today = DateTime.now();
   List endPeriod = rewardDetails.endPeriod.split('/').toList();
@@ -111,7 +115,8 @@ String getNoPrizeMessage(String prize) {
 
 String setRewardResult(prize) {
   var rewardBox = Hive.box('rewards');
-  RewardsModel rewardDetails = getCurrentGoal();
+  Map rewardBoxMap = rewardBox.toMap();
+  RewardsModel rewardDetails = rewardBoxMap.values.last;
   rewardDetails.won = prize;
   rewardBox.put(rewardDetails.rewardId, rewardDetails);
   return '';
