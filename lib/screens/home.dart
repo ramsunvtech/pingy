@@ -121,16 +121,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   List<Widget> getHomeBlocks(String score) {
     Map<String, dynamic> scoreDetails = getScoreDetails();
-    Widget todayScoreIndicator = (hasNoGoalInProgress())
-        ? const Padding(padding: EdgeInsets.only(left: 75.0))
-        : percentageIndicator(50.0, '0', 'Today Score');
-    Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
-        (hasNoGoalInProgress()) ? 'Your Last Score' : 'Total Score');
+    String todayScoreValue = scoreDetails['todayScore'] ?? '0';
     String totalActivities = scoreDetails['totalActivities'] ?? '-';
     String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
     String actualTotalScore = scoreDetails['actualTotalScore'] ?? '-';
     RewardsModel currentGoal = getCurrentGoal();
     RewardsModel lastGoal = getLastCompletedGoal();
+
+    Widget todayScoreIndicator = (hasNoGoalInProgress())
+        ? const Padding(padding: EdgeInsets.only(left: 75.0))
+        : percentageIndicator(50.0, todayScoreValue, 'Today Score');
+    Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
+        (hasNoGoalInProgress()) ? 'Your Last Score' : 'Total Score');
 
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
@@ -261,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     Map<String, dynamic> scoreDetails = getScoreDetails();
     todayScore = scoreDetails['todayScore'];
+
     dynamic rewardScore = scoreDetails['totalScore'];
     predictReward = findGoalPrize(rewardScore);
 
