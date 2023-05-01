@@ -1,10 +1,13 @@
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
-void noop() {
-  // Do nothing
+import 'goals.dart';
+
+void l(String message, {bool verbose = false}) {
+  if (verbose) {
+    print('$message');
+  }
 }
-const l = print ?? noop;
 
 dynamic getActivitiesTotalMaximumScore() {
   dynamic activityTypeFullScore = 0;
@@ -29,7 +32,8 @@ Iterable<dynamic> getActivityByCurrentGoal() {
   Map rewardBoxMap = rewardBox.toMap();
 
   // TODO: Filter with latest goal period.
-  RewardsModel lastReward = rewardBoxMap.values.last;
+  RewardsModel lastReward = getLastCompletedGoal();
+l('lastReward id: ${lastReward.title} (${lastReward.rewardId})');
   if (lastReward.rewardId != '') {
     return const Iterable.empty();
   }
@@ -60,10 +64,7 @@ dynamic getTodayScore(activityItems) {
 }
 
 Map<String, dynamic> getScoreDetails() {
-  var rewardBox = Hive.box('rewards');
   var activityBox = Hive.box('activity');
-
-  Map rewardBoxMap = rewardBox.toMap();
   var todayActivityId = getTodayActivityId();
 
   Map activityBoxMap = activityBox.toMap();
