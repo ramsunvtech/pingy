@@ -23,7 +23,11 @@ RewardsModel getCurrentGoal() {
   return rewardDetails;
 }
 
-int getGoalEndDayCount() {
+DateTime stripTime(DateTime dateTime) {
+  return DateTime(dateTime.year, dateTime.month, dateTime.day);
+}
+
+int getGoalDayCountByPeriodType(String periodType) {
   var rewardBox = Hive.box('rewards');
   Map rewardBoxMap = rewardBox.toMap();
 
@@ -32,14 +36,31 @@ int getGoalEndDayCount() {
   RewardsModel rewardDetails = rewardBoxMap.values.last;
   String rewardId = rewardDetails.rewardId ?? '';
 
-  DateTime today = DateTime.now();
+  DateTime today = stripTime(DateTime.now());
+  // TODO: change variable name.
   List endPeriod = rewardDetails.endPeriod.split('/').toList();
+  if (periodType == 'start') {
+    List startPeriod = rewardDetails.startPeriod.split('/').toList();
+    // Example: Date 2023-04-07
+    String startDateString = '${startPeriod[2]}-${startPeriod[1]}-${startPeriod[0]}';
+    DateTime startDate = stripTime(DateTime.parse(startDateString));
+    Duration diff = startDate.difference(today);
+    return diff.inDays;
+  }
 
   // Example: Date 2023-04-07
   String endDateString = '${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}';
-  DateTime endDate = DateTime.parse(endDateString);
+  DateTime endDate = stripTime(DateTime.parse(endDateString));
   Duration diff = endDate.difference(today);
   return diff.inDays;
+}
+
+int getGoalEndDayCount() {
+  return getGoalDayCountByPeriodType('');
+}
+
+int getGoalStartDayCount() {
+  return getGoalDayCountByPeriodType('start');
 }
 
 bool isGoalLastDay() {
@@ -55,6 +76,15 @@ bool isGoalEndedYesterday() {
 bool isGoalEndedMoreThanADay() {
   int goalEndDayCount = getGoalEndDayCount();
   return (goalEndDayCount < -1);
+}
+
+bool isGoalStartInFuture() {
+  int goalStartDayCount = getGoalStartDayCount();
+  return (goalStartDayCount > 0);
+}
+
+bool hasNoGoalInProgress() {
+  return (getGoalEndDayCount() < 0 || isGoalStartInFuture());
 }
 
 String getFirstPrizeMessage(prize) {
