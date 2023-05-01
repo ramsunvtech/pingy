@@ -29,7 +29,7 @@ RewardsModel getLastCompletedGoal() {
   Iterable<dynamic> rewardIterableValues = rewardBoxMap.values;
   RewardsModel rewardDetails = rewardIterableValues.last;
   int totalRewards = rewardIterableValues.length;
-  if (totalRewards > 1) {
+  if (hasNoGoalInProgress() && totalRewards > 1) {
     int findIndex = (totalRewards > 2) ? totalRewards - 2 : 0;
     rewardDetails = rewardIterableValues.elementAt(findIndex);
   }
