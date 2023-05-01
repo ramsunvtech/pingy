@@ -22,6 +22,8 @@ import 'package:pingy/utils/permissions.dart';
 
 import 'package:pingy/services/goals.dart';
 
+import '../services/activity.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -30,6 +32,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _goalPicture = '';
   bool _goalPictureSelected = false;
+  final bool _canDebug = true;
   bool _isGoalEnded = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
@@ -117,11 +120,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   List<Widget> getHomeBlocks(String score) {
+    Map<String, dynamic> scoreDetails = getScoreDetails();
     Widget todayScoreIndicator = (getGoalEndDayCount() < 0)
         ? const Padding(padding: EdgeInsets.only(left: 75.0))
         : percentageIndicator(50.0, todayScore, 'Today Score');
     Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
         (getGoalEndDayCount() < 0) ? 'Your Last Score' : 'Total Score');
+    String totalActivities = scoreDetails['totalActivities'] ?? '-';
+    String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
+    String actualTotalScore = scoreDetails['actualTotalScore'] ?? '-';
 
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
@@ -162,7 +169,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
       if (containsRewards && containsTypes)
-        greyCard(todayScoreIndicator, totalScoreIndicator),
+        twoColumnGreyCards(todayScoreIndicator, totalScoreIndicator),
+      if (_canDebug)
+        greyCard(Column(
+          children: [
+            Text('Total Activities for the day: $totalActivities'),
+            Text('Maximum Score for the day: $maximumTotalScore'),
+            Text('Actual Score for the day: $actualTotalScore'),
+          ],
+        )),
       if (containsRewards && containsTypes && predictReward != '')
         Center(
           child: Text(
@@ -238,83 +253,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
 
-    int goalEndDayCount = getGoalEndDayCount();
+    Map<String, dynamic> scoreDetails = getScoreDetails();
+    todayScore = scoreDetails['todayScore'];
+    dynamic rewardScore = scoreDetails['totalScore'];
+    predictReward = findGoalPrize(rewardScore);
 
-    Map activityBoxMap = activityBox.toMap();
-    // TODO: Filter with latest goal period.
-    String lastRewardId = rewardBoxMap.values.last.rewardId;
-    Iterable<dynamic> activityBoxMapValues = activityBoxMap.values.where((element) => element.goalId == lastRewardId);
+    // TODO: Need a better reusable function to generate prize and message.
+    if (rewardScore > 0) {
+      totalScore = rewardScore.toString();
 
-    Map activityTypeBoxMap = activityTypeBox.toMap();
-
-    dynamic activityTypeFullScore = 0;
-    activityTypeBoxMap.forEach((key, value) {
-      activityTypeFullScore += int.tryParse(value.fullScore)!;
-    });
-
-    // Check Activity Types are exist and scores is greater than zero.
-    if (activityTypeFullScore > 0) {
-      var today = DateTime.now();
-      var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
-
-      dynamic todayScoreValue = 0;
-
-      if (activityBoxMapValues.isNotEmpty) {
-        dynamic totalActivityScore = 0;
-        for (var activity in activityBoxMapValues) {
-          dynamic dayScore = 0;
-          if (activity.activityItems.length > 0) {
-            activity.activityItems.forEach((element) {
-              var scoreValue = int.tryParse(element.score ?? "0");
-
-              if (scoreValue != null) {
-                dayScore += scoreValue;
-              }
-            });
-
-            dynamic todayScoreValue =
-                (((dayScore / activityTypeFullScore) * 100).ceil());
-
-            if (activity.activityId == todayActivityId &&
-                todayScoreValue != '') {
-              todayScore = todayScoreValue.toString();
-            }
-
-            if (activity.activityId != todayActivityId &&
-                todayScoreValue != '') {
-              totalActivityScore += todayScoreValue;
-            }
-          }
-        }
-
-        dynamic totalActivityDays = activityBoxMapValues.length - 1;
-
-        dynamic rewardScore = 0;
-
-        if (totalActivityScore > 0 && totalActivityDays > 0) {
-          // TODO - this days multiplies by 100, so need formatting.
-          rewardScore =
-              ((totalActivityScore / (100 * totalActivityDays)) * 100).ceil();
-        }
-
-        predictReward = findGoalPrize(rewardScore);
-
-        // TODO: Need a better reusable function to generate prize and message.
-        if (rewardScore > 0) {
-          totalScore = rewardScore.toString();
-
-          if (rewardBoxMap.isNotEmpty) {
-            // TODO: Fix to get iterated / active Reward details instead of first one.
-            RewardsModel rewardDetails = rewardBoxMap.values.last;
-            setGoalPicturePath(rewardDetails);
-          }
-        }
-
-        if(isGoalEndedYesterday() || isGoalEndedMoreThanADay()) {
-          _isGoalEnded = true;
-          canCreateNewActivity = false;
-        }
+      if (rewardBoxMap.isNotEmpty) {
+        // TODO: Fix to get iterated / active Reward details instead of first one.
+        RewardsModel rewardDetails = rewardBoxMap.values.last;
+        setGoalPicturePath(rewardDetails);
       }
+    }
+
+    if(isGoalEndedYesterday() || isGoalEndedMoreThanADay()) {
+      _isGoalEnded = true;
+      canCreateNewActivity = false;
     }
 
     if (canCreateNewActivity) {
