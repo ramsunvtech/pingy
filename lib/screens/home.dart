@@ -121,11 +121,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   List<Widget> getHomeBlocks(String score) {
     Map<String, dynamic> scoreDetails = getScoreDetails();
-    Widget todayScoreIndicator = (getGoalEndDayCount() < 0)
+    Widget todayScoreIndicator = (hasNoGoalInProgress())
         ? const Padding(padding: EdgeInsets.only(left: 75.0))
-        : percentageIndicator(50.0, todayScore, 'Today Score');
+        : percentageIndicator(50.0, '0', 'Today Score');
     Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
-        (getGoalEndDayCount() < 0) ? 'Your Last Score' : 'Total Score');
+        (hasNoGoalInProgress()) ? 'Your Last Score' : 'Total Score');
     String totalActivities = scoreDetails['totalActivities'] ?? '-';
     String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
     String actualTotalScore = scoreDetails['actualTotalScore'] ?? '-';
@@ -173,7 +173,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (_canDebug)
         greyCard(Column(
           children: [
-            Text('Total Activities for the day: $totalActivities'),
+            Text('Reward Id: ${getCurrentGoal().rewardId}'),
+            Text('Goal Start Count: ${getGoalStartDayCount()}'),
+            Text('Goal End Count: ${getGoalEndDayCount()}'),
+            Text('Total Activities: $totalActivities'),
             Text('Maximum Score for the day: $maximumTotalScore'),
             Text('Actual Score for the day: $actualTotalScore'),
           ],
@@ -269,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
 
-    if(isGoalEndedYesterday() || isGoalEndedMoreThanADay()) {
+    if(isGoalEndedYesterday() || isGoalEndedMoreThanADay() || isGoalStartInFuture()) {
       _isGoalEnded = true;
       canCreateNewActivity = false;
     }
@@ -325,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget getFloatingButton(BuildContext context) {
     if (_isGoalEnded && !containsRewards ||
         !containsTypes ||
-        activityBox.length == 0) {
+        activityBox.length == 0 || isGoalStartInFuture()) {
       return Container();
     }
 
