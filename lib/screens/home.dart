@@ -129,6 +129,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     String totalActivities = scoreDetails['totalActivities'] ?? '-';
     String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
     String actualTotalScore = scoreDetails['actualTotalScore'] ?? '-';
+    RewardsModel currentGoal = getCurrentGoal();
+    RewardsModel lastGoal = getLastCompletedGoal();
 
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
@@ -173,7 +175,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (_canDebug)
         greyCard(Column(
           children: [
-            Text('Reward Id: ${getCurrentGoal().rewardId}'),
+            Text('Last: ${lastGoal.title} (${lastGoal.rewardId})'),
+            Text('${currentGoal.title} (${currentGoal.rewardId})'),
             Text('Goal Start Count: ${getGoalStartDayCount()}'),
             Text('Goal End Count: ${getGoalEndDayCount()}'),
             Text('Total Activities: $totalActivities'),
