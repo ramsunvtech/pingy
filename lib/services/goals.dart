@@ -23,6 +23,19 @@ RewardsModel getCurrentGoal() {
   return rewardDetails;
 }
 
+RewardsModel getLastCompletedGoal() {
+  var rewardBox = Hive.box('rewards');
+  Map rewardBoxMap = rewardBox.toMap();
+  Iterable<dynamic> rewardIterableValues = rewardBoxMap.values;
+  RewardsModel rewardDetails = rewardIterableValues.last;
+  int totalRewards = rewardIterableValues.length;
+  if (totalRewards > 1) {
+    int findIndex = (totalRewards > 2) ? totalRewards - 2 : 0;
+    rewardDetails = rewardIterableValues.elementAt(findIndex);
+  }
+  return rewardDetails;
+}
+
 DateTime stripTime(DateTime dateTime) {
   return DateTime(dateTime.year, dateTime.month, dateTime.day);
 }
