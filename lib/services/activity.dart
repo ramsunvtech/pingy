@@ -5,7 +5,7 @@ import 'package:pingy/models/hive/rewards.dart';
 
 import 'goals.dart';
 
-void l(String message, {bool verbose = true}) {
+void l(String message, {bool verbose = false}) {
   if (verbose) {
     print(message);
   }
