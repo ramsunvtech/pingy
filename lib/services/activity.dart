@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
 import 'goals.dart';
 
-void l(String message, {bool verbose = false}) {
+void l(String message, {bool verbose = true}) {
   if (verbose) {
     print(message);
   }
@@ -34,14 +35,14 @@ Iterable<dynamic> getActivityByCurrentGoal() {
 
   // TODO: Filter with latest goal period.
   RewardsModel lastReward = getLastCompletedGoal();
-  l('lastReward id: ${lastReward.title} (${lastReward.rewardId})');
-  if (lastReward.rewardId != '') {
+  if (lastReward.rewardId == '') {
     return const Iterable.empty();
   }
 
   Map activityBoxMap = activityBox.toMap();
-  return activityBoxMap.values
+  Iterable filteredActivity = activityBoxMap.values
       .where((element) => element.goalId == lastReward.rewardId);
+  return filteredActivity;
 }
 
 dynamic getCurrentDayScore(dynamic activityItems) {
@@ -79,7 +80,6 @@ Map<String, dynamic> getScoreDetails() {
   if (activityBoxMapValues.isNotEmpty) {
     for (var activity in activityBoxMapValues) {
       dynamic dayScore = 0;
-      l('activity items: ${activity.activityItems.length}');
       if (activity.activityItems.length > 0) {
         todayScoreValue = getTodayScore(activity.activityItems);
         bool isTodayActivity = (activity.activityId == todayActivityId);
@@ -100,7 +100,6 @@ Map<String, dynamic> getScoreDetails() {
       (activityBoxMapValues.isNotEmpty) ? activityBoxMapValues.length - 1 : 0;
   dynamic decidingScoreForReward = 0;
 
-  l('totalActivityDays: $totalActivityDays');
   if (totalActivityScore > 0 && totalActivityDays > 0) {
     // TODO - this days multiplies by 100, so need formatting.
     decidingScoreForReward =
@@ -111,7 +110,7 @@ Map<String, dynamic> getScoreDetails() {
     'todayScore': todayScore,
     'totalScore': decidingScoreForReward,
     // others.
-    'totalActivities': totalActivityDays.toString(),
+    'totalActivities': activityBoxMapValues.length.toString(),
     'maximumTotalScore': getActivitiesTotalMaximumScore().toString(),
     'actualTotalScore': totalActivityScore.toString(),
   };
