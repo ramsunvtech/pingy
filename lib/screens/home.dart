@@ -163,18 +163,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       if (containsRewards && containsTypes)
         greyCard(todayScoreIndicator, totalScoreIndicator),
-      // if (containsRewards && containsTypes)
-      //   Center(
-      //     child: Text(
-      //       '${AppLocalizations.of(context).todayScore(todayScore)}%', // Example for dynamic string locale
-      //       style: const TextStyle(
-      //         fontWeight: FontWeight.bold,
-      //         fontSize: 25,
-      //         fontStyle: FontStyle.italic,
-      //         color: Colors.blue,
-      //       ),
-      //     ),
-      //   ),
       if (containsRewards && containsTypes && predictReward != '')
         Center(
           child: Text(
@@ -200,12 +188,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           },
           child: Text(t(context).addActivityTypes),
         ),
-      // ElevatedButton(
-      //   onPressed: () {
-      //     NotificationService().display();
-      //   },
-      //   child: const Text('Test Notification'),
-      // ),
     ];
 
     return homePanes;
@@ -247,10 +229,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     if (activityBox.containsKey(activityId)) {
-      // print('Log: Today Activity is exist');
       Activity todayActivity = activityBox.get(activityId);
       if (todayActivity.activityItems.isNotEmpty) {
-        // print('Log: Today Activity Type is not empty');
         canCreateNewActivity = false;
         Iterable<ActivityItem> todayNonEmptyActivityItems =
             todayActivity.activityItems.where((element) => element.score != '');
@@ -272,45 +252,31 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       activityTypeFullScore += int.tryParse(value.fullScore)!;
     });
 
-    // print('activityTypeFullScore: $activityTypeFullScore');
-
     // Check Activity Types are exist and scores is greater than zero.
     if (activityTypeFullScore > 0) {
       var today = DateTime.now();
       var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
 
-      // print('Today ActivityId: $todayActivityId');
-      // print('Activity Count: ${activityBoxMapValues.length}');
-      // print('Activity Type is empty: ${activityBoxMapValues.isNotEmpty}');
-
       dynamic todayScoreValue = 0;
 
       if (activityBoxMapValues.isNotEmpty) {
-        // print("activityBoxMapValues is exist");
         dynamic totalActivityScore = 0;
-        activityBoxMapValues.forEach((activity) {
-          // print('Activity Id: ${activity.activityId}');
+        for (var activity in activityBoxMapValues) {
           dynamic dayScore = 0;
           if (activity.activityItems.length > 0) {
             activity.activityItems.forEach((element) {
-              // print('Activity Item Score: ${element.score}');
               var scoreValue = int.tryParse(element.score ?? "0");
 
               if (scoreValue != null) {
                 dayScore += scoreValue;
               }
-              // print('score: ${element.score}');
             });
-
-            // print ('day score: $dayScore');
 
             dynamic todayScoreValue =
                 (((dayScore / activityTypeFullScore) * 100).ceil());
-            // print ('todayScoreValue: $todayScoreValue');
 
             if (activity.activityId == todayActivityId &&
                 todayScoreValue != '') {
-              // totalActivityScore += todayScoreValue;
               todayScore = todayScoreValue.toString();
             }
 
@@ -319,13 +285,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               totalActivityScore += todayScoreValue;
             }
           }
-
-          if (todayScoreValue > 0) {
-            // print('dayScore: ${activity.activityId} $dayScore - $todayScoreValue%');
-          }
-        });
-
-        // print('totalActivityScore: $totalActivityScore');
+        }
 
         dynamic totalActivityDays = activityBoxMapValues.length - 1;
 
