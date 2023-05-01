@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
@@ -5,10 +6,9 @@ import 'goals.dart';
 
 void l(String message, {bool verbose = false}) {
   if (verbose) {
-    print('$message');
+    print(message);
   }
 }
-
 
 dynamic getActivitiesTotalMaximumScore() {
   dynamic activityTypeFullScore = 0;
@@ -34,7 +34,7 @@ Iterable<dynamic> getActivityByCurrentGoal() {
 
   // TODO: Filter with latest goal period.
   RewardsModel lastReward = getLastCompletedGoal();
-l('lastReward id: ${lastReward.title} (${lastReward.rewardId})');
+  l('lastReward id: ${lastReward.title} (${lastReward.rewardId})');
   if (lastReward.rewardId != '') {
     return const Iterable.empty();
   }
@@ -96,7 +96,8 @@ Map<String, dynamic> getScoreDetails() {
     }
   }
 
-  dynamic totalActivityDays = (activityBoxMapValues.isNotEmpty) ? activityBoxMapValues.length - 1 : 0;
+  dynamic totalActivityDays =
+      (activityBoxMapValues.isNotEmpty) ? activityBoxMapValues.length - 1 : 0;
   dynamic decidingScoreForReward = 0;
 
   l('totalActivityDays: $totalActivityDays');
