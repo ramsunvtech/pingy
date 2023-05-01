@@ -17,9 +17,6 @@ class ActivitiesListScreen extends StatefulWidget {
 }
 
 class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      GlobalKey<RefreshIndicatorState>();
-
   late final Box activityBox;
   late final Box activityTypeBox;
 
@@ -83,86 +80,74 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
               Iterable activityDataKeyList = activityDataBox.keys.toList().reversed;
               // TODO: fix the manual key index.
               int keyIndex = 0;
-              return RefreshIndicator(
-                key: _refreshIndicatorKey,
-                color: Colors.white,
-                backgroundColor: Colors.blue,
-                strokeWidth: 4.0,
-                onRefresh: () async {
-                  // Replace this delay with the code to be executed during refresh
-                  // and return a Future when code finish execution.
-                  return Future<void>.delayed(const Duration(seconds: 3));
-                },
-                // Pull from top to show refresh indicator.
-                child: ListView.builder(
-                  itemCount: activityDataKeyList.length,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    String activityId = activityDataKeyList.elementAt(keyIndex);
-                    Activity activityData = activityDataBox.get(activityId);
-                    keyIndex++;
-                    Map activityTypeBoxMap = activityTypeBox.toMap();
-                    Iterable<dynamic> activityTypeBoxMapValues =
-                        activityTypeBoxMap.values;
+              return ListView.builder(
+                itemCount: activityDataKeyList.length,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  String activityId = activityDataKeyList.elementAt(keyIndex);
+                  Activity activityData = activityDataBox.get(activityId);
+                  keyIndex++;
+                  Map activityTypeBoxMap = activityTypeBox.toMap();
+                  Iterable<dynamic> activityTypeBoxMapValues =
+                      activityTypeBoxMap.values;
 
-                    // Activity Total Score.
-                    dynamic activityTypeFullScore = 0;
-                    activityTypeBoxMap.forEach((key, value) {
-                      activityTypeFullScore += int.tryParse(value.fullScore)!;
+                  // Activity Total Score.
+                  dynamic activityTypeFullScore = 0;
+                  activityTypeBoxMap.forEach((key, value) {
+                    activityTypeFullScore += int.tryParse(value.fullScore)!;
+                  });
+
+                  dynamic dayScore = 0;
+                  String missedItemsCSV = '';
+                  if (activityData.activityItems.isNotEmpty) {
+                    activityData.activityItems.forEach((element) {
+                      var scoreValue = int.tryParse(element.score ?? "0");
+
+                      if (scoreValue != null) {
+                        dayScore += scoreValue;
+                      }
                     });
 
-                    dynamic dayScore = 0;
-                    String missedItemsCSV = '';
-                    if (activityData.activityItems.isNotEmpty) {
-                      activityData.activityItems.forEach((element) {
-                        var scoreValue = int.tryParse(element.score ?? "0");
+                    Iterable<ActivityItem> missedActivityIdList = activityData
+                        .activityItems
+                        .where((element) => element.score == "0");
+                    if (missedActivityIdList.isNotEmpty) {
+                      List activityTypes = [];
 
-                        if (scoreValue != null) {
-                          dayScore += scoreValue;
-                        }
-                      });
-
-                      Iterable<ActivityItem> missedActivityIdList = activityData
-                          .activityItems
-                          .where((element) => element.score == "0");
-                      if (missedActivityIdList.isNotEmpty) {
-                        List activityTypes = [];
-
-                        for (var activityItem in missedActivityIdList) {
-                          dynamic activityTypeDetail =
-                              activityTypeBox.get(activityItem.activityItemId);
-                          activityTypes.add(activityTypeDetail.activityName);
-                        }
-
-                        missedItemsCSV = 'Missed: \n${activityTypes.join('\n')}';
+                      for (var activityItem in missedActivityIdList) {
+                        dynamic activityTypeDetail =
+                        activityTypeBox.get(activityItem.activityItemId);
+                        activityTypes.add(activityTypeDetail.activityName);
                       }
+
+                      missedItemsCSV = 'Missed: \n${activityTypes.join('\n')}';
                     }
+                  }
 
-                    dynamic activityScoreValue =
-                        (((dayScore / activityTypeFullScore) * 100).ceil());
+                  dynamic activityScoreValue =
+                  (((dayScore / activityTypeFullScore) * 100).ceil());
 
-                    String formattedDate = '';
-                    if (activityData!.activityDate != null) {
-                      DateFormat dateFormat = DateFormat("EEE, dd/MMM/yy");
-                      formattedDate =
-                          '(${dateFormat.format(activityData!.activityDate as DateTime)})';
-                    }
+                  String formattedDate = '';
+                  if (activityData!.activityDate != null) {
+                    DateFormat dateFormat = DateFormat("EEE, dd/MMM/yy");
+                    formattedDate =
+                    '(${dateFormat.format(activityData!.activityDate as DateTime)})';
+                  }
 
-                    return InkWell(
-                      onTap: () => {},
-                      child: ListTile(
-                        title: Text(
-                            'Activity $formattedDate - $activityScoreValue%'),
-                        subtitle: Text(
-                          'Score: $dayScore/$activityTypeFullScore\n'
-                          '$missedItemsCSV',
-                        ),
-                        trailing: getListTileTrailingIconButton(
-                            activityData.activityId),
+                  return InkWell(
+                    onTap: () => {},
+                    child: ListTile(
+                      title: Text(
+                          'Activity $formattedDate - $activityScoreValue%'),
+                      subtitle: Text(
+                        'Score: $dayScore/$activityTypeFullScore\n'
+                            '$missedItemsCSV',
                       ),
-                    );
-                  },
-                ),
+                      trailing: getListTileTrailingIconButton(
+                          activityData.activityId),
+                    ),
+                  );
+                },
               );
             }
           },

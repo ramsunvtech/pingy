@@ -13,8 +13,6 @@ class GoalListScreen extends StatefulWidget {
 }
 
 class _GoalListScreenState extends State<GoalListScreen> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      GlobalKey<RefreshIndicatorState>();
   late final Box rewardsBox;
 
   @override
@@ -84,28 +82,17 @@ class _GoalListScreenState extends State<GoalListScreen> {
                 child: Text('No Goals are available.'),
               );
             } else {
-              return RefreshIndicator(
-                key: _refreshIndicatorKey,
-                color: Colors.white,
-                backgroundColor: Colors.blue,
-                strokeWidth: 4.0,
-                onRefresh: () async {
-                  // Replace this delay with the code to be executed during refresh
-                  // and return a Future when code finish execution.
-                  return Future<void>.delayed(const Duration(seconds: 3));
-                },
-                // Pull from top to show refresh indicator.
-                child: ListView.builder(
-                  itemCount: rewardsBox.length,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    var currentBox = rewardsBox;
-                    RewardsModel rewardsData = currentBox.getAt(index)!;
-                    return InkWell(
-                        onTap: () => {},
-                        child: ListTile(
-                          title: Text(rewardsData.title),
-                          subtitle: Text(
+              return ListView.builder(
+                itemCount: rewardsBox.length,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  var currentBox = rewardsBox;
+                  RewardsModel rewardsData = currentBox.getAt(index)!;
+                  return InkWell(
+                      onTap: () => {},
+                      child: ListTile(
+                        title: Text(rewardsData.title),
+                        subtitle: Text(
                             '${rewardsData.startPeriod}'
                                 ' to ${rewardsData.endPeriod}\n'
                                 'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
@@ -113,10 +100,9 @@ class _GoalListScreenState extends State<GoalListScreen> {
                                 'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}\n'
                                 '${getGoalResult(rewardsData)}'
                                 'Goal Picture: ${isPictureExist(rewardsData)}\n'
-                          ),
-                        ));
-                  },
-                ),
+                        ),
+                      ));
+                },
               );
             }
           },

@@ -17,9 +17,6 @@ class ActivityTypeListScreen extends StatefulWidget {
 }
 
 class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      GlobalKey<RefreshIndicatorState>();
-
   late final Box rewardBox;
   late final Box activityTypeBox;
   late final Box activityBox;
@@ -130,36 +127,24 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                   return a.rank.compareTo(b.rank);
                 });
 
-                return RefreshIndicator(
-                  key: _refreshIndicatorKey,
-                  color: Colors.white,
-                  backgroundColor: Colors.blue,
-                  strokeWidth: 4.0,
-                  onRefresh: () async {
-                    // Replace this delay with the code to be executed during refresh
-                    // and return a Future when code finish execution.
-                    return Future<void>.delayed(const Duration(seconds: 3));
-                  },
-                  // Pull from top to show refresh indicator.
-                  child: ListView.builder(
-                    itemCount: activityTypeList.length,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      var currentBox = activityTypeList;
-                      ActivityTypeModel activityTypeData =
-                          currentBox.elementAt(index)!;
+                return ListView.builder(
+                  itemCount: activityTypeList.length,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    var currentBox = activityTypeList;
+                    ActivityTypeModel activityTypeData =
+                    currentBox.elementAt(index)!;
 
-                      return InkWell(
-                        onTap: () => {},
-                        child: ListTile(
-                          title: Text(activityTypeData.activityName),
-                          subtitle: Text(activityTypeData.fullScore),
-                          trailing: getListTileTrailingIconButton(
-                              activityTypeData.activityTypeId),
-                        ),
-                      );
-                    },
-                  ),
+                    return InkWell(
+                      onTap: () => {},
+                      child: ListTile(
+                        title: Text(activityTypeData.activityName),
+                        subtitle: Text(activityTypeData.fullScore),
+                        trailing: getListTileTrailingIconButton(
+                            activityTypeData.activityTypeId),
+                      ),
+                    );
+                  },
                 );
               }
             },
