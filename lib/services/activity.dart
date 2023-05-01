@@ -9,6 +9,7 @@ void l(String message, {bool verbose = false}) {
   }
 }
 
+
 dynamic getActivitiesTotalMaximumScore() {
   dynamic activityTypeFullScore = 0;
   var activityTypeBox = Hive.box('activity_type');
