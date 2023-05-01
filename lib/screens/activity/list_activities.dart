@@ -79,14 +79,12 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
             } else {
               Iterable activityDataKeyList = activityDataBox.keys.toList().reversed;
               // TODO: fix the manual key index.
-              int keyIndex = 0;
               return ListView.builder(
                 itemCount: activityDataKeyList.length,
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
-                  String activityId = activityDataKeyList.elementAt(keyIndex);
+                  String activityId = activityDataKeyList.elementAt(index);
                   Activity activityData = activityDataBox.get(activityId);
-                  keyIndex++;
                   Map activityTypeBoxMap = activityTypeBox.toMap();
                   Iterable<dynamic> activityTypeBoxMapValues =
                       activityTypeBoxMap.values;
