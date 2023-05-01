@@ -74,8 +74,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           Container(
             height: 3,
             width: 70,
-            margin: const EdgeInsets.symmetric(
-                vertical: 12, horizontal: 160),
+            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 160),
             decoration: BoxDecoration(
                 color: Colors.grey, borderRadius: BorderRadius.circular(8)),
           ),
@@ -122,33 +121,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             child: FractionallySizedBox(
               widthFactor: 0.9,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                // color: Colors.pink,
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.6),
-                ),
-              ),
-            ),
-          ),
-          Center(
-            child: FractionallySizedBox(
-              widthFactor: 0.9,
-              child: ElevatedButton(
                 onPressed: () async {
                   if (_activateFormKey.currentState!.validate()) {
                     var updatedMissedActivity = ActivityItem(
                         todoActivity.activityItemId, _fullScoreController.text);
                     var activityItemIndex = todayActivity.activityItems
                         .indexWhere((element) =>
-                    element.activityItemId ==
-                        todoActivity.activityItemId);
+                            element.activityItemId ==
+                            todoActivity.activityItemId);
                     if (todayActivity.isInBox) {
                       todayActivity.activityItems
                           .setAll(activityItemIndex, [updatedMissedActivity]);
@@ -288,7 +268,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                         return Dismissible(
                             key: UniqueKey(),
                             child: taskItem(
-                              'todo',
+                                'todo',
                                 todayActivityItemDetail.activityName,
                                 'Swipe left to skip / right to update score',
                                 todoActivity,
@@ -411,8 +391,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     );
   }
 
-  Widget taskItem(String taskType, String taskName, String? mark, ActivityItem selectActivity,
-      bool isSelected, int index) {
+  Widget taskItem(String taskType, String taskName, String? mark,
+      ActivityItem selectActivity, bool isSelected, int index) {
     var enabled = true;
     IconData taskIcon = Icons.content_paste;
     dynamic taskScore = '';
@@ -426,7 +406,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       taskIcon = Icons.assignment_turned_in_outlined;
       String activityItemId = selectActivity.activityItemId;
       if (mark != '' && activityItemId.isNotEmpty) {
-        ActivityTypeModel activityTypeDetails = activityTypeBox.get(activityItemId);
+        ActivityTypeModel activityTypeDetails =
+            activityTypeBox.get(activityItemId);
         taskScore = 'You scored $mark out of ${activityTypeDetails.fullScore}';
       }
     }
