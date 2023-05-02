@@ -32,8 +32,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _goalPicture = '';
   bool _goalPictureSelected = false;
-  final bool _canDebug = true;
-  bool _isGoalEnded = false;
+  final bool _canDebug = false;
+  bool _isGoalEnded = true;
   final ImagePicker goalPicturePicker = ImagePicker();
 
   late final Box rewardBox;
@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           children: [
             Text('Last: ${lastGoal.title} (${lastGoal.rewardId})'),
             Text('${currentGoal.title} (${currentGoal.rewardId})'),
-            Text('Today date: $todayDateValue'),
+            Text('Today date: ${todayDateValue.toString()}'),
             Text('Goal Start Count: ${getGoalStartDayCount()}'),
             Text('Goal End Count: ${getGoalEndDayCount()}'),
             Text('Total Activities: $totalActivities'),

@@ -114,7 +114,7 @@ Map<String, dynamic> getScoreDetails() {
 
   Map<String, dynamic> scoreDetails = {
     'todayScore': todayScore,
-    'todayDate': getTodayDate.toString(),
+    'todayDate': getTodayDate().toString(),
     'totalScore': decidingScoreForReward,
     // others.
     'totalActivities': activityBoxMapValues.length.toString(),
