@@ -11,6 +11,10 @@ void l(String message, {bool verbose = false}) {
   }
 }
 
+DateTime getTodayDate() {
+  return stripTime(DateTime.now());
+}
+
 dynamic getActivitiesTotalMaximumScore() {
   dynamic activityTypeFullScore = 0;
   var activityTypeBox = Hive.box('activity_type');
@@ -75,6 +79,7 @@ Map<String, dynamic> getScoreDetails() {
 
   String todayScore = '';
   dynamic todayScoreValue = 0;
+  dynamic todayScoreTotalValue = 0;
   dynamic totalActivityScore = 0;
 
   if (activityBoxMapValues.isNotEmpty) {
@@ -82,6 +87,7 @@ Map<String, dynamic> getScoreDetails() {
       dynamic dayScore = 0;
       if (activity.activityItems.length > 0) {
         todayScoreValue = getTodayScore(activity.activityItems);
+        todayScoreTotalValue = getCurrentDayScore(activity.activityItems);
         bool isTodayActivity = (activity.activityId == todayActivityId);
         bool containsTodayScore = (todayScoreValue != '');
 
@@ -108,11 +114,12 @@ Map<String, dynamic> getScoreDetails() {
 
   Map<String, dynamic> scoreDetails = {
     'todayScore': todayScore,
+    'todayDate': getTodayDate.toString(),
     'totalScore': decidingScoreForReward,
     // others.
     'totalActivities': activityBoxMapValues.length.toString(),
     'maximumTotalScore': getActivitiesTotalMaximumScore().toString(),
-    'actualTotalScore': totalActivityScore.toString(),
+    'actualTotalScore': todayScoreTotalValue.toString(),
   };
 
   return scoreDetails;

@@ -121,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   List<Widget> getHomeBlocks(String score) {
     Map<String, dynamic> scoreDetails = getScoreDetails();
+    String todayDateValue = scoreDetails['todayDate'] ?? '0';
     String todayScoreValue = scoreDetails['todayScore'] ?? '0';
     String totalActivities = scoreDetails['totalActivities'] ?? '-';
     String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
@@ -179,6 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           children: [
             Text('Last: ${lastGoal.title} (${lastGoal.rewardId})'),
             Text('${currentGoal.title} (${currentGoal.rewardId})'),
+            Text('Today date: $todayDateValue'),
             Text('Goal Start Count: ${getGoalStartDayCount()}'),
             Text('Goal End Count: ${getGoalEndDayCount()}'),
             Text('Total Activities: $totalActivities'),
