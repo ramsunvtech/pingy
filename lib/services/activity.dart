@@ -87,12 +87,12 @@ Map<String, dynamic> getScoreDetails() {
       dynamic dayScore = 0;
       if (activity.activityItems.length > 0) {
         todayScoreValue = getTodayScore(activity.activityItems);
-        todayScoreTotalValue = getCurrentDayScore(activity.activityItems);
         bool isTodayActivity = (activity.activityId == todayActivityId);
         bool containsTodayScore = (todayScoreValue != '');
 
         if (isTodayActivity && containsTodayScore) {
           todayScore = todayScoreValue.toString();
+          todayScoreTotalValue = getCurrentDayScore(activity.activityItems);
         }
 
         if (!isTodayActivity && containsTodayScore) {
