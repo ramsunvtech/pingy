@@ -35,14 +35,13 @@ Iterable<dynamic> getActivityByCurrentGoal() {
   var rewardBox = Hive.box('rewards');
   var activityBox = Hive.box('activity');
 
-  Map rewardBoxMap = rewardBox.toMap();
-
   // TODO: Filter with latest goal period.
-  RewardsModel lastReward = getLastCompletedGoal();
-  if (lastReward.rewardId == '') {
+  if (!isRewardNotEmpty()) {
     return const Iterable.empty();
   }
 
+  Map rewardBoxMap = rewardBox.toMap();
+  RewardsModel lastReward = getLastCompletedGoal();
   Map activityBoxMap = activityBox.toMap();
   Iterable filteredActivity = activityBoxMap.values
       .where((element) => element.goalId == lastReward.rewardId);
@@ -75,7 +74,11 @@ Map<String, dynamic> getScoreDetails() {
 
   Map activityBoxMap = activityBox.toMap();
   // TODO: Filter with latest goal period.
-  Iterable<dynamic> activityBoxMapValues = getActivityByCurrentGoal();
+  Iterable<dynamic> activityBoxMapValues = const Iterable.empty();
+
+  if (isRewardNotEmpty()) {
+    activityBoxMapValues = getActivityByCurrentGoal();
+  }
 
   String todayScore = '';
   dynamic todayScoreValue = 0;
