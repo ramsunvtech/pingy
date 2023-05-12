@@ -16,6 +16,16 @@ int getThirdPricePercentage() {
   return 75;
 }
 
+bool isRewardEmpty() {
+  var rewardBox = Hive.box('rewards');
+  return rewardBox.isEmpty;
+}
+
+bool isRewardNotEmpty() {
+  var rewardBox = Hive.box('rewards');
+  return rewardBox.isNotEmpty;
+}
+
 RewardsModel getCurrentGoal() {
   var rewardBox = Hive.box('rewards');
   Map rewardBoxMap = rewardBox.toMap();
