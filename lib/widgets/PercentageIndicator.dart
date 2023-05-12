@@ -4,7 +4,11 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:pingy/utils/color.dart';
 
 dynamic percentageIndicator(double radius, String score, String label) {
-  double percentValue = (int.tryParse(score ?? '0')! / 100);
+  double percentValue = 0;
+
+  if (int.tryParse(score) != null) {
+    percentValue = int.tryParse(score)! / 100;
+  }
 
   // TODO - this line need to be removed later.
   if (percentValue > 1) {
