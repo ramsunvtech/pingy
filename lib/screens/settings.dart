@@ -155,6 +155,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
+                      await activityBox.clear();
+                      setState(() {
+                        activityCount = '0';
+
+                        if (activityBox.isNotEmpty) {
+                          activityCount = activityBox.length.toString();
+                        }
+                      });
+                    },
+                    child: const Text(
+                      'Clear all Activity',
+                      style: TextStyle(
+                        fontSize: 20,
+
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await activityTypeBox.clear();
+                      setState(() {
+                        activityTypeCount = '0';
+
+                        if (activityTypeBox.isNotEmpty) {
+                          activityTypeCount = activityTypeBox.length.toString();
+                        }
+                      });
+                    },
+                    child: const Text(
+                      'Clear all Types',
+                      style: TextStyle(
+                        fontSize: 20,
+
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
                       await rewardBox.clear();
                       await activityTypeBox.clear();
                       await activityBox.clear();
@@ -177,30 +219,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       });
                     },
                     child: const Text(
-                      'Clear All Data',
+                      'Clear All',
                       style: TextStyle(
                         fontSize: 20,
-                      ),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await activityBox.clear();
-                      setState(() {
-                        activityCount = '0';
-
-                        if (activityBox.isNotEmpty) {
-                          activityCount = activityBox.length.toString();
-                        }
-                      });
-                    },
-                    child: const Text(
-                      'Clear Only Activity',
-                      style: TextStyle(
-                        fontSize: 20,
-
                       ),
                     ),
                   ),
