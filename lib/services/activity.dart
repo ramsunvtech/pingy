@@ -18,6 +18,11 @@ DateTime getTodayDate() {
 dynamic getActivitiesTotalMaximumScore() {
   dynamic activityTypeFullScore = 0;
   var activityTypeBox = Hive.box('activity_type');
+
+  if (activityTypeBox.isEmpty) {
+    return activityTypeFullScore;
+  }
+
   Map activityTypeBoxMap = activityTypeBox.toMap();
 
   activityTypeBoxMap.forEach((key, value) {
@@ -64,6 +69,9 @@ dynamic getCurrentDayScore(dynamic activityItems) {
 
 dynamic getTodayScore(activityItems) {
   int activityTypeFullScore = getActivitiesTotalMaximumScore();
+
+  if (activityTypeFullScore == 0) return 0;
+
   int dayScore = getCurrentDayScore(activityItems);
   return (((dayScore / activityTypeFullScore) * 100).ceil());
 }
