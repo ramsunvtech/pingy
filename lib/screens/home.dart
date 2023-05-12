@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _goalPicture = '';
   bool _goalPictureSelected = false;
   final bool _canDebug = false;
-  bool _isGoalEnded = true;
+  bool _isGoalEnded = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
   late final Box rewardBox;
@@ -126,14 +126,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     String totalActivities = scoreDetails['totalActivities'] ?? '-';
     String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
     String actualTotalScore = scoreDetails['actualTotalScore'] ?? '-';
-    RewardsModel currentGoal = getCurrentGoal();
-    RewardsModel lastGoal = getLastCompletedGoal();
+    String? currentGoalTitle = '?Title?';
+    String? currentGoalRewardId = '?Id?';
+    String? lastGoalTitle = '?Title?';
+    String? lastGoalRewardId = '?Id?';
 
-    Widget todayScoreIndicator = (hasNoGoalInProgress())
+    if (isRewardNotEmpty()) {
+      RewardsModel currentGoal = getCurrentGoal();
+      currentGoalTitle = currentGoal.title;
+      currentGoalRewardId = currentGoal.rewardId;
+      RewardsModel lastGoal = getLastCompletedGoal();
+      lastGoalTitle = lastGoal.title;
+      lastGoalRewardId = lastGoal.rewardId;
+    }
+
+    bool canShowPercentageIndicator = (
+        isRewardEmpty() || hasNoGoalInProgress()
+    );
+
+    Widget todayScoreIndicator = (canShowPercentageIndicator)
         ? const Padding(padding: EdgeInsets.only(left: 75.0))
         : percentageIndicator(50.0, todayScoreValue, 'Today Score');
     Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
-        (hasNoGoalInProgress()) ? 'Your Last Score' : 'Total Score');
+        (canShowPercentageIndicator) ? 'Your Last Score' : 'Total Score');
 
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
@@ -178,8 +193,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (_canDebug)
         greyCard(Column(
           children: [
-            Text('Last: ${lastGoal.title} (${lastGoal.rewardId})'),
-            Text('${currentGoal.title} (${currentGoal.rewardId})'),
+            Text('Last: $lastGoalTitle ($lastGoalRewardId)'),
+            Text('$currentGoalTitle ($currentGoalRewardId)'),
             Text('Today date: ${todayDateValue.toString()}'),
             Text('Goal Start Count: ${getGoalStartDayCount()}'),
             Text('Goal End Count: ${getGoalEndDayCount()}'),
@@ -362,7 +377,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         appBar: customAppBar(
           title: t(context).appName,
           actions: [
-            if (containsRewards && containsTypes && _isGoalEnded == false)
+              if (containsRewards && containsTypes)
               settingsLinkIconButton(context),
           ],
         ),
