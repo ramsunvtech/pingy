@@ -16,7 +16,7 @@ dynamic percentageIndicator(double radius, String score, String label) {
   }
 
   return Padding(
-    padding: const EdgeInsets.only(left: 45.0, top: 20, bottom: 10),
+    padding: const EdgeInsets.only(left: 20, top: 20, bottom: 10, right: 20),
     child: CircularPercentIndicator(
       radius: radius,
       lineWidth: 13.0,
