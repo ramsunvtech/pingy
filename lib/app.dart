@@ -4,7 +4,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+// Screens.
 import 'package:pingy/screens/home.dart';
+
+// Utils.
 import 'package:pingy/utils/color.dart';
 
 class PingyApp extends StatefulWidget {
