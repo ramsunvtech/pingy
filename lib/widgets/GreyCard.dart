@@ -12,11 +12,18 @@ Widget twoColumnGreyCards(Widget leftBlock, Widget rightBlock) {
         ),
         borderRadius: const BorderRadius.all(Radius.circular(16)),
       ),
-      child: Row(
-        children: [
-          leftBlock,
-          rightBlock,
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Align(
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              leftBlock,
+              rightBlock,
+            ],
+          ),
+        ),
       )
     ),
   );
