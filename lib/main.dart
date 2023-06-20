@@ -8,12 +8,14 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/foundation.dart'
     show PlatformDispatcher, kIsWeb, kReleaseMode;
 
+// Models.
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/services/notification.dart';
 
+// App.
 import 'app.dart';
 
 void main() async {
