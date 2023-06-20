@@ -6,15 +6,19 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 
+// Widgets.
 import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/PercentageIndicator.dart';
 import 'package:pingy/widgets/GreyCard.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 
+// Models.
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
+
+// Utils.
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/utils/l10n.dart';
 import 'package:pingy/utils/color.dart';
@@ -145,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
 
     Widget todayScoreIndicator = (canShowPercentageIndicator)
-        ? const Padding(padding: EdgeInsets.only(left: 75.0))
+        ? const SizedBox.shrink()
         : percentageIndicator(50.0, todayScoreValue, 'Today Score');
     Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
         (canShowPercentageIndicator) ? 'Your Last Score' : 'Total Score');
@@ -377,7 +381,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         appBar: customAppBar(
           title: t(context).appName,
           actions: [
-              if (containsRewards && containsTypes)
+              // if (containsRewards && containsTypes)
               settingsLinkIconButton(context),
           ],
         ),
