@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:pingy/utils/color.dart';
 
 Widget twoColumnGreyCards(Widget leftBlock, Widget rightBlock) {

@@ -148,9 +148,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         isRewardEmpty() || hasNoGoalInProgress()
     );
 
+    double indicatorRadius = 50.0;
     Widget todayScoreIndicator = (canShowPercentageIndicator)
         ? const SizedBox.shrink()
-        : percentageIndicator(50.0, todayScoreValue, 'Today Score');
+        : percentageIndicator(indicatorRadius, todayScoreValue, 'Today Score');
     Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
         (canShowPercentageIndicator) ? 'Your Last Score' : 'Total Score');
 
@@ -256,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     activityTypeBox = Hive.box('activity_type');
 
     DateTime today = DateTime.now();
-    var activityId = 'activity_${today.year}${today.month}${today.day}';
+    String activityId = getTodayActivityId();
     bool canCreateNewActivity = true;
 
     Map rewardBoxMap = rewardBox.toMap();
@@ -272,7 +273,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       canCreateNewActivity = false;
     }
 
-    if (activityBox.containsKey(activityId)) {
+    bool isTodayActivityExist = activityBox.containsKey(activityId);
+    if (isTodayActivityExist) {
       Activity todayActivity = activityBox.get(activityId);
       if (todayActivity.activityItems.isNotEmpty) {
         canCreateNewActivity = false;
