@@ -144,16 +144,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       lastGoalRewardId = lastGoal.rewardId;
     }
 
-    bool canShowPercentageIndicator = (
+    bool canShowTodayPercentageIndicator = (
         isRewardEmpty() || hasNoGoalInProgress()
     );
+    bool canShowTotalPercentageIndicator = (
+        isRewardEmpty()
+    );
+    String totalPercentageIndicatorLabel ='Total Score';
+
+    if (hasNoGoalInProgress()) {
+      totalPercentageIndicatorLabel = 'Your Last Score';
+    }
 
     double indicatorRadius = 50.0;
-    Widget todayScoreIndicator = (canShowPercentageIndicator)
+    Widget leftSideTodayScoreIndicator = (canShowTodayPercentageIndicator)
         ? const SizedBox.shrink()
         : percentageIndicator(indicatorRadius, todayScoreValue, 'Today Score');
-    Widget totalScoreIndicator = percentageIndicator(70.0, totalScore,
-        (canShowPercentageIndicator) ? 'Your Last Score' : 'Total Score');
+    Widget rightSdietotalScoreIndicator = (canShowTotalPercentageIndicator)
+    ? const SizedBox.shrink()
+    : percentageIndicator(70.0, totalScore,
+        totalPercentageIndicatorLabel);
 
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
@@ -194,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
       if (containsRewards && containsTypes)
-        twoColumnGreyCards(todayScoreIndicator, totalScoreIndicator),
+        twoColumnGreyCards(leftSideTodayScoreIndicator, rightSdietotalScoreIndicator),
       if (_canDebug)
         greyCard(Column(
           children: [
