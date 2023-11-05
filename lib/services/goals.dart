@@ -112,7 +112,7 @@ bool hasNoGoalInProgress() {
 
 String getFirstPrizeMessage(prize) {
   if (isGoalLastDay()) {
-    return "Goal ends tomorrow, first milestones reached! Keep up the momentum for your next big win!";
+    return "Goal ends today, first milestones reached! Keep up the momentum for your next big win!";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
     return "Congratulations! You've reached your $prize (1st prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
@@ -126,7 +126,7 @@ String getFirstPrizeMessage(prize) {
 
 String getSecondPrizeMessage(prize) {
   if (isGoalLastDay()) {
-    return "Goal ends tomorrow, second milestones reached! Keep up the momentum for your next big win!";
+    return "Goal ends today, second milestones reached! Keep up the momentum for your next big win!";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
     return "Congratulations! You've reached your $prize (2nd prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
@@ -140,7 +140,7 @@ String getSecondPrizeMessage(prize) {
 
 String geThirdPrizeMessage(String prize) {
   if (isGoalLastDay()) {
-    return "Goal ends tomorrow, third milestones reached! Keep up the momentum for your next big win!";
+    return "Goal ends today, third milestones reached! Keep up the momentum for your next big win!";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
     return "Congratulations! You've reached your $prize (3rd prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
@@ -154,7 +154,7 @@ String geThirdPrizeMessage(String prize) {
 
 String getNoPrizeMessage(String prize) {
   if (isGoalLastDay()) {
-    return "Goal ends tomorrow, keep going! Celebrate your progress even if you didn't reach a milestone.";
+    return "Goal ends today, keep going! Celebrate your progress even if you didn't reach a milestone.";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
     return "Great effort! Even though you couldn't hit any milestone, keep celebrating the steps you've taken so far. You're making great strides towards your success";
