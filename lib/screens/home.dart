@@ -183,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // Inside a build method of a Widget
     double screenHeight = MediaQuery.of(context).size.height;
     // You can adjust the factor (0.15 in this case) to fit the circle avatar in your layout properly
-    double avatarRadius = screenHeight * 0.12;
+    double avatarRadius = screenHeight * 0.10;
 
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
