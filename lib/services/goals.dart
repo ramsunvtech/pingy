@@ -112,7 +112,7 @@ bool hasNoGoalInProgress() {
 
 String getFirstPrizeMessage(prize) {
   if (isGoalLastDay()) {
-    return "Goal ends today, first milestones reached! Keep up the momentum for your next big win!";
+    return "First prize is almost yours; let today's dedication be the key to victory.";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
     return "Congratulations! You've reached your $prize (1st prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
@@ -126,7 +126,7 @@ String getFirstPrizeMessage(prize) {
 
 String getSecondPrizeMessage(prize) {
   if (isGoalLastDay()) {
-    return "Goal ends today, second milestones reached! Keep up the momentum for your next big win!";
+    return "Second prize is up for grabs; today's the day to make a decisive move.";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
     return "Congratulations! You've reached your $prize (2nd prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
@@ -140,7 +140,7 @@ String getSecondPrizeMessage(prize) {
 
 String geThirdPrizeMessage(String prize) {
   if (isGoalLastDay()) {
-    return "Goal ends today, third milestones reached! Keep up the momentum for your next big win!";
+    return "Third prize awaits; strong performance today could be the difference between a near miss and a win.";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
     return "Congratulations! You've reached your $prize (3rd prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
