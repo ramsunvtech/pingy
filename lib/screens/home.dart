@@ -180,6 +180,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     : percentageIndicator(70.0, totalScore,
         totalPercentageIndicatorLabel);
 
+    // Inside a build method of a Widget
+    double screenHeight = MediaQuery.of(context).size.height;
+    // You can adjust the factor (0.15 in this case) to fit the circle avatar in your layout properly
+    double avatarRadius = screenHeight * 0.15;
+
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
         Center(
@@ -189,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             },
             child: CircleAvatar(
               backgroundColor: Colors.white,
-              radius: 120, // (115+5)
+              radius: avatarRadius,
               child: getSelectedImage(),
             ),
           ),
