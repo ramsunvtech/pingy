@@ -89,12 +89,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (_goalPictureSelected || _goalPicture.isNotEmpty) {
       File goalPictureFile = File(_goalPicture);
       if (goalPictureFile.existsSync()) {
-        return CircleAvatar(
-            radius: 120 - 5,
-            backgroundImage: Image.file(
-              goalPictureFile,
-              fit: BoxFit.cover,
-            ).image);
+        return
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white, // Match the background color to the white background
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3), // Soft grey shadow
+                  spreadRadius: 1, // Extend the shadow to all sides by 1 pixel
+                  blurRadius: 5, // Soften the shadow by blurring it
+                  offset: Offset(0, 3), // Position the shadow below the avatar
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+                radius: 110 - 5,
+                backgroundImage: Image.file(
+                  goalPictureFile,
+                  fit: BoxFit.cover,
+                ).image),
+          );
       }
     }
 
