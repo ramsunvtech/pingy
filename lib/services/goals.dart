@@ -177,7 +177,7 @@ String setRewardResult(prize) {
 
 String findGoalPrize(int rewardScore) {
   if (rewardScore == 0) {
-    return 'Welcome you Start! Every time you update your activities, you\'re one step closer to achieving your goal.';
+    return 'Welcome you start! Every time you update your activities, you\'re one step closer to achieving your goal.';
   }
 
   var rewardBox = Hive.box('rewards');

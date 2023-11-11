@@ -142,6 +142,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     Map<String, dynamic> scoreDetails = getScoreDetails();
     String todayDateValue = scoreDetails['todayDate'] ?? '0';
     String todayScoreValue = scoreDetails['todayScore'] ?? '0';
+    String totalScoreValue = scoreDetails['totalScore'].toString() ?? '0';
     String totalActivities = scoreDetails['totalActivities'] ?? '-';
     String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
     String actualTotalScore = scoreDetails['actualTotalScore'] ?? '-';
@@ -234,6 +235,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Text('Goal Start Count: ${getGoalStartDayCount()}'),
             Text('Goal End Count: ${getGoalEndDayCount()}'),
             Text('Total Activities: $totalActivities'),
+            Text('Total Score: $totalScoreValue'),
             Text('Maximum Score for the day: $maximumTotalScore'),
             Text('Actual Score for the day: $actualTotalScore'),
           ],
@@ -336,6 +338,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       canCreateNewActivity = false;
     }
 
+    // Create New Activity.
     if (canCreateNewActivity) {
       RewardsModel rewardDetails = rewardBoxMap.values.last;
       String rewardId = rewardDetails.rewardId?.toString() ?? '';
