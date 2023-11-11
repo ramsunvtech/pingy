@@ -169,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     String totalPercentageIndicatorLabel ='Total Score';
 
     if (hasNoGoalInProgress()) {
+      totalScore = totalScoreValue;
       totalPercentageIndicatorLabel = 'Your Last Score';
     }
 
@@ -176,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     Widget leftSideTodayScoreIndicator = (canShowTodayPercentageIndicator)
         ? const SizedBox.shrink()
         : percentageIndicator(indicatorRadius, todayScoreValue, 'Today Score');
-    Widget rightSdietotalScoreIndicator = (canShowTotalPercentageIndicator)
+    Widget rightSideTotalScoreIndicator = (canShowTotalPercentageIndicator)
     ? const SizedBox.shrink()
     : percentageIndicator(70.0, totalScore,
         totalPercentageIndicatorLabel);
@@ -225,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
       if (containsRewards && containsTypes)
-        twoColumnGreyCards(leftSideTodayScoreIndicator, rightSdietotalScoreIndicator),
+        twoColumnGreyCards(leftSideTodayScoreIndicator, rightSideTotalScoreIndicator),
       if (_canDebug)
         greyCard(Column(
           children: [
