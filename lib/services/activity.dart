@@ -129,6 +129,8 @@ Map<String, dynamic> getScoreDetails() {
     'totalScore': decidingScoreForReward,
     // others.
     'totalActivities': activityBoxMapValues.length.toString(),
+    'totalActivityDays': totalActivityDays.toString(),
+    'totalActivityScore': totalActivityScore.toString(),
     'maximumTotalScore': getActivitiesTotalMaximumScore().toString(),
     'actualTotalScore': todayScoreTotalValue.toString(),
   };
