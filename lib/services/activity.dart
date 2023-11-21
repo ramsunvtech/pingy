@@ -114,7 +114,7 @@ Map<String, dynamic> getScoreDetails() {
   }
 
   dynamic totalActivityDays =
-      (activityBoxMapValues.isNotEmpty) ? activityBoxMapValues.length - 1 : 0;
+      (activityBoxMapValues.isNotEmpty) ? activityBoxMapValues.length : 0;
   dynamic decidingScoreForReward = 0;
 
   if (totalActivityScore > 0 && totalActivityDays > 0) {
