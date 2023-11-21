@@ -40,7 +40,7 @@ RewardsModel getLastCompletedGoal() {
   RewardsModel rewardDetails = rewardIterableValues.last;
   int totalRewards = rewardIterableValues.length;
   if (hasNoGoalInProgress() && totalRewards > 1) {
-    int findIndex = (totalRewards > 2) ? totalRewards - 2 : 0;
+    int findIndex = (totalRewards > 2) ? totalRewards - 1 : 0;
     rewardDetails = rewardIterableValues.elementAt(findIndex);
   }
   return rewardDetails;

@@ -36,7 +36,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _goalPicture = '';
   bool _goalPictureSelected = false;
-  final bool _canDebug = false;
+  final bool _canDebug = true;
   bool _isGoalEnded = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
