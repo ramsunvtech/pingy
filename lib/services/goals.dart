@@ -191,18 +191,14 @@ String findGoalPrize(int rewardScore) {
     int secondPricePercentage = getSecondPricePercentage();
     int thirdPricePercentage = getThirdPricePercentage();
     String prize = '';
-    String prizeType = '';
 
     if (rewardScore >= firstPricePercentage) {
-      prizeType = '$firstPricePercentage%';
       prize = rewardDetails.firstPrice;
       return getFirstPrizeMessage(prize);
     } else if (rewardScore >= secondPricePercentage) {
-      prizeType = '$secondPricePercentage%';
       prize = rewardDetails.secondPrice;
       return getSecondPrizeMessage(prize);
     } else if (rewardScore >= thirdPricePercentage) {
-      prizeType = '$thirdPricePercentage%';
       prize = rewardDetails.thirdPrice;
       return geThirdPrizeMessage(prize);
     }
