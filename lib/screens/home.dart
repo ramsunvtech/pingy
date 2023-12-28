@@ -265,14 +265,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           onPressed: () {
             goToGoalsForm(context);
           },
-          child: Text(t(context).addGoals),
+          // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
+          // child: Text(t(context).addGoals),
+          child: const Text('Add your Goal details'),
         ),
       if (containsRewards && !containsTypes)
         ElevatedButton(
           onPressed: () {
             goToActivityTypeFormScreen(context);
           },
-          child: Text(t(context).addActivityTypes),
+          // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
+          // child: Text(t(context).addActivityTypes),
+          child: const Text('Add your Activity Types'),
         ),
     ];
 
@@ -423,7 +427,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return WillPopScope(
       child: Scaffold(
         appBar: customAppBar(
-          title: t(context).appName,
+          // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
+          // title: t(context).appName,
+          title: 'Steppy',
           actions: [
               // if (containsRewards && containsTypes)
               settingsLinkIconButton(context),
