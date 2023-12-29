@@ -36,7 +36,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _goalPicture = '';
   bool _goalPictureSelected = false;
-  final bool _canDebug = true;
+  final bool _canDebug = false;
   bool _isGoalEnded = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
@@ -209,6 +209,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // You can adjust the factor (0.15 in this case) to fit the circle avatar in your layout properly
     double avatarRadius = screenHeight * 0.127;
 
+    dynamic totalRewardScore = scoreDetails['totalScore'];
+    predictReward = findGoalPrize(totalRewardScore);
+
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
         Center(
@@ -352,12 +355,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     todayScore = scoreDetails['todayScore'];
 
     dynamic rewardScore = scoreDetails['totalScore'];
-
-    showAlert(context, 'rewardScore', rewardScore);
-
-    setState(() {
-      predictReward = findGoalPrize(rewardScore);
-    });
+    predictReward = findGoalPrize(rewardScore);
 
     // TODO: Need a better reusable function to generate prize and message.
     if (rewardScore > 0) {
