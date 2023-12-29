@@ -251,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (containsRewards && containsTypes)
         Center(
           child: Text(
-            predictReward,
+            predictReward ?? 'No Prize',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
