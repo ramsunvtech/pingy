@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // You can adjust the factor (0.15 in this case) to fit the circle avatar in your layout properly
     double avatarRadius = screenHeight * 0.127;
 
-    dynamic totalRewardScore = scoreDetails['totalScore'];
+    int totalRewardScore = scoreDetails['totalScore'];
     predictReward = findGoalPrize(totalRewardScore);
 
     final List<Widget> homePanes = [
