@@ -36,7 +36,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _goalPicture = '';
   bool _goalPictureSelected = false;
-  final bool _canDebug = false;
+  final bool _canDebug = true;
   bool _isGoalEnded = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
@@ -85,6 +85,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void showAlert(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget getSelectedImage() {
     if (_goalPictureSelected || _goalPicture.isNotEmpty) {
       File goalPictureFile = File(_goalPicture);
@@ -99,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   color: Colors.grey.withOpacity(0.3), // Soft grey shadow
                   spreadRadius: 1, // Extend the shadow to all sides by 1 pixel
                   blurRadius: 5, // Soften the shadow by blurring it
-                  offset: const Offset(0, 3), // Position the shadow below the avatar
+                  offset: Offset(0, 3), // Position the shadow below the avatar
                 ),
               ],
             ),
@@ -248,10 +268,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Text('predictReward: $predictReward'),
           ],
         )),
-      if (containsRewards && containsTypes)
+      if (containsRewards && containsTypes && predictReward != '')
         Center(
           child: Text(
-            predictReward ?? 'No Prize',
+            predictReward,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
@@ -332,7 +352,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     todayScore = scoreDetails['todayScore'];
 
     dynamic rewardScore = scoreDetails['totalScore'];
-    predictReward = findGoalPrize(rewardScore);
+
+    setState(() {
+      predictReward = findGoalPrize(rewardScore);
+    });
 
     // TODO: Need a better reusable function to generate prize and message.
     if (rewardScore > 0) {
