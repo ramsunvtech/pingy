@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   String todayScore = '0';
   String totalScore = '0';
-  String predictReward = '';
+  String predictReward = 'default predictReward value';
   bool containsRewards = false;
   bool containsTypes = false;
 
