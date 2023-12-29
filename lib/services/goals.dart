@@ -202,9 +202,7 @@ String findGoalPrize(int rewardScore) {
       prize = rewardDetails.thirdPrice;
       return geThirdPrizeMessage(prize);
     }
-
-    return getNoPrizeMessage('No Prize for $rewardScore');
   }
 
-  return getNoPrizeMessage('No Prize for $rewardScore');
+  return getNoPrizeMessage('No Prize');
 }

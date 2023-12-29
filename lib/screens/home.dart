@@ -162,10 +162,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       lastGoalRewardId = lastGoal.rewardId;
     }
 
-    bool canShowTodayPercentageIndicator = (
+    bool canHideTodayPercentageIndicator = (
         isRewardEmpty() || hasNoGoalInProgress()
     );
-    bool canShowTotalPercentageIndicator = (
+    bool canHideTotalPercentageIndicator = (
         isRewardEmpty()
     );
     String totalPercentageIndicatorLabel ='Total Score';
@@ -176,10 +176,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     double indicatorRadius = 50.0;
-    Widget leftSideTodayScoreIndicator = (canShowTodayPercentageIndicator)
+    Widget leftSideTodayScoreIndicator = (canHideTodayPercentageIndicator)
         ? const SizedBox.shrink()
         : percentageIndicator(indicatorRadius, todayScoreValue, 'Today Score');
-    Widget rightSideTotalScoreIndicator = (canShowTotalPercentageIndicator)
+    Widget rightSideTotalScoreIndicator = (canHideTotalPercentageIndicator)
     ? const SizedBox.shrink()
     : percentageIndicator(70.0, totalScore,
         totalPercentageIndicatorLabel);
