@@ -43,7 +43,7 @@ class _GoalListScreenState extends State<GoalListScreen> {
       onPressed: () {
         goToGoalsForm(context);
       },
-      backgroundColor: const Color(0xFF98006D),
+      backgroundColor: Colors.lightGreen,
       child: const Icon(Icons.add),
     );
   }
