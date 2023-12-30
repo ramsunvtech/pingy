@@ -165,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     String totalActivityDays = scoreDetails['totalActivityDays'] ?? '0';
     String totalActivityScore = scoreDetails['totalActivityScore'] ?? '0';
     String totalScoreValue = scoreDetails['totalScore'].toString() ?? '0';
+    int totalScoreNumberValue = scoreDetails['totalScore'] as int;
     String totalActivities = scoreDetails['totalActivities'] ?? '-';
     String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
     String actualTotalScore = scoreDetails['actualTotalScore'] ?? '-';
@@ -209,8 +210,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // You can adjust the factor (0.15 in this case) to fit the circle avatar in your layout properly
     double avatarRadius = screenHeight * 0.127;
 
-    int totalRewardScore = scoreDetails['totalScore'];
-    predictReward = findGoalPrize(totalRewardScore);
+    predictReward = findGoalPrize(totalScoreNumberValue);
 
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
