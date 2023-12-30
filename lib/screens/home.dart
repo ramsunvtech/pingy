@@ -355,7 +355,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     todayScore = scoreDetails['todayScore'];
 
     dynamic rewardScore = scoreDetails['totalScore'];
-    predictReward = findGoalPrize(rewardScore);
 
     // TODO: Need a better reusable function to generate prize and message.
     if (rewardScore > 0) {

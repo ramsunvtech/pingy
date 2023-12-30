@@ -170,7 +170,7 @@ String setRewardResult(prize) {
   var rewardBox = Hive.box('rewards');
   Map rewardBoxMap = rewardBox.toMap();
   RewardsModel rewardDetails = rewardBoxMap.values.last;
-  rewardDetails.won = prize;
+  // rewardDetails.won = prize;
   rewardBox.put(rewardDetails.rewardId, rewardDetails);
   return '';
 }
@@ -204,5 +204,5 @@ String findGoalPrize(int rewardScore) {
     }
   }
 
-  return getNoPrizeMessage('No Prize');
+  return getNoPrizeMessage('No Prize for $rewardScore');
 }

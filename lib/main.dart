@@ -6,7 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/foundation.dart'
-    show PlatformDispatcher, kIsWeb, kReleaseMode;
+    show PlatformDispatcher, kDebugMode, kIsWeb, kReleaseMode;
 
 // Models.
 import 'package:pingy/models/hive/activity_type.dart';
@@ -62,8 +62,11 @@ void main() async {
   await Hive.openBox('rewards');
   await Hive.openBox('activity');
 
-  FlutterError.onError = (details) {
+  FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
+    if (kDebugMode) {
+      print('Steppy Error occurred: ${details.exception}');
+    }
     if (kReleaseMode) exit(1);
   };
 
