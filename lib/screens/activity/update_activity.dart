@@ -144,7 +144,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 child: const Text(
                   'Update',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.green,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.6),
                 ),
