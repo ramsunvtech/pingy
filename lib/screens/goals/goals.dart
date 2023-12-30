@@ -6,8 +6,10 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
+import 'package:pingy/widgets/PaddedFormField.dart';
 
 import 'package:pingy/utils/navigators.dart';
+
 
 class GoalScreen extends StatefulWidget {
   @override
@@ -41,9 +43,6 @@ class _GoalScreenState extends State<GoalScreen> {
 
   @override
   void dispose() {
-    // Close Hive Connection.
-    // Hive.close();
-
     super.dispose();
   }
 
@@ -68,13 +67,6 @@ class _GoalScreenState extends State<GoalScreen> {
     });
   }
 
-  Widget wrapWithPadding(Widget childWidget,
-      {double leftPadding = 16.0, double rightPadding = 16.0}) {
-    return Padding(
-        padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
-        child: childWidget);
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -87,7 +79,7 @@ class _GoalScreenState extends State<GoalScreen> {
         body: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            wrapWithPadding(TextFormField(
+            paddedFormField(TextFormField(
               controller: _titleController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
@@ -104,7 +96,7 @@ class _GoalScreenState extends State<GoalScreen> {
                 ),
               ),
             )),
-            wrapWithPadding(TextFormField(
+            paddedFormField(TextFormField(
               controller: _startPeriodController,
               cursorColor: Theme.of(context).colorScheme.background,
               readOnly: true,
@@ -153,7 +145,7 @@ class _GoalScreenState extends State<GoalScreen> {
                 );
               },
             )),
-            wrapWithPadding(TextFormField(
+            paddedFormField(TextFormField(
               controller: _firstPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
@@ -170,7 +162,7 @@ class _GoalScreenState extends State<GoalScreen> {
                 ),
               ),
             )),
-            wrapWithPadding(TextFormField(
+            paddedFormField(TextFormField(
               controller: _secondPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
@@ -187,7 +179,7 @@ class _GoalScreenState extends State<GoalScreen> {
                 ),
               ),
             )),
-            wrapWithPadding(TextFormField(
+            paddedFormField(TextFormField(
               controller: _thirdPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
@@ -227,8 +219,6 @@ class _GoalScreenState extends State<GoalScreen> {
                 showToastMessage(context, toastMessage);
                 goToHomeScreen(context);
               },
-              // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-              // color: Colors.pink,
               child: const Text(
                 'Add Goal',
                 style: TextStyle(
