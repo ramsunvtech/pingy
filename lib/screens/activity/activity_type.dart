@@ -166,7 +166,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                   child: const Text(
                     'Add Activity Type',
                     style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.green,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.6),
                   ),
