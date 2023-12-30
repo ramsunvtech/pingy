@@ -4,16 +4,20 @@ import 'dart:ffi';
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
+const int firstPrize = 95;
+const int secondPrize = 85;
+const int thirdPrize = 75;
+
 int getFirstPricePercentage() {
-  return 95;
+  return firstPrize;
 }
 
 int getSecondPricePercentage() {
-  return 85;
+  return secondPrize;
 }
 
 int getThirdPricePercentage() {
-  return 75;
+  return thirdPrize;
 }
 
 bool isRewardEmpty() {
@@ -39,7 +43,7 @@ RewardsModel getLastCompletedGoal() {
   Iterable<dynamic> rewardIterableValues = rewardBoxMap.values;
   RewardsModel rewardDetails = rewardIterableValues.last;
   int totalRewards = rewardIterableValues.length;
-  if (hasNoGoalInProgress() && totalRewards > 1) {
+  if (hasNoGoalInProgress() && rewardIterableValues.isNotEmpty) {
     int findIndex = (totalRewards > 2) ? totalRewards - 1 : 0;
     rewardDetails = rewardIterableValues.elementAt(findIndex);
   }
@@ -154,16 +158,16 @@ String geThirdPrizeMessage(String prize) {
 
 String getNoPrizeMessage(String prize) {
   if (isGoalLastDay()) {
-    return "Goal ends today, keep going! Celebrate your progress even if you didn't reach a milestone.";
+    return "Final day! No prize, but remember: 'Success is small efforts repeated.' - Collier. You've done well!";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
-    return "Great effort! Even though you couldn't hit any milestone, keep celebrating the steps you've taken so far. You're making great strides towards your success";
+    return "Your last goal showed great effort! Now's the time to start planning your next goal.";
   } else if (isGoalEndedMoreThanADay()) {
     setRewardResult(prize);
-    return "Great job on last time! Begin your next goal to for focus on milestone prizes.";
+    return "Kickstart a new goal, Its been more than a day! Your previous progress was impressive. 'Great things from small things.' - Van Gogh.";
   }
 
-  return 'Getting there! still not late, Work hard to reach the milestone.';
+  return "It's time to get back on track. 'The secret of getting ahead is starting.' - Twain. Your next milestone awaits!";
 }
 
 String setRewardResult(prize) {
