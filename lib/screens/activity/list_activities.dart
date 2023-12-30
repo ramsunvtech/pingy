@@ -32,7 +32,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     activityTypeBox = Hive.box('activity_type');
 
     if (activityBox.isNotEmpty) {
-      activityCount = activityBox.length.toString()
+      activityCount = activityBox.length.toString();
     }
   }
 
