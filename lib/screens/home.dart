@@ -428,16 +428,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return Container();
     }
 
-    return FloatingActionButton(
-      onPressed: () {
-        if (isTodayActivityExist()) {
-          goToUpdateActivityScreen(context);
-          return;
-        }
-        goToGoalsForm(context);
-      },
-      backgroundColor: Colors.green,
-      child: Icon(isTodayActivityExist() ? Icons.edit : Icons.add),
+    return Padding(
+      padding: const EdgeInsets.only(top: 70), // Adjust the value as needed
+      child: FloatingActionButton(
+        onPressed: () {
+          if (isTodayActivityExist()) {
+            goToUpdateActivityScreen(context);
+            return;
+          }
+          goToGoalsForm(context);
+        },
+        backgroundColor: Colors.green,
+        child: Icon(isTodayActivityExist() ? Icons.edit : Icons.add),
+      ),
     );
   }
 
