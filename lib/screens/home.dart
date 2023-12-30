@@ -438,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           }
           goToGoalsForm(context);
         },
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.lightGreen,
         child: Icon(isTodayActivityExist() ? Icons.edit : Icons.add),
       ),
     );
