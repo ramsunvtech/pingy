@@ -84,7 +84,6 @@ class _GoalScreenState extends State<GoalScreen> {
               controller: _titleController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
-                icon: Icon(Icons.label),
                 labelText: 'Goals Title',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
@@ -103,7 +102,6 @@ class _GoalScreenState extends State<GoalScreen> {
               cursorColor: Theme.of(context).colorScheme.background,
               readOnly: true,
               decoration: const InputDecoration(
-                icon: Icon(Icons.calendar_today),
                 labelText: 'Activity Period',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
@@ -152,7 +150,6 @@ class _GoalScreenState extends State<GoalScreen> {
               controller: _firstPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
-                icon: Icon(Icons.numbers),
                 labelText: '1st Prize',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
@@ -170,7 +167,6 @@ class _GoalScreenState extends State<GoalScreen> {
               controller: _secondPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
-                icon: Icon(Icons.numbers),
                 labelText: '2nd Prize',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
@@ -188,7 +184,6 @@ class _GoalScreenState extends State<GoalScreen> {
               controller: _thirdPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
-                icon: Icon(Icons.numbers),
                 labelText: '3rd Prize',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
