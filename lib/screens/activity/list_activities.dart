@@ -20,6 +20,8 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
   late final Box activityBox;
   late final Box activityTypeBox;
 
+  String activityCount = '0';
+
   set activityTypeDetail(activityTypeDetail) {}
 
   @override
@@ -28,6 +30,10 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     // Get reference to an already opened box
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
+
+    if (activityBox.isNotEmpty) {
+      activityCount = activityBox.length.toString()
+    }
   }
 
   Widget getListTileTrailingIconButton(String activityId) {
@@ -49,7 +55,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     return IconButton(
       onPressed: () {
         activityBox.delete(activityId);
-        String toastMessage = 'Activity removed successfully!';
+        String toastMessage = 'Score removed successfully!';
         showToastMessage(context, toastMessage);
       },
       icon: const Icon(
@@ -64,7 +70,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     return WillPopScope(
       child: Scaffold(
         appBar: customAppBar(
-          title: 'Activities',
+          title: 'Scores ($activityCount days)',
           actions: [
             settingsLinkIconButton(context),
           ],
@@ -74,7 +80,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
           builder: (context, Box activityDataBox, widget) {
             if (activityDataBox.isEmpty) {
               return const Center(
-                child: Text('No Activities are available.'),
+                child: Text('No Scores are available.'),
               );
             } else {
               Iterable activityDataKeyList = activityDataBox.keys.toList().reversed;

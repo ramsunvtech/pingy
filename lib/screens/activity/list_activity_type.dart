@@ -93,7 +93,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
       onPressed: () {
         goToActivityTypeFormScreen(context);
       },
-      backgroundColor: const Color(0xFF98006D),
+      backgroundColor: Colors.lightGreen,
       child: const Icon(Icons.add),
     );
   }
@@ -103,7 +103,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     return WillPopScope(
         child: Scaffold(
           appBar: customAppBar(
-            title: 'Activity Types ($activityTypeCount)',
+            title: 'Activities ($activityTypeCount)',
             actions: [
               settingsLinkIconButton(context),
             ],
