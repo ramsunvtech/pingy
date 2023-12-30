@@ -68,6 +68,13 @@ class _GoalScreenState extends State<GoalScreen> {
     });
   }
 
+  Widget wrapWithPadding(Widget childWidget,
+      {double leftPadding = 16.0, double rightPadding = 16.0}) {
+    return Padding(
+        padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
+        child: childWidget);
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -80,7 +87,7 @@ class _GoalScreenState extends State<GoalScreen> {
         body: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            TextFormField(
+            wrapWithPadding(TextFormField(
               controller: _titleController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
@@ -96,8 +103,8 @@ class _GoalScreenState extends State<GoalScreen> {
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
                 ),
               ),
-            ),
-            TextFormField(
+            )),
+            wrapWithPadding(TextFormField(
               controller: _startPeriodController,
               cursorColor: Theme.of(context).colorScheme.background,
               readOnly: true,
@@ -135,7 +142,7 @@ class _GoalScreenState extends State<GoalScreen> {
                           child: const Text(
                             'Done',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.green,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.6),
                           ),
@@ -145,8 +152,8 @@ class _GoalScreenState extends State<GoalScreen> {
                   },
                 );
               },
-            ),
-            TextFormField(
+            )),
+            wrapWithPadding(TextFormField(
               controller: _firstPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
@@ -162,8 +169,8 @@ class _GoalScreenState extends State<GoalScreen> {
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
                 ),
               ),
-            ),
-            TextFormField(
+            )),
+            wrapWithPadding(TextFormField(
               controller: _secondPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
@@ -179,8 +186,8 @@ class _GoalScreenState extends State<GoalScreen> {
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
                 ),
               ),
-            ),
-            TextFormField(
+            )),
+            wrapWithPadding(TextFormField(
               controller: _thirdPrizeController,
               cursorColor: Theme.of(context).colorScheme.background,
               decoration: const InputDecoration(
@@ -196,14 +203,14 @@ class _GoalScreenState extends State<GoalScreen> {
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
                 ),
               ),
-            ),
+            )),
             ElevatedButton(
               onPressed: () {
                 var today = DateTime.now();
                 var todayDate = '${today.year}${today.month}${today.day}';
                 var todayTime = '${today.hour}${today.minute}${today.second}';
                 var rewardId = 'goal_$todayDate$todayTime';
-          String yetToWin = '';
+                String yetToWin = '';
                 String emptyPicture = '';
                 RewardsModel newRewards = RewardsModel(
                     _titleController.text,
@@ -214,8 +221,7 @@ class _GoalScreenState extends State<GoalScreen> {
                     _thirdPrizeController.text,
                     emptyPicture,
                     rewardId,
-                    yetToWin
-                );
+                    yetToWin);
                 rewardsBox.add(newRewards);
                 String toastMessage = 'Goal Added!';
                 showToastMessage(context, toastMessage);
@@ -226,7 +232,7 @@ class _GoalScreenState extends State<GoalScreen> {
               child: const Text(
                 'Add Goal',
                 style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.green,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.6),
               ),
