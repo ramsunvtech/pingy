@@ -109,27 +109,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (_goalPictureSelected || _goalPicture.isNotEmpty) {
       File goalPictureFile = File(_goalPicture);
       if (goalPictureFile.existsSync()) {
-        return
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white, // Match the background color to the white background
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3), // Soft grey shadow
-                  spreadRadius: 1, // Extend the shadow to all sides by 1 pixel
-                  blurRadius: 5, // Soften the shadow by blurring it
-                  offset: Offset(0, 3), // Position the shadow below the avatar
-                ),
-              ],
-            ),
-            child: CircleAvatar(
-                radius: 110 - 5,
-                backgroundImage: Image.file(
-                  goalPictureFile,
-                  fit: BoxFit.cover,
-                ).image),
-          );
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            // Match the background color to the white background
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3), // Soft grey shadow
+                spreadRadius: 1, // Extend the shadow to all sides by 1 pixel
+                blurRadius: 5, // Soften the shadow by blurring it
+                offset: Offset(0, 3), // Position the shadow below the avatar
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+              radius: 110 - 5,
+              backgroundImage: Image.file(
+                goalPictureFile,
+                fit: BoxFit.cover,
+              ).image),
+        );
       }
     }
 
@@ -183,13 +183,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       lastGoalRewardId = lastGoal.rewardId;
     }
 
-    bool canHideTodayPercentageIndicator = (
-        isRewardEmpty() || hasNoGoalInProgress()
-    );
-    bool canHideTotalPercentageIndicator = (
-        isRewardEmpty()
-    );
-    String totalPercentageIndicatorLabel ='Total Score';
+    bool canHideTodayPercentageIndicator =
+        (isRewardEmpty() || hasNoGoalInProgress());
+    bool canHideTotalPercentageIndicator = (isRewardEmpty());
+    String totalPercentageIndicatorLabel = 'Total Score';
 
     if (hasNoGoalInProgress()) {
       totalScore = totalScoreValue;
@@ -201,9 +198,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ? const SizedBox.shrink()
         : percentageIndicator(indicatorRadius, todayScoreValue, 'Today Score');
     Widget rightSideTotalScoreIndicator = (canHideTotalPercentageIndicator)
-    ? const SizedBox.shrink()
-    : percentageIndicator(70.0, totalScore,
-        totalPercentageIndicatorLabel);
+        ? const SizedBox.shrink()
+        : percentageIndicator(70.0, totalScore, totalPercentageIndicatorLabel);
 
     // Inside a build method of a Widget
     double screenHeight = MediaQuery.of(context).size.height;
@@ -251,7 +247,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
       if (containsRewards && containsTypes)
-        twoColumnGreyCards(leftSideTodayScoreIndicator, rightSideTotalScoreIndicator),
+        twoColumnGreyCards(
+            leftSideTodayScoreIndicator, rightSideTotalScoreIndicator),
       if (_canDebug)
         greyCard(Column(
           children: [
@@ -367,7 +364,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
 
-    if(isGoalEndedYesterday() || isGoalEndedMoreThanADay() || isGoalStartInFuture()) {
+    if (isGoalEndedYesterday() ||
+        isGoalEndedMoreThanADay() ||
+        isGoalStartInFuture()) {
       _isGoalEnded = true;
       canCreateNewActivity = false;
     }
@@ -424,7 +423,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget getFloatingButton(BuildContext context) {
     if (_isGoalEnded && !containsRewards ||
         !containsTypes ||
-        activityBox.length == 0 || isGoalStartInFuture()) {
+        activityBox.length == 0 ||
+        isGoalStartInFuture()) {
       return Container();
     }
 
@@ -455,8 +455,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           // title: t(context).appName,
           title: 'Steppy',
           actions: [
-              // if (containsRewards && containsTypes)
-              settingsLinkIconButton(context),
+            // if (containsRewards && containsTypes)
+            settingsLinkIconButton(context),
           ],
         ),
         body: ListView.builder(
