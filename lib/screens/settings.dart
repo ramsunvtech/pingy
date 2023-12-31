@@ -168,7 +168,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       'Clear all Activity',
                       style: TextStyle(
                         fontSize: 20,
-
                       ),
                     ),
                   ),
@@ -189,7 +188,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       'Clear all Types',
                       style: TextStyle(
                         fontSize: 20,
-
                       ),
                     ),
                   ),
