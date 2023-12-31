@@ -1,4 +1,3 @@
-
 import 'dart:ffi';
 
 import 'package:hive/hive.dart';
@@ -69,7 +68,8 @@ int getGoalDayCountByPeriodType(String periodType) {
   if (periodType == 'start') {
     List startPeriod = rewardDetails.startPeriod.split('/').toList();
     // Example: Date 2023-04-07
-    String startDateString = '${startPeriod[2]}-${startPeriod[1]}-${startPeriod[0]}';
+    String startDateString =
+        '${startPeriod[2]}-${startPeriod[1]}-${startPeriod[0]}';
     DateTime startDate = stripTime(DateTime.parse(startDateString));
     Duration diff = startDate.difference(today);
     return diff.inDays;
