@@ -53,9 +53,6 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
 
   @override
   void dispose() {
-    // Close Hive Connection.
-    // Hive.close();
-
     super.dispose();
   }
 
@@ -71,7 +68,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
       }
     }
 
-    return WillPopScope(
+    return PopScope(
         child: Scaffold(
           appBar: customAppBar(
               title: (formMode == 'edit')
@@ -175,9 +172,9 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
             ),
           ),
         ),
-        onWillPop: () async {
+        onPopInvoked: (bool didPop) {
           goToActivityTypeListScreen(context);
-          return true;
+          return;
         });
   }
 }
