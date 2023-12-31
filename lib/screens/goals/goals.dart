@@ -10,7 +10,6 @@ import 'package:pingy/widgets/PaddedFormField.dart';
 
 import 'package:pingy/utils/navigators.dart';
 
-
 class GoalScreen extends StatefulWidget {
   @override
   _GoalScreenState createState() => _GoalScreenState();
