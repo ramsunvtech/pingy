@@ -100,7 +100,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return PopScope(
         child: Scaffold(
           appBar: customAppBar(
             title: 'Activities ($activityTypeCount)',
@@ -152,9 +152,9 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
           floatingActionButton: getFloatingActionButton(),
           bottomNavigationBar: settingsBottomNavigationBar(context),
         ),
-        onWillPop: () async {
+        onPopInvoked: (bool didPop) {
           goToSettingScreen(context);
-          return true;
+          return;
         });
   }
 }
