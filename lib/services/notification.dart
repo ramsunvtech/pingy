@@ -11,7 +11,8 @@ class NotificationService {
 
   DateTime nextInstanceOfTenAM(int hour, int minutes) {
     final DateTime now = DateTime.now();
-    final DateTime tenAM = DateTime(now.year, now.month, now.day, hour, minutes);
+    final DateTime tenAM =
+        DateTime(now.year, now.month, now.day, hour, minutes);
     return tenAM.isBefore(now) ? tenAM.add(const Duration(days: 1)) : tenAM;
   }
 
