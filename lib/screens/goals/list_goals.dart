@@ -92,15 +92,13 @@ class _GoalListScreenState extends State<GoalListScreen> {
                       onTap: () => {},
                       child: ListTile(
                         title: Text(rewardsData.title),
-                        subtitle: Text(
-                            '${rewardsData.startPeriod}'
-                                ' to ${rewardsData.endPeriod}\n'
-                                'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
-                                'Second Prize (85%): ${getPrize(rewardsData.secondPrice)}\n'
-                                'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}\n'
-                                '${getGoalResult(rewardsData)}'
-                                'Goal Picture: ${isPictureExist(rewardsData)}\n'
-                        ),
+                        subtitle: Text('${rewardsData.startPeriod}'
+                            ' to ${rewardsData.endPeriod}\n'
+                            'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
+                            'Second Prize (85%): ${getPrize(rewardsData.secondPrice)}\n'
+                            'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}\n'
+                            '${getGoalResult(rewardsData)}'
+                            'Goal Picture: ${isPictureExist(rewardsData)}\n'),
                       ));
                 },
               );
