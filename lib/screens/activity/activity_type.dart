@@ -5,6 +5,7 @@ import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
+import 'package:pingy/widgets/PaddedFormField.dart';
 
 class TaskTypeScreen extends StatefulWidget {
   final String? activityTypeId;
@@ -64,21 +65,24 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
       ActivityTypeModel editingActivityType = getActivityTypeDetails();
       _nameController.text = editingActivityType.activityName;
       _fullScoreController.text = editingActivityType.fullScore;
-      _rankController.text =  '0';
+      _rankController.text = '0';
       if (editingActivityType.rank != null) {
-        _rankController.text =  editingActivityType.rank!;
+        _rankController.text = editingActivityType.rank!;
       }
     }
 
     return WillPopScope(
         child: Scaffold(
-          appBar: customAppBar(title: (formMode == 'edit') ? 'Edit Activity Type' : 'Add Activity Type'),
+          appBar: customAppBar(
+              title: (formMode == 'edit')
+                  ? 'Edit Activity Type'
+                  : 'Add Activity Type'),
           body: Container(
             alignment: Alignment.center,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                TextFormField(
+                paddedFormField(TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
                     labelText: 'Activity Type Name',
@@ -93,8 +97,8 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                       borderSide: BorderSide(color: Color(0xFF6200EE)),
                     ),
                   ),
-                ),
-                TextFormField(
+                )),
+                paddedFormField(TextFormField(
                   controller: _fullScoreController,
                   keyboardType: TextInputType.number,
                   maxLength: 3,
@@ -111,8 +115,8 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                       borderSide: BorderSide(color: Color(0xFF6200EE)),
                     ),
                   ),
-                ),
-                TextFormField(
+                )),
+                paddedFormField(TextFormField(
                   controller: _rankController,
                   keyboardType: TextInputType.number,
                   maxLength: 3,
@@ -129,7 +133,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                       borderSide: BorderSide(color: Color(0xFF6200EE)),
                     ),
                   ),
-                ),
+                )),
                 ElevatedButton(
                   onPressed: () {
                     var today = DateTime.now();
@@ -152,7 +156,6 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                         _fullScoreController.text,
                         _rankController.text);
                     activityTypeBox.put(activityTypeId, updatingActivityType);
-
 
                     showToastMessage(context, 'Activity Type Added!');
 
