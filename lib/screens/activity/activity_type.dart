@@ -81,7 +81,6 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
-                    icon: Icon(Icons.label),
                     labelText: 'Activity Type Name',
                     labelStyle: TextStyle(
                       color: Color(0xFF6200EE),
@@ -100,7 +99,6 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                   keyboardType: TextInputType.number,
                   maxLength: 3,
                   decoration: const InputDecoration(
-                    icon: Icon(Icons.numbers),
                     labelText: 'Activity Score',
                     labelStyle: TextStyle(
                       color: Color(0xFF6200EE),
@@ -119,7 +117,6 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
                   keyboardType: TextInputType.number,
                   maxLength: 3,
                   decoration: const InputDecoration(
-                    icon: Icon(Icons.numbers),
                     labelText: 'Activity Rank',
                     labelStyle: TextStyle(
                       color: Color(0xFF6200EE),
