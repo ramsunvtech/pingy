@@ -133,7 +133,7 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                   itemBuilder: (context, index) {
                     var currentBox = activityTypeList;
                     ActivityTypeModel activityTypeData =
-                    currentBox.elementAt(index)!;
+                        currentBox.elementAt(index)!;
 
                     return InkWell(
                       onTap: () => {},
