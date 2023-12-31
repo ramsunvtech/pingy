@@ -448,7 +448,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     List<Widget> homePanes = getHomeBlocks('100');
 
-    return WillPopScope(
+    return PopScope(
       child: Scaffold(
         appBar: customAppBar(
           // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
@@ -474,9 +474,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         floatingActionButton: getFloatingButton(context),
       ),
-      onWillPop: () async {
+      onPopInvoked: (bool didPop) {
         SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-        return false;
+        return;
       },
     );
   }
