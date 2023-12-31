@@ -103,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return PopScope(
       child: Scaffold(
         appBar: customAppBar(
           title: 'Settings',
@@ -235,9 +235,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
-      onWillPop: () async {
+      onPopInvoked: (bool didPop) {
         goToHomeScreen(context);
-        return true;
+        return;
       },
     );
   }
