@@ -195,7 +195,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       return 'To do (${todoActivities.length.toString()})';
     }
 
-    return WillPopScope(
+    return PopScope(
       child: DefaultTabController(
         length: 3,
         initialIndex: defaultActivityTabIndex,
@@ -384,9 +384,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           ),
         ),
       ),
-      onWillPop: () async {
+      onPopInvoked: (bool didPop) {
         goToHomeScreen(context);
-        return true;
+        return;
       },
     );
   }
