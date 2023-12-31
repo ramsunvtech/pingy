@@ -12,8 +12,7 @@ Future<String> getCheckNotificationPermStatus() async {
   if (!kIsWeb) {
     if (await Permission.notification.request().isGranted) {
       String notificationPermissionStatus =
-      Permission.notification.status as String;
-
+          Permission.notification.status as String;
       return notificationPermissionStatus;
     }
 
