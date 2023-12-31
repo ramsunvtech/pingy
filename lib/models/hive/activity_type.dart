@@ -16,5 +16,6 @@ class ActivityTypeModel extends HiveObject {
   @HiveField(3)
   final String? rank;
 
-  ActivityTypeModel(this.activityTypeId, this.activityName, this.fullScore, this.rank);
+  ActivityTypeModel(
+      this.activityTypeId, this.activityName, this.fullScore, this.rank);
 }
