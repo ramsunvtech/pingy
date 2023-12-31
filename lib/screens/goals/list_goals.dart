@@ -66,7 +66,7 @@ class _GoalListScreenState extends State<GoalListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return PopScope(
       child: Scaffold(
         appBar: customAppBar(
           title: 'Goals',
@@ -110,9 +110,9 @@ class _GoalListScreenState extends State<GoalListScreen> {
         floatingActionButton: getFloatingButton(context),
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
-      onWillPop: () async {
+      onPopInvoked: (bool didPop) {
         goToSettingScreen(context);
-        return true;
+        return;
       },
     );
   }
