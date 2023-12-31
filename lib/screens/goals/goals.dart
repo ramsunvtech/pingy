@@ -69,7 +69,7 @@ class _GoalScreenState extends State<GoalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return PopScope(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: customAppBar(
@@ -230,14 +230,14 @@ class _GoalScreenState extends State<GoalScreen> {
           ],
         ),
       ),
-      onWillPop: () async {
+      onPopInvoked: (bool didPop) {
         if (activityBox.values.isEmpty) {
           goToHomeScreen(context);
-          return true;
+          return;
         }
 
         goToGoalsListScreen(context);
-        return true;
+        return;
       },
     );
   }
