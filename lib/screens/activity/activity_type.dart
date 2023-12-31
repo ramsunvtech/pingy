@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
-
-import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
+import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/PaddedFormField.dart';
 
 class TaskTypeScreen extends StatefulWidget {
