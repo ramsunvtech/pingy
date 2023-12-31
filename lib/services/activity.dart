@@ -7,7 +7,9 @@ import 'goals.dart';
 
 void l(String message, {bool verbose = false}) {
   if (verbose) {
-    print(message);
+    if (kDebugMode) {
+      print(message);
+    }
   }
 }
 
