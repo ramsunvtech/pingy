@@ -8,6 +8,7 @@ import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
+import 'package:pingy/widgets/PaddedFormField.dart';
 
 import 'package:pingy/utils/color.dart';
 
@@ -80,7 +81,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           ),
           const Center(child: Text('Update')),
           Center(
-            child: TextFormField(
+            child: paddedFormField(TextFormField(
               controller: _fullScoreController,
               cursorColor: Theme.of(context).backgroundColor,
               keyboardType: TextInputType.number,
@@ -101,7 +102,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 return null;
               },
               decoration: InputDecoration(
-                icon: Icon(Icons.numbers),
                 labelText: 'Activity Score',
                 labelStyle: TextStyle(
                   color: Color(0xFF6200EE),
@@ -115,7 +115,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
                 ),
               ),
-            ),
+            )),
           ),
           Center(
             child: FractionallySizedBox(
