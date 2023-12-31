@@ -83,7 +83,8 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                 child: Text('No Scores are available.'),
               );
             } else {
-              Iterable activityDataKeyList = activityDataBox.keys.toList().reversed;
+              Iterable activityDataKeyList =
+                  activityDataBox.keys.toList().reversed;
               // TODO: fix the manual key index.
               return ListView.builder(
                 itemCount: activityDataKeyList.length,
@@ -120,7 +121,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
 
                       for (var activityItem in missedActivityIdList) {
                         dynamic activityTypeDetail =
-                        activityTypeBox.get(activityItem.activityItemId);
+                            activityTypeBox.get(activityItem.activityItemId);
                         activityTypes.add(activityTypeDetail.activityName);
                       }
 
@@ -129,13 +130,13 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                   }
 
                   dynamic activityScoreValue =
-                  (((dayScore / activityTypeFullScore) * 100).ceil());
+                      (((dayScore / activityTypeFullScore) * 100).ceil());
 
                   String formattedDate = '';
                   if (activityData!.activityDate != null) {
                     DateFormat dateFormat = DateFormat("EEE, dd/MMM/yy");
                     formattedDate =
-                    '(${dateFormat.format(activityData!.activityDate as DateTime)})';
+                        '(${dateFormat.format(activityData!.activityDate as DateTime)})';
                   }
 
                   return InkWell(
@@ -145,7 +146,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                           'Activity $formattedDate - $activityScoreValue%'),
                       subtitle: Text(
                         'Score: $dayScore/$activityTypeFullScore\n'
-                            '$missedItemsCSV',
+                        '$missedItemsCSV',
                       ),
                       trailing: getListTileTrailingIconButton(
                           activityData.activityId),
