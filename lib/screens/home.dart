@@ -24,9 +24,9 @@ import 'package:pingy/utils/l10n.dart';
 import 'package:pingy/utils/color.dart';
 import 'package:pingy/utils/permissions.dart';
 
+// Services.
 import 'package:pingy/services/goals.dart';
-
-import '../services/activity.dart';
+import 'package:pingy/services/activity.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -83,26 +83,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
     }
-  }
-
-  void showAlert(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Widget getSelectedImage() {
@@ -204,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // Inside a build method of a Widget
     double screenHeight = MediaQuery.of(context).size.height;
     // You can adjust the factor (0.15 in this case) to fit the circle avatar in your layout properly
-    double avatarRadius = screenHeight * 0.127;
+    double avatarRadius = screenHeight * 0.115;
 
     predictReward = findGoalPrize(totalScoreNumberValue);
 
