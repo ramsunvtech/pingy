@@ -265,7 +265,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Text('Actual Score for the day: $actualTotalScore'),
             Text('containsRewards: $containsRewards'),
             Text('containsTypes: $containsTypes'),
-            Text('predictReward: $predictReward'),
           ],
         )),
       if (containsRewards && containsTypes && predictReward != '')
