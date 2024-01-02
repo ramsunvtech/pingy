@@ -107,7 +107,7 @@ Map<String, dynamic> getScoreDetails() {
         if (isTodayActivity && activityContainsScore && isGoalEnded) {
           todayScore = currentDayScoreValue.toString();
           todayScoreTotalValue = getCurrentDayScore(activity.activityItems);
-        } else if (activityContainsScore) {
+        } else if (isTodayActivity == false && activityContainsScore) {
           totalActivityScore += currentDayScoreValue;
         }
       }
