@@ -69,7 +69,7 @@ dynamic getCurrentDayScore(dynamic activityItems) {
   return dayScore;
 }
 
-dynamic getTodayScore(activityItems) {
+dynamic getCurrentActivityDayScore(activityItems) {
   int activityTypeFullScore = getActivitiesTotalMaximumScore();
 
   if (activityTypeFullScore == 0) return 0;
@@ -91,26 +91,24 @@ Map<String, dynamic> getScoreDetails() {
   }
 
   String todayScore = '';
-  dynamic todayScoreValue = 0;
+  dynamic currentDayScoreValue = 0;
   dynamic todayScoreTotalValue = 0;
   dynamic totalActivityScore = 0;
-  bool isGoalInProgress = isGoalEndedYesterday() == false || isGoalEndedMoreThanADay() == false;
+  bool isGoalEnded = isGoalEndedYesterday() || isGoalEndedMoreThanADay();
 
   if (activityBoxMapValues.isNotEmpty) {
     for (var activity in activityBoxMapValues) {
       dynamic dayScore = 0;
       if (activity.activityItems.length > 0) {
-        todayScoreValue = getTodayScore(activity.activityItems);
+        currentDayScoreValue = getCurrentActivityDayScore(activity.activityItems);
         bool isTodayActivity = (activity.activityId == todayActivityId);
-        bool containsTodayScore = (todayScoreValue != '');
+        bool activityContainsScore = (currentDayScoreValue != '');
 
-        if (isTodayActivity && containsTodayScore && isGoalInProgress) {
-          todayScore = todayScoreValue.toString();
+        if (isTodayActivity && activityContainsScore && isGoalEnded) {
+          todayScore = currentDayScoreValue.toString();
           todayScoreTotalValue = getCurrentDayScore(activity.activityItems);
-        }
-
-        if (!isTodayActivity && containsTodayScore) {
-          totalActivityScore += todayScoreValue;
+        } else if (activityContainsScore) {
+          totalActivityScore += currentDayScoreValue;
         }
       }
     }
