@@ -114,6 +114,10 @@ bool hasNoGoalInProgress() {
   return (getGoalEndDayCount() < 0 || isGoalStartInFuture());
 }
 
+bool isGoalInProgress() {
+  return (getGoalEndDayCount() >= 0);
+}
+
 String getFirstPrizeMessage(prize) {
   if (isGoalLastDay()) {
     return "First prize is almost yours; let today's dedication be the key to victory.";
