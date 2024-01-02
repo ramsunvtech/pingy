@@ -5,9 +5,12 @@ import 'package:pingy/utils/color.dart';
 
 dynamic percentageIndicator(double radius, String score, String label) {
   double percentValue = 0;
+  String displayScore = "0"; // Default display value
 
   if (int.tryParse(score) != null) {
     percentValue = int.tryParse(score)! / 100;
+  } else {
+    displayScore = score;
   }
 
   // TODO - this line need to be removed later.
@@ -24,7 +27,7 @@ dynamic percentageIndicator(double radius, String score, String label) {
       animationDuration: 1600,
       percent: percentValue,
       center: Text(
-        '$score%',
+        '$displayScore%',
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
       ),
       footer: Padding(
