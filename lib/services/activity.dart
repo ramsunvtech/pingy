@@ -104,7 +104,7 @@ Map<String, dynamic> getScoreDetails() {
         bool isTodayActivity = (activity.activityId == todayActivityId);
         bool activityContainsScore = (currentDayScoreValue != '');
 
-        if (isTodayActivity && activityContainsScore && isGoalEnded) {
+        if (isTodayActivity && activityContainsScore) {
           todayScore = currentDayScoreValue.toString();
           todayScoreTotalValue = getCurrentDayScore(activity.activityItems);
         }
