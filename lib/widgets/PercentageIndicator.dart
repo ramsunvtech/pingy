@@ -8,9 +8,8 @@ dynamic percentageIndicator(double radius, String score, String label) {
   String displayScore = "0"; // Default display value
 
   if (int.tryParse(score) != null) {
-    percentValue = int.tryParse(score)! / 100;
-  } else {
     displayScore = score;
+    percentValue = int.tryParse(score)! / 100;
   }
 
   // TODO - this line need to be removed later.
