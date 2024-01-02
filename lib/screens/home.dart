@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   String todayScore = '0';
   String totalScore = '0';
-  String predictReward = 'default predictReward value';
+  String predictReward = '';
   bool containsRewards = false;
   bool containsTypes = false;
 
@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 color: Colors.grey.withOpacity(0.3), // Soft grey shadow
                 spreadRadius: 1, // Extend the shadow to all sides by 1 pixel
                 blurRadius: 5, // Soften the shadow by blurring it
-                offset: Offset(0, 3), // Position the shadow below the avatar
+                offset: const Offset(0, 3), // Position the shadow below the avatar
               ),
             ],
           ),
