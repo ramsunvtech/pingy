@@ -94,6 +94,7 @@ Map<String, dynamic> getScoreDetails() {
   dynamic todayScoreValue = 0;
   dynamic todayScoreTotalValue = 0;
   dynamic totalActivityScore = 0;
+  bool isGoalInProgress = isGoalEndedYesterday() == false || isGoalEndedMoreThanADay() == false;
 
   if (activityBoxMapValues.isNotEmpty) {
     for (var activity in activityBoxMapValues) {
@@ -103,7 +104,7 @@ Map<String, dynamic> getScoreDetails() {
         bool isTodayActivity = (activity.activityId == todayActivityId);
         bool containsTodayScore = (todayScoreValue != '');
 
-        if (isTodayActivity && containsTodayScore) {
+        if (isTodayActivity && containsTodayScore && isGoalInProgress) {
           todayScore = todayScoreValue.toString();
           todayScoreTotalValue = getCurrentDayScore(activity.activityItems);
         }
