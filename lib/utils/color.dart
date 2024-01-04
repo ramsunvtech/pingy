@@ -21,3 +21,5 @@ const Color iconColor = Color(0xff0A150E);
 Color blackColor = const Color(0xFF000000);
 
 Color lightBlackColor = const Color(0xFF202020);
+
+Color darkGreyColor = const Color(0xFF121212);
