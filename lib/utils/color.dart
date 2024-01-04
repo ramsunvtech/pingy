@@ -22,4 +22,4 @@ Color blackColor = const Color(0xFF000000);
 
 Color lightBlackColor = const Color(0xFF202020);
 
-Color lightGreyColor = const Color(0xFF0A0A0A);
+Color lightGreyColor = const Color(0xFF1A1A1A);
