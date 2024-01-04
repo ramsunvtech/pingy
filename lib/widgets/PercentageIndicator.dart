@@ -37,7 +37,7 @@ dynamic percentageIndicator(double radius, String score, String label) {
         ),
       ),
       circularStrokeCap: CircularStrokeCap.round,
-      backgroundColor: darkGreyColor,
+      backgroundColor: darkGreyColor2,
       progressColor: totalScoreColor,
     ),
   );
