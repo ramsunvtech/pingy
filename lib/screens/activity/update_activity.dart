@@ -83,7 +83,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           Center(
             child: paddedFormField(TextFormField(
               controller: _fullScoreController,
-              cursorColor: Theme.of(context).backgroundColor,
+              cursorColor: Theme.of(context).colorScheme.background,
               keyboardType: TextInputType.number,
               maxLength: 3,
               validator: (value) {
@@ -103,15 +103,15 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
               },
               decoration: InputDecoration(
                 labelText: 'Activity Score',
-                labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
+                labelStyle: const TextStyle(
+                  color: Color(0xFF000000),
                 ),
                 helperText:
                     'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
-                suffixIcon: Icon(
+                suffixIcon: const Icon(
                   Icons.check_circle,
                 ),
-                enabledBorder: UnderlineInputBorder(
+                enabledBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6200EE)),
                 ),
               ),
