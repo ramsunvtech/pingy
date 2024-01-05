@@ -83,7 +83,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           Center(
             child: paddedFormField(TextFormField(
               controller: _fullScoreController,
-              cursorColor: Theme.of(context).colorScheme.background,
               keyboardType: TextInputType.number,
               maxLength: 3,
               validator: (value) {
