@@ -9,6 +9,7 @@ import 'package:pingy/widgets/CustomAppBar.dart';
 import 'package:pingy/widgets/PaddedFormField.dart';
 
 import 'package:pingy/utils/navigators.dart';
+import 'package:pingy/utils/color.dart';
 
 class GoalScreen extends StatefulWidget {
   @override
@@ -84,7 +85,7 @@ class _GoalScreenState extends State<GoalScreen> {
               decoration: const InputDecoration(
                 labelText: 'Goals Title',
                 labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
+                  color: Color(0xFF000000),
                 ),
                 helperText: 'Enter your Goal title',
                 suffixIcon: Icon(
@@ -102,7 +103,7 @@ class _GoalScreenState extends State<GoalScreen> {
               decoration: const InputDecoration(
                 labelText: 'Activity Period',
                 labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
+                  color: Color(0xFF000000),
                 ),
                 helperText: 'Choose activity period',
                 suffixIcon: Icon(
@@ -150,7 +151,7 @@ class _GoalScreenState extends State<GoalScreen> {
               decoration: const InputDecoration(
                 labelText: '1st Prize',
                 labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
+                  color: Color(0xFF000000),
                 ),
                 helperText: 'Enter First Prize those who score 95% or above',
                 suffixIcon: Icon(
@@ -167,7 +168,7 @@ class _GoalScreenState extends State<GoalScreen> {
               decoration: const InputDecoration(
                 labelText: '2nd Prize',
                 labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
+                  color: Color(0xFF000000),
                 ),
                 helperText: 'Enter Second Prize those who score 85% or above',
                 suffixIcon: Icon(
@@ -184,7 +185,7 @@ class _GoalScreenState extends State<GoalScreen> {
               decoration: const InputDecoration(
                 labelText: '3rd Prize',
                 labelStyle: TextStyle(
-                  color: Color(0xFF6200EE),
+                  color: Color(0xFF000000),
                 ),
                 helperText: 'Enter Third Prize those who score 75% or above',
                 suffixIcon: Icon(
