@@ -123,7 +123,7 @@ String getFirstPrizeMessage(prize) {
     return "First prize is almost yours; let today's dedication be the key to victory.";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
-    return "Congratulations! You've reached your $prize (1st prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
+    return "🎉 Congrats! You've achieved your $prize (1st prize) milestone 🥇. Time to reward yourself! Keep going strong until the end! 💪🌟";
   } else if (isGoalEndedMoreThanADay()) {
     setRewardResult(prize);
     return "Great job on winning $prize (1st Prize) last time! Begin your next goal to keep consistency.";
@@ -137,7 +137,7 @@ String getSecondPrizeMessage(prize) {
     return "Second prize is up for grabs; today's the day to make a decisive move.";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
-    return "Congratulations! You've reached your $prize (2nd prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
+    return "🥳 Congrats! You've hit your $prize (2nd prize) milestone 🥈. Time for a reward! Don't stop, keep the momentum to the end! 🚀🌟";
   } else if (isGoalEndedMoreThanADay()) {
     setRewardResult(prize);
     return "Great job on winning $prize (2nd Prize) last time! Begin your next goal to focus for 1st Prize.";
@@ -151,7 +151,7 @@ String geThirdPrizeMessage(String prize) {
     return "Third prize awaits; strong performance today could be the difference between a near miss and a win.";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
-    return "Congratulations! You've reached your $prize (3rd prize) milestone and it's time to reward yourself! And  don’t stop now, keep up the momentum until the end!";
+    return "🎉 Congrats! You've hit your $prize (3rd prize) milestone 🏆. Time for a treat! Keep the momentum going till the end! 💪🌟";
   } else if (isGoalEndedMoreThanADay()) {
     setRewardResult(prize);
     return "Great job on winning $prize (3rd Prize) last time! Begin your next goal to for focus for 2nd / 1st Prize.";
