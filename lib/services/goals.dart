@@ -165,7 +165,7 @@ String getNoPrizeMessage(String prize) {
     return "Final day! No prize, but remember: 'Success is small efforts repeated.' - Collier. You've done well!";
   } else if (isGoalEndedYesterday()) {
     setRewardResult(prize);
-    return "Your last goal showed great effort! Now's the time to start planning your next goal.";
+    return "No prize this time 🏆, great effort though! On to the next one 🚀";
   } else if (isGoalEndedMoreThanADay()) {
     setRewardResult(prize);
     return "Kickstart a new goal, Its been more than a day! Your previous progress was impressive. 'Great things from small things.' - Van Gogh.";
