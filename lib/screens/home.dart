@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     if (hasNoGoalInProgress()) {
       totalScore = totalScoreValue;
-      totalPercentageIndicatorLabel = 'Your Last Score';
+      totalPercentageIndicatorLabel = isGoalEndedYesterday() ? 'Final Score' : 'Your Last Score';
     }
 
     double indicatorRadius = 50.0;
