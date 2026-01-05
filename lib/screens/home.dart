@@ -94,43 +94,43 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget getSelectedImage() {
-  if ((_goalPictureSelected || _goalPicture.isNotEmpty) && _goalPicture.isNotEmpty) {
-    File goalPictureFile = File(_goalPicture);
-    if (goalPictureFile.existsSync()) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: CircleAvatar(
-          radius: 105,
-          backgroundImage: FileImage(goalPictureFile),
-        ),
-      );
+    if ((_goalPictureSelected || _goalPicture.isNotEmpty) && _goalPicture.isNotEmpty) {
+      File goalPictureFile = File(_goalPicture);
+      if (goalPictureFile.existsSync()) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: 105,
+            backgroundImage: FileImage(goalPictureFile),
+          ),
+        );
+      }
     }
-  }
 
-  return SizedBox(
-    width: double.infinity,
-    child: CircleAvatar(
-      radius: 110,
-      backgroundColor: greyColor,
-      child: Icon(
-        Icons.camera_alt,
-        size: 70.0,
-        color: darkGreyColor,
+    return SizedBox(
+      width: double.infinity,
+      child: CircleAvatar(
+        radius: 110,
+        backgroundColor: greyColor,
+        child: Icon(
+          Icons.camera_alt,
+          size: 70.0,
+          color: darkGreyColor,
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   String getGoalDetails(goalFieldName) {
     RewardsModel goalDetails = rewardBox.values.last;
@@ -180,13 +180,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           isGoalEndedYesterday() ? 'Final Score' : 'Your Last Score';
     }
 
-    double indicatorRadius = 50.0;
+    // FIXED: Reduced circle sizes to prevent overflow
+    double todayIndicatorRadius = 45.0; // Reduced from 50.0
+    double totalIndicatorRadius = 60.0; // Reduced from 70.0
+    
     Widget leftSideTodayScoreIndicator = (canHideTodayPercentageIndicator)
         ? const SizedBox.shrink()
-        : percentageIndicator(indicatorRadius, todayScoreValue, 'Today Score');
+        : percentageIndicator(todayIndicatorRadius, todayScoreValue, 'Today Score');
     Widget rightSideTotalScoreIndicator = (canHideTotalPercentageIndicator)
         ? const SizedBox.shrink()
-        : percentageIndicator(70.0, totalScore, totalPercentageIndicatorLabel);
+        : percentageIndicator(totalIndicatorRadius, totalScore, totalPercentageIndicatorLabel);
 
     // Inside a build method of a Widget
     double screenHeight = MediaQuery.of(context).size.height;
