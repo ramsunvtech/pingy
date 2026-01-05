@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:hive/hive.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
@@ -60,7 +58,6 @@ int getGoalDayCountByPeriodType(String periodType) {
   if (rewardBoxMap.isEmpty) return 0;
 
   RewardsModel rewardDetails = rewardBoxMap.values.last;
-  String rewardId = rewardDetails.rewardId ?? '';
 
   DateTime today = stripTime(DateTime.now());
   // TODO: change variable name.
