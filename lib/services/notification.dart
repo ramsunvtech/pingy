@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,23 +17,42 @@ class NotificationService {
     return tenAM.isBefore(now) ? tenAM.add(const Duration(days: 1)) : tenAM;
   }
 
-  static void initialize() {
+  static Future<void> initialize() async {
     DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
             requestAlertPermission: true,
             requestBadgePermission: true,
-            requestSoundPermission: true,
-            onDidReceiveLocalNotification: (int id, String? title, String? body,
-                String? payload) async {});
+            requestSoundPermission: true);
 
     InitializationSettings initializationSettings = InitializationSettings(
       android: const AndroidInitializationSettings('@mipmap/ic_launcher'),
       iOS: initializationSettingsIOS,
     );
 
-    _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onDidReceiveNotificationResponse:
             (NotificationResponse notificationResponse) async {});
+  }
+
+  // Request exact alarm permission for Android 12+
+  static Future<bool> requestExactAlarmPermission() async {
+    if (Platform.isAndroid) {
+      final androidImplementation = _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidImplementation != null) {
+        // Check if permission is already granted
+        final bool? granted = await androidImplementation.canScheduleExactNotifications();
+        
+        if (granted == true) {
+          return true;
+        }
+
+        // Request permission
+        final bool? requestResult = await androidImplementation.requestExactAlarmsPermission();
+        return requestResult ?? false;
+      }
+    }
+    return true; // iOS doesn't need this permission
   }
 
   NotificationDetails getNotificationDetails() {
@@ -65,14 +85,15 @@ class NotificationService {
     }
   }
 
-  scheduleNotification({
+  Future<bool> scheduleNotification({
     required int id,
     String? title,
     String? body,
     String? payload,
     required DateTime scheduledNotificationDateTime,
   }) async {
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
+    try {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
         body,
@@ -81,8 +102,12 @@ class NotificationService {
           tz.local,
         ),
         getNotificationDetails(),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        androidAllowWhileIdle: true);
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+      return true;
+    } catch (e) {
+      print('Error scheduling notification: $e');
+      return false;
+    }
   }
 }
