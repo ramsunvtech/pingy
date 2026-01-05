@@ -22,7 +22,7 @@ void goToActivityTypeFormScreen(BuildContext context) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (builder) => TaskTypeScreen(),
+      builder: (builder) => const TaskTypeScreen(),
     ),
   );
 }
