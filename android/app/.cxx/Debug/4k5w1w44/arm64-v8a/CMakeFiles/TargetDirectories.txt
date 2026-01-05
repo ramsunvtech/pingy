@@ -1,0 +1,2 @@
+/Users/alamelu/workspace/pingy/android/app/.cxx/Debug/4k5w1w44/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/alamelu/workspace/pingy/android/app/.cxx/Debug/4k5w1w44/arm64-v8a/CMakeFiles/rebuild_cache.dir
