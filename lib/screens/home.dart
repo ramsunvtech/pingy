@@ -59,72 +59,78 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
       if (pickedGoalImage == null) return;
 
-      String filePath = pickedGoalImage!.path;
+      String filePath = pickedGoalImage.path;
 
       RewardsModel goalDetails = rewardBox.values.last;
-      String rewardId = goalDetails?.rewardId?.toString() ?? '';
-      String yetToWin = '';
+      String rewardId = goalDetails.rewardId?.toString() ?? '';
+      String yetToWin = goalDetails.won ?? '';
+
       RewardsModel editedGoalDetails = RewardsModel(
-          goalDetails.title,
-          goalDetails.startPeriod,
-          goalDetails.endPeriod,
-          goalDetails.firstPrice,
-          goalDetails.secondPrice,
-          goalDetails.thirdPrice,
-          filePath,
-          rewardId,
-          yetToWin);
-      rewardBox.putAt(rewardBox.keys.last, editedGoalDetails);
+        goalDetails.title,
+        goalDetails.startPeriod,
+        goalDetails.endPeriod,
+        goalDetails.firstPrice,
+        goalDetails.secondPrice,
+        goalDetails.thirdPrice,
+        filePath,
+        rewardId,
+        yetToWin,
+      );
+
+      // Get the key of the last reward
+      var lastKey = rewardBox.keys.last;
+      await rewardBox.put(lastKey, editedGoalDetails);
 
       setState(() {
-        _goalPicture = pickedGoalImage!.path;
+        _goalPicture = filePath;
         _goalPictureSelected = true;
       });
+
+      showToastMessage(context, 'Goal picture saved!');
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
+      showToastMessage(context, 'Failed to pick image');
     }
   }
 
   Widget getSelectedImage() {
-    if (_goalPictureSelected || _goalPicture.isNotEmpty) {
-      File goalPictureFile = File(_goalPicture);
-      if (goalPictureFile.existsSync()) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            // Match the background color to the white background
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3), // Soft grey shadow
-                spreadRadius: 1, // Extend the shadow to all sides by 1 pixel
-                blurRadius: 5, // Soften the shadow by blurring it
-                offset: const Offset(0, 3), // Position the shadow below the avatar
-              ),
-            ],
-          ),
-          child: CircleAvatar(
-              radius: 110 - 5,
-              backgroundImage: Image.file(
-                goalPictureFile,
-                fit: BoxFit.cover,
-              ).image),
-        );
-      }
-    }
-
-    return SizedBox(
-        width: double.infinity,
+  if ((_goalPictureSelected || _goalPicture.isNotEmpty) && _goalPicture.isNotEmpty) {
+    File goalPictureFile = File(_goalPicture);
+    if (goalPictureFile.existsSync()) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
         child: CircleAvatar(
-          radius: 110,
-          backgroundColor: greyColor,
-          child: Icon(
-            Icons.camera_alt,
-            size: 70.0,
-            color: darkGreyColor,
-          ),
-        ));
+          radius: 105,
+          backgroundImage: FileImage(goalPictureFile),
+        ),
+      );
+    }
   }
+
+  return SizedBox(
+    width: double.infinity,
+    child: CircleAvatar(
+      radius: 110,
+      backgroundColor: greyColor,
+      child: Icon(
+        Icons.camera_alt,
+        size: 70.0,
+        color: darkGreyColor,
+      ),
+    ),
+  );
+}
 
   String getGoalDetails(goalFieldName) {
     RewardsModel goalDetails = rewardBox.values.last;
@@ -170,7 +176,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     if (hasNoGoalInProgress()) {
       totalScore = totalScoreValue;
-      totalPercentageIndicatorLabel = isGoalEndedYesterday() ? 'Final Score' : 'Your Last Score';
+      totalPercentageIndicatorLabel =
+          isGoalEndedYesterday() ? 'Final Score' : 'Your Last Score';
     }
 
     double indicatorRadius = 50.0;
@@ -282,8 +289,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void setGoalPicturePath(RewardsModel rewardDetails) {
-    if (rewardDetails.rewardPicture != '') {
-      _goalPicture = rewardDetails.rewardPicture!;
+    if (rewardDetails.rewardPicture != null &&
+        rewardDetails.rewardPicture!.isNotEmpty) {
+      setState(() {
+        _goalPicture = rewardDetails.rewardPicture!;
+        _goalPictureSelected = true;
+      });
     }
   }
 
@@ -333,12 +344,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     dynamic rewardScore = scoreDetails['totalScore'];
 
     // TODO: Need a better reusable function to generate prize and message.
-    if (rewardScore > 0) {
-      totalScore = rewardScore.toString();
-
-      if (rewardBoxMap.isNotEmpty) {
-        // TODO: Fix to get iterated / active Reward details instead of first one.
-        RewardsModel rewardDetails = rewardBoxMap.values.last;
+    if (rewardBoxMap.isNotEmpty) {
+      RewardsModel rewardDetails = rewardBoxMap.values.last;
+      if (rewardDetails.rewardPicture != null &&
+          rewardDetails.rewardPicture!.isNotEmpty) {
         setGoalPicturePath(rewardDetails);
       }
     }
