@@ -1,0 +1,1 @@
+/Users/alamelu/workspace/pingy/build/app/intermediates/cxx/RelWithDebInfo/1d37686p/obj/arm64-v8a

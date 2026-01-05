@@ -1,0 +1,2 @@
+/Users/alamelu/workspace/pingy/android/app/.cxx/RelWithDebInfo/1d37686p/x86/CMakeFiles/edit_cache.dir
+/Users/alamelu/workspace/pingy/android/app/.cxx/RelWithDebInfo/1d37686p/x86/CMakeFiles/rebuild_cache.dir
