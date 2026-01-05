@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:pingy/screens/home.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
@@ -12,10 +13,10 @@ import 'package:pingy/utils/navigators.dart';
 
 class GoalScreen extends StatefulWidget {
   @override
-  _GoalScreenState createState() => _GoalScreenState();
+  GoalScreenState createState() => GoalScreenState();
 }
 
-class _GoalScreenState extends State<GoalScreen> {
+class GoalScreenState extends State<GoalScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _startPeriodController = TextEditingController();
   final TextEditingController _firstPrizeController = TextEditingController();
@@ -42,6 +43,11 @@ class _GoalScreenState extends State<GoalScreen> {
 
   @override
   void dispose() {
+    _titleController.dispose();
+    _startPeriodController.dispose();
+    _firstPrizeController.dispose();
+    _secondPrizeController.dispose();
+    _thirdPrizeController.dispose();
     super.dispose();
   }
 
@@ -62,6 +68,72 @@ class _GoalScreenState extends State<GoalScreen> {
         _dateCount = args.value.length.toString();
       } else {
         _rangeCount = args.value.length.toString();
+      }
+    });
+  }
+
+  void _handleAddGoal() {
+    // Validate inputs
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.fixed,
+          content: Text('Please enter a goal title'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (startDate.isEmpty || endDate.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.fixed,
+          content: Text('Please select an activity period'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Save the goal
+    var today = DateTime.now();
+    var todayDate = '${today.year}${today.month}${today.day}';
+    var todayTime = '${today.hour}${today.minute}${today.second}';
+    var rewardId = 'goal_$todayDate$todayTime';
+    String yetToWin = '';
+    String emptyPicture = '';
+    
+    RewardsModel newRewards = RewardsModel(
+      _titleController.text,
+      startDate,
+      endDate,
+      _firstPrizeController.text,
+      _secondPrizeController.text,
+      _thirdPrizeController.text,
+      emptyPicture,
+      rewardId,
+      yetToWin,
+    );
+    
+    rewardsBox.add(newRewards);
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        behavior: SnackBarBehavior.fixed,
+        content: Text('Goal Added!'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    // Navigate after a short delay to avoid Navigator lock
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       }
     });
   }
@@ -122,20 +194,20 @@ class _GoalScreenState extends State<GoalScreen> {
                           selectionMode: DateRangePickerSelectionMode.range,
                         ),
                         Center(
-                            child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                          // color: Colors.pink,
-                          child: const Text(
-                            'Done',
-                            style: TextStyle(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text(
+                              'Done',
+                              style: TextStyle(
                                 color: Colors.green,
                                 fontWeight: FontWeight.w600,
-                                letterSpacing: 0.6),
+                                letterSpacing: 0.6,
+                              ),
+                            ),
                           ),
-                        )),
+                        ),
                       ],
                     );
                   },
@@ -191,47 +263,34 @@ class _GoalScreenState extends State<GoalScreen> {
               ),
             )),
             ElevatedButton(
-              onPressed: () {
-                var today = DateTime.now();
-                var todayDate = '${today.year}${today.month}${today.day}';
-                var todayTime = '${today.hour}${today.minute}${today.second}';
-                var rewardId = 'goal_$todayDate$todayTime';
-                String yetToWin = '';
-                String emptyPicture = '';
-                RewardsModel newRewards = RewardsModel(
-                    _titleController.text,
-                    startDate,
-                    endDate,
-                    _firstPrizeController.text,
-                    _secondPrizeController.text,
-                    _thirdPrizeController.text,
-                    emptyPicture,
-                    rewardId,
-                    yetToWin);
-                rewardsBox.add(newRewards);
-                String toastMessage = 'Goal Added!';
-                showToastMessage(context, toastMessage);
-                goToHomeScreen(context);
-              },
+              onPressed: _handleAddGoal,
               child: const Text(
                 'Add Goal',
                 style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.6),
+                  color: Colors.green,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.6,
+                ),
               ),
             ),
           ],
         ),
       ),
       onPopInvoked: (bool didPop) {
-        if (activityBox.values.isEmpty) {
-          goToHomeScreen(context);
-          return;
-        }
-
-        goToGoalsListScreen(context);
-        return;
+        if (didPop) return;
+        
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            if (activityBox.values.isEmpty) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
+            } else {
+              goToGoalsListScreen(context);
+            }
+          }
+        });
       },
     );
   }
