@@ -21,24 +21,37 @@ import 'app.dart';
 void main() async {
   // Initialize.
   WidgetsFlutterBinding.ensureInitialized();
-  NotificationService.initialize();
+  await NotificationService.initialize();
   tz.initializeTimeZones();
 
-  // Morning Reminder
-  await NotificationService().scheduleNotification(
-      id: 1,
-      title: 'Steppy Reminder',
-      body: 'Good Morning, Time to update your activities :)',
-      scheduledNotificationDateTime:
-          NotificationService().nextInstanceOfTenAM(10, 00));
+  // Request exact alarm permission for Android
+  bool permissionGranted = await NotificationService.requestExactAlarmPermission();
+  
+  if (permissionGranted) {
+    try {
+      // Morning Reminder
+      await NotificationService().scheduleNotification(
+          id: 1,
+          title: 'Steppy Reminder',
+          body: 'Good Morning, Time to update your activities :)',
+          scheduledNotificationDateTime:
+              NotificationService().nextInstanceOfTenAM(10, 00));
 
-  // Evening Reminder
-  await NotificationService().scheduleNotification(
-      id: 2,
-      title: 'Steppy Reminder',
-      body: 'Good Evening, Time to update your activities :)',
-      scheduledNotificationDateTime:
-          NotificationService().nextInstanceOfTenAM(20, 00));
+      // Evening Reminder
+      await NotificationService().scheduleNotification(
+          id: 2,
+          title: 'Steppy Reminder',
+          body: 'Good Evening, Time to update your activities :)',
+          scheduledNotificationDateTime:
+              NotificationService().nextInstanceOfTenAM(20, 00));
+      
+      print('Notifications scheduled successfully');
+    } catch (e) {
+      print('Failed to schedule notifications: $e');
+    }
+  } else {
+    print('Exact alarm permission not granted. Notifications will not be scheduled.');
+  }
 
   var path = "/assets/db";
   if (!kIsWeb) {
