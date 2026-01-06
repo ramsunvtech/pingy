@@ -68,6 +68,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: true,
       child: Scaffold(
         appBar: customAppBar(
           title: 'Scores ($activityCount days)',
@@ -159,7 +160,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
         ),
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
         goToSettingScreen(context);
         return;
       },
