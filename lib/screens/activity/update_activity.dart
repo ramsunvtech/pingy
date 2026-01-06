@@ -9,6 +9,7 @@ import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 import 'package:pingy/widgets/PaddedFormField.dart';
+import 'package:pingy/widgets/ProgressSelector.dart';
 
 import 'package:pingy/utils/color.dart';
 
@@ -68,90 +69,136 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     ActivityTypeModel todayActivityItemDetail =
         activityTypeBox.get(todoActivity.activityItemId);
 
-    return Form(
-      key: _activateFormKey,
-      child: Wrap(
-        children: [
-          Container(
-            height: 3,
-            width: 70,
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 160),
-            decoration: BoxDecoration(
-                color: Colors.grey, borderRadius: BorderRadius.circular(8)),
-          ),
-          const Center(child: Text('Update')),
-          Center(
-            child: paddedFormField(TextFormField(
-              controller: _fullScoreController,
-              keyboardType: TextInputType.number,
-              maxLength: 3,
-              validator: (value) {
-                bool hasNoValue = value == '' || value == null || value.isEmpty;
-                var parsedIntegerValue = int.tryParse(value!);
-                var parsedFullScoreValue =
-                    int.tryParse(todayActivityItemDetail.fullScore);
-                bool isValidScore = (parsedIntegerValue != null &&
-                    parsedFullScoreValue != null &&
-                    parsedIntegerValue > 0 &&
-                    parsedIntegerValue <= parsedFullScoreValue);
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setModalState) {
+        return Form(
+          key: _activateFormKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ─── HANDLE BAR ─────────────────────────────
+                Container(
+                  height: 3,
+                  width: 70,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
 
-                if (hasNoValue || parsedIntegerValue == 0 || !isValidScore) {
-                  return 'Score should be a number between 1 and ${todayActivityItemDetail.fullScore}';
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                labelText: 'Activity Score',
-                labelStyle: const TextStyle(
-                  color: Color(0xFF000000),
+                const SizedBox(height: 8),
+
+                // ─── TITLE AND ACTIVITY NAME ─────────────────
+                const Text(
+                  'How did you do?',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                helperText:
-                    'Enter the activity score out of ${todayActivityItemDetail.fullScore}',
-                suffixIcon: const Icon(
-                  Icons.check_circle,
+                const SizedBox(height: 4),
+                Text(
+                  todayActivityItemDetail.activityName,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500),
                 ),
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6200EE)),
+
+                const SizedBox(height: 16),
+
+                // ─── SELECTED PROGRESS DISPLAY ───────────────
+                if (_fullScoreController.text.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green.shade200),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Score: ${_fullScoreController.text} / ${todayActivityItemDetail.fullScore}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 16),
+
+                // ─── PROGRESS SELECTOR (NO CONFIRM BUTTON) ───
+                SizedBox(
+                  height: 450,
+                  child: ProgressSelectorContent(
+                    initialPercentage: null,
+                    showConfirmButton: false,
+                    onSelected: (percentage, label) {
+                      final fullScore =
+                          int.parse(todayActivityItemDetail.fullScore);
+                      final calculatedScore = (percentage * fullScore).round();
+
+                      setModalState(() {
+                        _fullScoreController.text = calculatedScore.toString();
+                      });
+                    },
+                  ),
                 ),
-              ),
-            )),
-          ),
-          Center(
-            child: FractionallySizedBox(
-              widthFactor: 0.9,
-              child: ElevatedButton(
-                onPressed: () async {
-                  if (_activateFormKey.currentState!.validate()) {
-                    var updatedMissedActivity = ActivityItem(
-                        todoActivity.activityItemId, _fullScoreController.text);
-                    var activityItemIndex = todayActivity.activityItems
-                        .indexWhere((element) =>
-                            element.activityItemId ==
-                            todoActivity.activityItemId);
-                    if (todayActivity.isInBox) {
-                      todayActivity.activityItems
-                          .setAll(activityItemIndex, [updatedMissedActivity]);
-                      await todayActivity.save();
-                    }
-                    _fullScoreController.text = '';
-                    setState(() => {defaultActivityTabIndex = 2});
-                    Navigator.of(context).pop(true);
-                  }
-                },
-                // padding: const EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
-                // color: Colors.pink,
-                child: const Text(
-                  'Update',
-                  style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.6),
+
+                const SizedBox(height: 05),
+
+                // ─── UPDATE BUTTON ───────────────────────────
+                FractionallySizedBox(
+                  widthFactor: 0.9,
+                  child: ElevatedButton(
+                    onPressed: _fullScoreController.text.isEmpty
+                        ? null
+                        : () async {
+                            var updatedActivity = ActivityItem(
+                              todoActivity.activityItemId,
+                              _fullScoreController.text,
+                            );
+
+                            var index = todayActivity.activityItems.indexWhere(
+                              (e) =>
+                                  e.activityItemId ==
+                                  todoActivity.activityItemId,
+                            );
+
+                            if (todayActivity.isInBox) {
+                              todayActivity.activityItems
+                                  .setAll(index, [updatedActivity]);
+                              await todayActivity.save();
+                            }
+
+                            _fullScoreController.clear();
+                            setState(() => defaultActivityTabIndex = 2);
+                            Navigator.pop(context, true);
+                          },
+                    child: const Text(
+                      'Update',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -195,6 +242,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     }
 
     return PopScope(
+      canPop: true,
       child: DefaultTabController(
         length: 3,
         initialIndex: defaultActivityTabIndex,
@@ -288,9 +336,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                   ),
                                   builder: (context) =>
                                       DraggableScrollableSheet(
-                                          initialChildSize: 0.550,
-                                          maxChildSize: 0.9,
-                                          minChildSize: 0.32,
+                                          initialChildSize: 0.85,
+                                          maxChildSize: 0.95,
+                                          minChildSize: 0.80,
                                           expand: false,
                                           builder: (context, scrollController) {
                                             return SingleChildScrollView(
@@ -383,9 +431,13 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
           ),
         ),
       ),
-      onPopInvoked: (bool didPop) {
-        goToHomeScreen(context);
-        return;
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        // If the system already handled the pop, do nothing
+        if (didPop) return;
+
+        // If for some reason didPop is false (e.g. nested navigators),
+        // then trigger your custom logic:
+        goToHomeScreenV2(context);
       },
     );
   }
@@ -439,9 +491,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
             ),
           ),
           builder: (context) => DraggableScrollableSheet(
-              initialChildSize: 0.7,
-              maxChildSize: 0.9,
-              minChildSize: 0.32,
+              initialChildSize: 0.85,
+              maxChildSize: 0.95,
+              minChildSize: 0.80,
               expand: false,
               builder: (context, scrollController) {
                 return SingleChildScrollView(
