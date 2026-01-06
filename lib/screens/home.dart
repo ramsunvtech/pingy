@@ -94,7 +94,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget getSelectedImage() {
-    if ((_goalPictureSelected || _goalPicture.isNotEmpty) && _goalPicture.isNotEmpty) {
+    if ((_goalPictureSelected || _goalPicture.isNotEmpty) &&
+        _goalPicture.isNotEmpty) {
       File goalPictureFile = File(_goalPicture);
       if (goalPictureFile.existsSync()) {
         return Container(
@@ -183,13 +184,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // FIXED: Reduced circle sizes to prevent overflow
     double todayIndicatorRadius = 45.0; // Reduced from 50.0
     double totalIndicatorRadius = 60.0; // Reduced from 70.0
-    
+
     Widget leftSideTodayScoreIndicator = (canHideTodayPercentageIndicator)
         ? const SizedBox.shrink()
-        : percentageIndicator(todayIndicatorRadius, todayScoreValue, 'Today Score');
+        : percentageIndicator(
+            todayIndicatorRadius, todayScoreValue, 'Today Score');
     Widget rightSideTotalScoreIndicator = (canHideTotalPercentageIndicator)
         ? const SizedBox.shrink()
-        : percentageIndicator(totalIndicatorRadius, totalScore, totalPercentageIndicatorLabel);
+        : percentageIndicator(
+            totalIndicatorRadius, totalScore, totalPercentageIndicatorLabel);
 
     // Inside a build method of a Widget
     double screenHeight = MediaQuery.of(context).size.height;
