@@ -68,6 +68,7 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
     }
 
     return PopScope(
+        canPop: true,
         child: Scaffold(
           appBar: customAppBar(
               title: (formMode == 'edit')
@@ -171,7 +172,10 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
             ),
           ),
         ),
-        onPopInvoked: (bool didPop) {
+        onPopInvokedWithResult: (bool didPop, dynamic result) {
+          // If the system already handled the pop, do nothing
+          if (didPop) return;
+
           goToActivityTypeListScreen(context);
           return;
         });
