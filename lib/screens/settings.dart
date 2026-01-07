@@ -104,6 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: false,
       child: Scaffold(
         appBar: customAppBar(
           title: 'Settings',
@@ -233,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
         goToHomeScreen(context);
         return;
       },
