@@ -79,132 +79,165 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
       builder: (BuildContext context, StateSetter setModalState) {
         return Form(
           key: _activateFormKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 20),
+          child: SizedBox(
+            height:
+                MediaQuery.of(context).size.height * 0.85, // ⬅️ sheet height
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                // ─── HANDLE BAR ─────────────────────────────
-                Container(
-                  height: 3,
-                  width: 70,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // ─── TITLE AND ACTIVITY NAME ─────────────────
-                const Text(
-                  'How did you do?',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  todayActivityItemDetail.activityName,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w500),
-                ),
-
-                const SizedBox(height: 16),
-
-                // ─── SELECTED PROGRESS DISPLAY ───────────────
-                if (_fullScoreController.text.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.green.shade200),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                // ───────── SCROLLABLE CONTENT ─────────
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.green),
-                        const SizedBox(width: 8),
+                        // ─── HANDLE BAR ───
+                        Container(
+                          height: 3,
+                          width: 70,
+                          margin: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        const Text(
+                          'How did you do?',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+
+                        const SizedBox(height: 4),
+
                         Text(
-                          'Score: ${_fullScoreController.text} / ${todayActivityItemDetail.fullScore}',
+                          todayActivityItemDetail.activityName,
                           style: const TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.green,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ─── SCORE PREVIEW ───
+                        if (_fullScoreController.text.isNotEmpty)
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.green.shade200),
+                            ),
+                            child: Text(
+                              'Score: ${_fullScoreController.text}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+
+                        const SizedBox(height: 16),
+
+                        // ─── PROGRESS SELECTOR ───
+                        SizedBox(
+                          height: 420,
+                          child: ProgressSelectorContent(
+                            initialPercentage: initialPercentage,
+                            showConfirmButton: false,
+                            onSelected: (percentage, label) {
+                              final calculatedScore =
+                                  (percentage * fullScore).round();
+                              setModalState(() {
+                                _fullScoreController.text =
+                                    calculatedScore.toString();
+                              });
+                            },
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                const SizedBox(height: 16),
-
-                // ─── PROGRESS SELECTOR (NO CONFIRM BUTTON) ───
-                SizedBox(
-                  height: 450,
-                  child: ProgressSelectorContent(
-                    initialPercentage: initialPercentage,
-                    showConfirmButton: false,
-                    onSelected: (percentage, label) {
-                      final fullScore =
-                          int.parse(todayActivityItemDetail.fullScore);
-                      final calculatedScore = (percentage * fullScore).round();
-
-                      setModalState(() {
-                        _fullScoreController.text = calculatedScore.toString();
-                      });
-                    },
-                  ),
                 ),
 
-                // ─── UPDATE BUTTON ───────────────────────────
-                FractionallySizedBox(
-                  widthFactor: 0.9,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Colors.green.withOpacity(0.12), // very light
-                      foregroundColor: Colors.green, // text & icon color
-                      disabledBackgroundColor: Colors.green.withOpacity(0.05),
-                      disabledForegroundColor: Colors.green.withOpacity(0.4),
-                      elevation: 0, // flat, clean look
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: _fullScoreController.text.isEmpty
-                        ? null
-                        : () async {
-                            var updatedActivity = ActivityItem(
-                              todoActivity.activityItemId,
-                              _fullScoreController.text,
-                            );
+                // ───────── FIXED BOTTOM BUTTONS ─────────
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    child: Row(
+                      children: [
+                        // CANCEL
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              _fullScoreController.clear();
+                              Navigator.pop(context);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
 
-                            var index = todayActivity.activityItems.indexWhere(
-                              (e) =>
-                                  e.activityItemId ==
-                                  todoActivity.activityItemId,
-                            );
+                        const SizedBox(width: 12),
 
-                            if (todayActivity.isInBox) {
-                              todayActivity.activityItems
-                                  .setAll(index, [updatedActivity]);
-                              await todayActivity.save();
-                            }
+                        // UPDATE
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green.withOpacity(0.12),
+                              foregroundColor: Colors.green,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: BorderSide(
+                                color: Colors.green.withOpacity(0.6),
+                                width: 1,
+                              ),
+                            ),
+                            onPressed: _fullScoreController.text.isEmpty
+                                ? null
+                                : () async {
+                                    var updatedActivity = ActivityItem(
+                                      todoActivity.activityItemId,
+                                      _fullScoreController.text,
+                                    );
 
-                            _fullScoreController.clear();
-                            setState(() => defaultActivityTabIndex = 2);
-                            Navigator.pop(context, true);
-                          },
-                    child: const Text(
-                      'Update',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                                    var index =
+                                        todayActivity.activityItems.indexWhere(
+                                      (e) =>
+                                          e.activityItemId ==
+                                          todoActivity.activityItemId,
+                                    );
+
+                                    if (todayActivity.isInBox) {
+                                      todayActivity.activityItems
+                                          .setAll(index, [updatedActivity]);
+                                      await todayActivity.save();
+                                    }
+
+                                    _fullScoreController.clear();
+                                    setState(() => defaultActivityTabIndex = 2);
+                                    Navigator.pop(context, true);
+                                  },
+                            child: const Text(
+                              'Update',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
