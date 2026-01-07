@@ -242,7 +242,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     }
 
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: DefaultTabController(
         length: 3,
         initialIndex: defaultActivityTabIndex,
