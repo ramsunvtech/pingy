@@ -67,6 +67,7 @@ class _GoalListScreenState extends State<GoalListScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: true,
       child: Scaffold(
         appBar: customAppBar(
           title: 'Goals',
@@ -108,7 +109,9 @@ class _GoalListScreenState extends State<GoalListScreen> {
         floatingActionButton: getFloatingButton(context),
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        // If the system already handled the pop, do nothing
+        if (didPop) return;
         goToSettingScreen(context);
         return;
       },
