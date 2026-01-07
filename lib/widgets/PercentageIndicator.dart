@@ -30,12 +30,21 @@ dynamic percentageIndicator(double radius, String score, String label) {
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
       ),
       footer: Padding(
-        padding: const EdgeInsets.only(top: 10),
-        child: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+  padding: const EdgeInsets.only(top: 10),
+  child: SizedBox(
+    width: radius * 2, // match indicator width
+    child: FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 20.0,
         ),
       ),
+    ),
+  ),
+),
       circularStrokeCap: CircularStrokeCap.round,
       backgroundColor: darkGreyColor,
       progressColor: totalScoreColor,
