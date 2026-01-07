@@ -103,7 +103,7 @@ class GoalScreenState extends State<GoalScreen> {
     var rewardId = 'goal_$todayDate$todayTime';
     String yetToWin = '';
     String emptyPicture = '';
-    
+
     RewardsModel newRewards = RewardsModel(
       _titleController.text,
       startDate,
@@ -115,7 +115,7 @@ class GoalScreenState extends State<GoalScreen> {
       rewardId,
       yetToWin,
     );
-    
+
     rewardsBox.add(newRewards);
 
     // Show success message
@@ -141,6 +141,7 @@ class GoalScreenState extends State<GoalScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: true,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: customAppBar(
@@ -276,9 +277,10 @@ class GoalScreenState extends State<GoalScreen> {
           ],
         ),
       ),
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        // If the system already handled the pop, do nothing
         if (didPop) return;
-        
+
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             if (activityBox.values.isEmpty) {
