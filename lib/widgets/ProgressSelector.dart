@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// ===============================
-/// PURE CONTENT WIDGET (REUSABLE)
-/// ===============================
 class ProgressSelectorContent extends StatefulWidget {
   final Function(double percentage, String label) onSelected;
   final double? initialPercentage;
@@ -85,7 +82,7 @@ class _ProgressSelectorContentState extends State<ProgressSelectorContent> {
     );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
@@ -106,9 +103,6 @@ class _ProgressSelectorContentState extends State<ProgressSelectorContent> {
   }
 }
 
-/// ===============================
-/// BOTTOM SHEET WRAPPER (OPTIONAL)
-/// ===============================
 class ProgressSelector {
   static void show(
     BuildContext context, {
