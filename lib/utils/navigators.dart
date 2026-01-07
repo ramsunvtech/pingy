@@ -55,8 +55,10 @@ void goToHomeScreen(BuildContext context) {
 }
 
 void goToHomeScreenV2(BuildContext context) {
-  // Use pushAndRemoveUntil to ensure the back stack is cleared/handled
-  Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+  Navigator.of(context).pushNamedAndRemoveUntil(
+    '/home',
+    (route) => false,
+  );
 }
 
 void goToSettingScreen(BuildContext context) {
