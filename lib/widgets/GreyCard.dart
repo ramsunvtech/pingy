@@ -4,27 +4,28 @@ import 'package:pingy/utils/color.dart';
 Widget twoColumnGreyCards(Widget leftBlock, Widget rightBlock) {
   return Center(
     child: Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: greyColor,
-        ),
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Align(
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              leftBlock,
-              rightBlock,
-            ],
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: greyColor,
           ),
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
         ),
-      )
-    ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Align(
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(child: leftBlock),
+                const SizedBox(
+                    width: 16), // Add spacing between the two circles
+                Flexible(child: rightBlock),
+              ],
+            ),
+          ),
+        )),
   );
 }
 
@@ -39,10 +40,7 @@ Widget greyCard(Widget blockContent) {
           borderRadius: const BorderRadius.all(Radius.circular(16)),
         ),
         child: Row(
-          children: [
-            blockContent
-          ],
-        )
-    ),
+          children: [blockContent],
+        )),
   );
 }
