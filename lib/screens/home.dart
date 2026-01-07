@@ -59,78 +59,72 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
       if (pickedGoalImage == null) return;
 
-      String filePath = pickedGoalImage.path;
+      String filePath = pickedGoalImage!.path;
 
       RewardsModel goalDetails = rewardBox.values.last;
-      String rewardId = goalDetails.rewardId?.toString() ?? '';
-      String yetToWin = goalDetails.won ?? '';
-
+      String rewardId = goalDetails?.rewardId?.toString() ?? '';
+      String yetToWin = '';
       RewardsModel editedGoalDetails = RewardsModel(
-        goalDetails.title,
-        goalDetails.startPeriod,
-        goalDetails.endPeriod,
-        goalDetails.firstPrice,
-        goalDetails.secondPrice,
-        goalDetails.thirdPrice,
-        filePath,
-        rewardId,
-        yetToWin,
-      );
-
-      // Get the key of the last reward
-      var lastKey = rewardBox.keys.last;
-      await rewardBox.put(lastKey, editedGoalDetails);
+          goalDetails.title,
+          goalDetails.startPeriod,
+          goalDetails.endPeriod,
+          goalDetails.firstPrice,
+          goalDetails.secondPrice,
+          goalDetails.thirdPrice,
+          filePath,
+          rewardId,
+          yetToWin);
+      rewardBox.putAt(rewardBox.keys.last, editedGoalDetails);
 
       setState(() {
-        _goalPicture = filePath;
+        _goalPicture = pickedGoalImage!.path;
         _goalPictureSelected = true;
       });
-
-      showToastMessage(context, 'Goal picture saved!');
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
-      showToastMessage(context, 'Failed to pick image');
     }
   }
 
   Widget getSelectedImage() {
-    if ((_goalPictureSelected || _goalPicture.isNotEmpty) &&
-        _goalPicture.isNotEmpty) {
+    if (_goalPictureSelected || _goalPicture.isNotEmpty) {
       File goalPictureFile = File(_goalPicture);
       if (goalPictureFile.existsSync()) {
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
+            // Match the background color to the white background
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 1,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
+                color: Colors.grey.withOpacity(0.3), // Soft grey shadow
+                spreadRadius: 1, // Extend the shadow to all sides by 1 pixel
+                blurRadius: 5, // Soften the shadow by blurring it
+                offset:
+                    const Offset(0, 3), // Position the shadow below the avatar
               ),
             ],
           ),
           child: CircleAvatar(
-            radius: 105,
-            backgroundImage: FileImage(goalPictureFile),
-          ),
+              radius: 110 - 5,
+              backgroundImage: Image.file(
+                goalPictureFile,
+                fit: BoxFit.cover,
+              ).image),
         );
       }
     }
 
     return SizedBox(
-      width: double.infinity,
-      child: CircleAvatar(
-        radius: 110,
-        backgroundColor: greyColor,
-        child: Icon(
-          Icons.camera_alt,
-          size: 70.0,
-          color: darkGreyColor,
-        ),
-      ),
-    );
+        width: double.infinity,
+        child: CircleAvatar(
+          radius: 110,
+          backgroundColor: greyColor,
+          child: Icon(
+            Icons.camera_alt,
+            size: 70.0,
+            color: darkGreyColor,
+          ),
+        ));
   }
 
   String getGoalDetails(goalFieldName) {
@@ -181,18 +175,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           isGoalEndedYesterday() ? 'Final Score' : 'Your Last Score';
     }
 
-    // FIXED: Reduced circle sizes to prevent overflow
-    double todayIndicatorRadius = 45.0; // Reduced from 50.0
-    double totalIndicatorRadius = 60.0; // Reduced from 70.0
-
+    double indicatorRadius = 50.0;
     Widget leftSideTodayScoreIndicator = (canHideTodayPercentageIndicator)
         ? const SizedBox.shrink()
-        : percentageIndicator(
-            todayIndicatorRadius, todayScoreValue, 'Today Score');
+        : percentageIndicator(indicatorRadius, todayScoreValue, 'Today Score');
     Widget rightSideTotalScoreIndicator = (canHideTotalPercentageIndicator)
         ? const SizedBox.shrink()
-        : percentageIndicator(
-            totalIndicatorRadius, totalScore, totalPercentageIndicatorLabel);
+        : percentageIndicator(70.0, totalScore, totalPercentageIndicatorLabel);
 
     // Inside a build method of a Widget
     double screenHeight = MediaQuery.of(context).size.height;
@@ -295,12 +284,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void setGoalPicturePath(RewardsModel rewardDetails) {
-    if (rewardDetails.rewardPicture != null &&
-        rewardDetails.rewardPicture!.isNotEmpty) {
-      setState(() {
-        _goalPicture = rewardDetails.rewardPicture!;
-        _goalPictureSelected = true;
-      });
+    if (rewardDetails.rewardPicture != '') {
+      _goalPicture = rewardDetails.rewardPicture!;
     }
   }
 
@@ -350,10 +335,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     dynamic rewardScore = scoreDetails['totalScore'];
 
     // TODO: Need a better reusable function to generate prize and message.
-    if (rewardBoxMap.isNotEmpty) {
-      RewardsModel rewardDetails = rewardBoxMap.values.last;
-      if (rewardDetails.rewardPicture != null &&
-          rewardDetails.rewardPicture!.isNotEmpty) {
+    if (rewardScore > 0) {
+      totalScore = rewardScore.toString();
+
+      if (rewardBoxMap.isNotEmpty) {
+        // TODO: Fix to get iterated / active Reward details instead of first one.
+        RewardsModel rewardDetails = rewardBoxMap.values.last;
         setGoalPicturePath(rewardDetails);
       }
     }
@@ -398,9 +385,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    // Close Hive Connection.
-    Hive.close();
-
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -440,37 +424,47 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> homePanes = getHomeBlocks('100');
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        Hive.box('rewards').listenable(),
+        Hive.box('activity').listenable(),
+        Hive.box('activity_type').listenable(),
+      ]),
+      builder: (context, _) {
+        List<Widget> homePanes = getHomeBlocks('100');
 
-    return PopScope(
-      child: Scaffold(
-        appBar: customAppBar(
-          // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
-          // title: t(context).appName,
-          title: 'Steppy',
-          actions: [
-            // if (containsRewards && containsTypes)
-            settingsLinkIconButton(context),
-          ],
-        ),
-        body: ListView.builder(
-          itemCount: homePanes.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  child: homePanes[index],
-                ),
-              ),
-            );
+        return PopScope(
+          canPop: true,
+          child: Scaffold(
+            appBar: customAppBar(
+              // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
+              // title: t(context).appName,
+              title: 'Steppy',
+              actions: [
+                // if (containsRewards && containsTypes)
+                settingsLinkIconButton(context),
+              ],
+            ),
+            body: ListView.builder(
+              itemCount: homePanes.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      child: homePanes[index],
+                    ),
+                  ),
+                );
+              },
+            ),
+            floatingActionButton: getFloatingButton(context),
+          ),
+          onPopInvokedWithResult: (bool didPop, dynamic result) {
+            SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            return;
           },
-        ),
-        floatingActionButton: getFloatingButton(context),
-      ),
-      onPopInvoked: (bool didPop) {
-        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-        return;
+        );
       },
     );
   }
