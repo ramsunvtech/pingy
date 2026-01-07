@@ -66,8 +66,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   Widget getUpdateActivityForm(BuildContext content, dynamic todoActivity) {
     Activity todayActivity = getActivityDetails();
+    // ✅ RESET / PREFILL ACTIVITY SCORE
+    _fullScoreController.text = todoActivity.score ?? '';
     ActivityTypeModel todayActivityItemDetail =
         activityTypeBox.get(todoActivity.activityItemId);
+    final int fullScore = int.parse(todayActivityItemDetail.fullScore);
+    final int currentScore = int.tryParse(todoActivity.score ?? '') ?? 0;
+    final double? initialPercentage =
+        currentScore > 0 ? currentScore / fullScore : null;
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setModalState) {
@@ -141,7 +147,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 SizedBox(
                   height: 450,
                   child: ProgressSelectorContent(
-                    initialPercentage: null,
+                    initialPercentage: initialPercentage,
                     showConfirmButton: false,
                     onSelected: (percentage, label) {
                       final fullScore =
@@ -155,12 +161,21 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 05),
-
                 // ─── UPDATE BUTTON ───────────────────────────
                 FractionallySizedBox(
                   widthFactor: 0.9,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Colors.green.withOpacity(0.12), // very light
+                      foregroundColor: Colors.green, // text & icon color
+                      disabledBackgroundColor: Colors.green.withOpacity(0.05),
+                      disabledForegroundColor: Colors.green.withOpacity(0.4),
+                      elevation: 0, // flat, clean look
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                     onPressed: _fullScoreController.text.isEmpty
                         ? null
                         : () async {
@@ -188,7 +203,6 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                     child: const Text(
                       'Update',
                       style: TextStyle(
-                        color: Colors.green,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -336,9 +350,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                   ),
                                   builder: (context) =>
                                       DraggableScrollableSheet(
-                                          initialChildSize: 0.85,
-                                          maxChildSize: 0.95,
-                                          minChildSize: 0.80,
+                                          initialChildSize: 0.90,
+                                          maxChildSize: 0.97,
+                                          minChildSize: 0.85,
                                           expand: false,
                                           builder: (context, scrollController) {
                                             return SingleChildScrollView(
