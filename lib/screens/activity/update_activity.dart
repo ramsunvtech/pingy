@@ -242,7 +242,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     }
 
     return PopScope(
-      canPop: true,
+      canPop: false,
       child: DefaultTabController(
         length: 3,
         initialIndex: defaultActivityTabIndex,
@@ -432,12 +432,8 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
         ),
       ),
       onPopInvokedWithResult: (bool didPop, dynamic result) {
-        // If the system already handled the pop, do nothing
-        if (didPop) return;
-
-        // If for some reason didPop is false (e.g. nested navigators),
-        // then trigger your custom logic:
-        goToHomeScreenV2(context);
+        goToHomeScreen(context);
+        return;
       },
     );
   }
