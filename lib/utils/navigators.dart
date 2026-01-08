@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:pingy/screens/activity/list_activity_type.dart';
 import 'package:pingy/screens/activity/list_activities.dart';
+import 'package:pingy/screens/home.dart';
 import 'package:pingy/screens/goals/list_goals.dart';
 import 'package:pingy/screens/goals/goal_status.dart';
 import 'package:pingy/screens/settings.dart';
@@ -108,6 +109,15 @@ void goToGoalStatusScreen(BuildContext context) {
     context,
     MaterialPageRoute(
       builder: (builder) => GoalStatusScreen(),
+    ),
+  );
+}
+
+void goToGoalStatusScreenWithId(BuildContext context, String goalId) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (builder) => GoalStatusScreen(goalId: goalId),
     ),
   );
 }
