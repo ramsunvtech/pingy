@@ -194,6 +194,8 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
       onPopInvokedWithResult: (bool didPop, dynamic result) {
+        // If the system already handled the pop, do nothing
+        if (didPop) return;
         goToSettingScreen(context);
         return;
       },
