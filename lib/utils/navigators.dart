@@ -45,13 +45,10 @@ void goToActivityListScreen(BuildContext context) {
   );
 }
 
+/// Navigate back to home screen (pops until we reach home)
 void goToHomeScreen(BuildContext context) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (builder) => HomeScreen(),
-    ),
-  );
+  // Pop back to the first route (home screen)
+  Navigator.of(context).popUntil((route) => route.isFirst);
 }
 
 void goToHomeScreenV2(BuildContext context) {
