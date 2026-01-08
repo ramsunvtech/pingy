@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // DATE HELPERS
   // --------------------------------------------------
   DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
-  
+
   DateTime parseDate(String date) {
     try {
       // Expected format: dd/MM/yyyy
@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final today = normalize(DateTime.now());
     final start = normalize(parseDate(goal.startPeriod));
     final end = normalize(parseDate(goal.endPeriod));
-    
+
     // Goal is active if today is between start and end (inclusive)
     return !today.isBefore(start) && !today.isAfter(end);
   }
@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   RewardsModel? getLastCompletedGoal() {
     if (rewardBox.isEmpty) return null;
-    
+
     // Return the last goal in the box (most recent)
     return rewardBox.values.last as RewardsModel;
   }
@@ -131,9 +131,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // Find the index of the active goal
     final goalsList = rewardBox.values.toList().cast<RewardsModel>();
-    final goalIndex = goalsList.indexWhere((g) => 
-      g.rewardId == goal.rewardId
-    );
+    final goalIndex = goalsList.indexWhere((g) => g.rewardId == goal.rewardId);
 
     if (goalIndex == -1) return;
 
@@ -207,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void setGoalPicturePath(RewardsModel rewardDetails) {
-    if (rewardDetails.rewardPicture != null && 
+    if (rewardDetails.rewardPicture != null &&
         rewardDetails.rewardPicture!.isNotEmpty) {
       _goalPicture = rewardDetails.rewardPicture!;
     }
@@ -224,15 +222,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     debugPrint('Activity Box Keys: ${activityBox.keys.toList()}');
     debugPrint('Today Activity ID: ${getTodayActivityId()}');
     debugPrint('Today Activity Exists: ${isTodayActivityExist()}');
-    
+
     // Check today's activity details
     if (isTodayActivityExist()) {
       final todayActivity = activityBox.get(getTodayActivityId());
       debugPrint('📋 Today Activity: $todayActivity');
-      
+
       // Check if it's an Activity object with activityItems
       if (todayActivity is Activity) {
-        debugPrint('📋 Activity Items Count: ${todayActivity.activityItems.length}');
+        debugPrint(
+            '📋 Activity Items Count: ${todayActivity.activityItems.length}');
         for (var item in todayActivity.activityItems) {
           debugPrint('📋 Item: ${item.activityItemId} = "${item.score}"');
         }
@@ -240,13 +239,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     // Handle empty string scores
-    final todayScoreValue = (scoreDetails['todayScore']?.toString() ?? '0').isEmpty 
-        ? '0' 
-        : scoreDetails['todayScore'].toString();
+    final todayScoreValue =
+        (scoreDetails['todayScore']?.toString() ?? '0').isEmpty
+            ? '0'
+            : scoreDetails['todayScore'].toString();
     final totalScoreValue = scoreDetails['totalScore']?.toString() ?? '0';
     final totalScoreInt = scoreDetails['totalScore'] as int? ?? 0;
 
-    debugPrint('Today Score Value: "$todayScoreValue" (empty: ${todayScoreValue.isEmpty})');
+    debugPrint(
+        'Today Score Value: "$todayScoreValue" (empty: ${todayScoreValue.isEmpty})');
     debugPrint('Total Score Value: $totalScoreValue');
     debugPrint('===========================');
 
@@ -255,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // Determine labels
     String totalLabel = 'Total Score';
-    
+
     if (!hasActiveGoal) {
       // No active goal - show last completed goal's score
       if (isGoalEndedYesterday()) {
@@ -313,10 +314,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       if (containsRewards && containsTypes)
         twoColumnGreyCards(
-          hasActiveGoal 
-            ? percentageIndicator(50.0, todayScore, 'Today Score')
-            : const SizedBox.shrink(),
-          percentageIndicator(70.0, totalScore, totalLabel),
+          hasActiveGoal
+              ? GestureDetector(
+                  onTap: () {
+                    goToUpdateActivityScreen(context);
+                  },
+                  child: percentageIndicator(50.0, todayScore, 'Today Score'),
+                )
+              : const SizedBox.shrink(),
+          GestureDetector(
+            onTap: () {
+              goToGoalStatusScreen(context);
+            },
+            child: percentageIndicator(70.0, totalScore, totalLabel),
+          ),
         ),
       if (containsRewards && containsTypes && predictReward.isNotEmpty)
         Center(
@@ -379,7 +390,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _isGoalEnded = true;
     } else {
       _isGoalEnded = isGoalEnded(activeGoal);
-      
+
       // Load goal picture if available
       if (_goalPicture.isEmpty) {
         setGoalPicturePath(activeGoal);
@@ -387,12 +398,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     // Only create new activity if there's an active goal and prerequisites are met
-    if (activeGoal != null && 
-        !_isGoalEnded && 
+    if (activeGoal != null &&
+        !_isGoalEnded &&
         !isGoalStartInFuture(activeGoal) &&
-        containsRewards && 
+        containsRewards &&
         containsTypes) {
-      
       final activityId = getTodayActivityId();
 
       if (!activityBox.containsKey(activityId)) {
@@ -409,34 +419,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
 
         await activityBox.put(activityId, activity);
-        debugPrint('✅ Created today activity with rewardId: ${activeGoal.rewardId}');
+        debugPrint(
+            '✅ Created today activity with rewardId: ${activeGoal.rewardId}');
         if (mounted) {
           showToastMessage(context, 'Today Activity created');
         }
       } else {
         // Check if existing activity needs goalId update
         final existingActivity = activityBox.get(activityId) as Activity;
-        
+
         debugPrint('📋 Existing activity goalId: ${existingActivity.goalId}');
         debugPrint('📋 Active goal rewardId: ${activeGoal.rewardId}');
-        
+
         // Check if goalId needs updating
         if (existingActivity.goalId != activeGoal.rewardId) {
           debugPrint('⚠️ Activity has wrong goalId!');
-          debugPrint('🔧 Fixing goalId from ${existingActivity.goalId} to ${activeGoal.rewardId}...');
-          
+          debugPrint(
+              '🔧 Fixing goalId from ${existingActivity.goalId} to ${activeGoal.rewardId}...');
+
           // Create updated activity with correct goalId
           final updatedActivity = Activity(
-            existingActivity.activityId,      // activityId
-            existingActivity.activityItems,   // activityItems
-            existingActivity.score,           // score
-            existingActivity.activityDate,    // activityDate
-            activeGoal.rewardId,              // goalId (FIXED)
+            existingActivity.activityId, // activityId
+            existingActivity.activityItems, // activityItems
+            existingActivity.score, // score
+            existingActivity.activityDate, // activityDate
+            activeGoal.rewardId, // goalId (FIXED)
           );
-          
+
           await activityBox.put(activityId, updatedActivity);
           debugPrint('✅ Fixed goalId to: ${activeGoal.rewardId}');
-          
+
           if (mounted) {
             showToastMessage(context, 'Fixed activity link to current goal');
           }
@@ -457,7 +469,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     final activeGoal = getActiveGoal();
-    
+
     // Don't show FAB if no active goal or goal hasn't started yet
     if (activeGoal == null || isGoalStartInFuture(activeGoal)) {
       return Container();
