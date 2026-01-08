@@ -3,28 +3,26 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 
-// Widgets.
+// Widgets
 import 'package:pingy/widgets/icons/settings.dart';
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/PercentageIndicator.dart';
 import 'package:pingy/widgets/GreyCard.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 
-// Models.
+// Models
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
-// Utils.
+// Utils
 import 'package:pingy/utils/navigators.dart';
-import 'package:pingy/utils/l10n.dart';
 import 'package:pingy/utils/color.dart';
 import 'package:pingy/utils/permissions.dart';
 
-// Services.
+// Services
 import 'package:pingy/services/goals.dart';
 import 'package:pingy/services/activity.dart';
 
@@ -34,174 +32,259 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  String _goalPicture = '';
-  bool _goalPictureSelected = false;
-  final bool _canDebug = false;
-  bool _isGoalEnded = false;
   final ImagePicker goalPicturePicker = ImagePicker();
 
-  late final Box rewardBox;
-  late final Box activityBox;
-  late final Box activityTypeBox;
+  late Box rewardBox;
+  late Box activityBox;
+  late Box activityTypeBox;
 
   late Future<String> permissionStatusFuture;
+
+  bool containsRewards = false;
+  bool containsTypes = false;
+  bool _isGoalEnded = false;
 
   String todayScore = '0';
   String totalScore = '0';
   String predictReward = '';
-  bool containsRewards = false;
-  bool containsTypes = false;
 
-  Future getGoalImage() async {
+  String _goalPicture = '';
+  bool _goalPictureSelected = false;
+
+  // --------------------------------------------------
+  // DATE HELPERS
+  // --------------------------------------------------
+  DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
+  
+  DateTime parseDate(String date) {
     try {
-      final pickedGoalImage = await goalPicturePicker.pickImage(
-        source: ImageSource.camera,
-      );
-      if (pickedGoalImage == null) return;
+      // Expected format: dd/MM/yyyy
+      final parts = date.split('/');
+      if (parts.length != 3) {
+        throw FormatException('Invalid date format', date);
+      }
 
-      String filePath = pickedGoalImage!.path;
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
 
-      RewardsModel goalDetails = rewardBox.values.last;
-      String rewardId = goalDetails?.rewardId?.toString() ?? '';
-      String yetToWin = '';
-      RewardsModel editedGoalDetails = RewardsModel(
-          goalDetails.title,
-          goalDetails.startPeriod,
-          goalDetails.endPeriod,
-          goalDetails.firstPrice,
-          goalDetails.secondPrice,
-          goalDetails.thirdPrice,
-          filePath,
-          rewardId,
-          yetToWin);
-      rewardBox.putAt(rewardBox.keys.last, editedGoalDetails);
-
-      setState(() {
-        _goalPicture = pickedGoalImage!.path;
-        _goalPictureSelected = true;
-      });
-    } on PlatformException catch (e) {
-      print('Failed to pick image: $e');
+      return DateTime(year, month, day);
+    } catch (e) {
+      debugPrint('Steppy Error parsing date: $e for date: $date');
+      rethrow;
     }
   }
 
+  bool isGoalActive(RewardsModel goal) {
+    final today = normalize(DateTime.now());
+    final start = normalize(parseDate(goal.startPeriod));
+    final end = normalize(parseDate(goal.endPeriod));
+    
+    // Goal is active if today is between start and end (inclusive)
+    return !today.isBefore(start) && !today.isAfter(end);
+  }
+
+  bool isGoalEnded(RewardsModel goal) {
+    final today = normalize(DateTime.now());
+    final end = normalize(parseDate(goal.endPeriod));
+    return today.isAfter(end);
+  }
+
+  bool isGoalStartInFuture(RewardsModel goal) {
+    final today = normalize(DateTime.now());
+    final start = normalize(parseDate(goal.startPeriod));
+    return today.isBefore(start);
+  }
+
+  // --------------------------------------------------
+  // GOAL HELPERS
+  // --------------------------------------------------
+  RewardsModel? getActiveGoal() {
+    if (rewardBox.isEmpty) return null;
+
+    for (final goal in rewardBox.values.cast<RewardsModel>()) {
+      if (isGoalActive(goal)) {
+        return goal;
+      }
+    }
+    return null;
+  }
+
+  RewardsModel? getLastCompletedGoal() {
+    if (rewardBox.isEmpty) return null;
+    
+    // Return the last goal in the box (most recent)
+    return rewardBox.values.last as RewardsModel;
+  }
+
+  // --------------------------------------------------
+  // IMAGE
+  // --------------------------------------------------
+  Future<void> getGoalImage() async {
+    final picked = await goalPicturePicker.pickImage(
+      source: ImageSource.camera,
+    );
+    if (picked == null) return;
+
+    final goal = getActiveGoal();
+    if (goal == null) return;
+
+    // Find the index of the active goal
+    final goalsList = rewardBox.values.toList().cast<RewardsModel>();
+    final goalIndex = goalsList.indexWhere((g) => 
+      g.rewardId == goal.rewardId
+    );
+
+    if (goalIndex == -1) return;
+
+    final editedGoal = RewardsModel(
+      goal.title,
+      goal.startPeriod,
+      goal.endPeriod,
+      goal.firstPrice,
+      goal.secondPrice,
+      goal.thirdPrice,
+      picked.path,
+      goal.rewardId,
+      '',
+    );
+
+    rewardBox.putAt(goalIndex, editedGoal);
+
+    setState(() {
+      _goalPicture = picked.path;
+      _goalPictureSelected = true;
+    });
+  }
+
   Widget getSelectedImage() {
-    if (_goalPictureSelected || _goalPicture.isNotEmpty) {
-      File goalPictureFile = File(_goalPicture);
-      if (goalPictureFile.existsSync()) {
+    if (_goalPicture.isNotEmpty) {
+      final file = File(_goalPicture);
+      if (file.existsSync()) {
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            // Match the background color to the white background
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.3), // Soft grey shadow
-                spreadRadius: 1, // Extend the shadow to all sides by 1 pixel
-                blurRadius: 5, // Soften the shadow by blurring it
-                offset:
-                    const Offset(0, 3), // Position the shadow below the avatar
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
           child: CircleAvatar(
-              radius: 110 - 5,
-              backgroundImage: Image.file(
-                goalPictureFile,
-                fit: BoxFit.cover,
-              ).image),
+            radius: 105,
+            backgroundImage: FileImage(file),
+          ),
         );
       }
     }
 
-    return SizedBox(
-        width: double.infinity,
-        child: CircleAvatar(
-          radius: 110,
-          backgroundColor: greyColor,
-          child: Icon(
-            Icons.camera_alt,
-            size: 70.0,
-            color: darkGreyColor,
-          ),
-        ));
+    return CircleAvatar(
+      radius: 110,
+      backgroundColor: greyColor,
+      child: Icon(Icons.camera_alt, size: 70, color: darkGreyColor),
+    );
   }
 
-  String getGoalDetails(goalFieldName) {
-    RewardsModel goalDetails = rewardBox.values.last;
-    switch (goalFieldName) {
+  // --------------------------------------------------
+  // DISPLAY HELPERS
+  // --------------------------------------------------
+  String getGoalDetails(String field) {
+    final goal = getActiveGoal() ?? getLastCompletedGoal();
+    if (goal == null) return '';
+
+    switch (field) {
       case 'title':
-        return goalDetails.title;
+        return goal.title;
       case 'period':
-        return '${goalDetails.startPeriod} to ${goalDetails.endPeriod}';
+        return '${goal.startPeriod} to ${goal.endPeriod}';
       default:
         return '';
     }
   }
 
+  void setGoalPicturePath(RewardsModel rewardDetails) {
+    if (rewardDetails.rewardPicture != null && 
+        rewardDetails.rewardPicture!.isNotEmpty) {
+      _goalPicture = rewardDetails.rewardPicture!;
+    }
+  }
+
   List<Widget> getHomeBlocks(String score) {
-    Map<String, dynamic> scoreDetails = getScoreDetails();
-    String todayDateValue = scoreDetails['todayDate'] ?? '0';
-    String todayScoreValue = scoreDetails['todayScore'] ?? '0';
-    String totalActivityDays = scoreDetails['totalActivityDays'] ?? '0';
-    String totalActivityScore = scoreDetails['totalActivityScore'] ?? '0';
-    String totalScoreValue = scoreDetails['totalScore'].toString() ?? '0';
-    int totalScoreNumberValue = scoreDetails['totalScore'] as int;
-    String totalActivities = scoreDetails['totalActivities'] ?? '-';
-    String maximumTotalScore = scoreDetails['maximumTotalScore'] ?? '-';
-    String actualTotalScore = scoreDetails['actualTotalScore'] ?? '-';
-    String? currentGoalTitle = '?Title?';
-    String? currentGoalRewardId = '?Id?';
-    String? lastGoalTitle = '?Title?';
-    String? lastGoalRewardId = '?Id?';
+    final scoreDetails = getScoreDetails();
 
-    if (isRewardNotEmpty()) {
-      RewardsModel currentGoal = getCurrentGoal();
-      currentGoalTitle = currentGoal.title;
-      currentGoalRewardId = currentGoal.rewardId;
-      RewardsModel lastGoal = getLastCompletedGoal();
-      lastGoalTitle = lastGoal.title;
-      lastGoalRewardId = lastGoal.rewardId;
+    // Debug output
+    debugPrint('=== Score Details Debug ===');
+    debugPrint('scoreDetails: $scoreDetails');
+    debugPrint('Active Goal: ${getActiveGoal()?.title}');
+    debugPrint('Active Goal RewardId: ${getActiveGoal()?.rewardId}');
+    debugPrint('Activity Box Keys: ${activityBox.keys.toList()}');
+    debugPrint('Today Activity ID: ${getTodayActivityId()}');
+    debugPrint('Today Activity Exists: ${isTodayActivityExist()}');
+    
+    // Check today's activity details
+    if (isTodayActivityExist()) {
+      final todayActivity = activityBox.get(getTodayActivityId());
+      debugPrint('📋 Today Activity: $todayActivity');
+      
+      // Check if it's an Activity object with activityItems
+      if (todayActivity is Activity) {
+        debugPrint('📋 Activity Items Count: ${todayActivity.activityItems.length}');
+        for (var item in todayActivity.activityItems) {
+          debugPrint('📋 Item: ${item.activityItemId} = "${item.score}"');
+        }
+      }
     }
 
-    bool canHideTodayPercentageIndicator =
-        (isRewardEmpty() || hasNoGoalInProgress());
-    bool canHideTotalPercentageIndicator = (isRewardEmpty());
-    String totalPercentageIndicatorLabel = 'Total Score';
+    // Handle empty string scores
+    final todayScoreValue = (scoreDetails['todayScore']?.toString() ?? '0').isEmpty 
+        ? '0' 
+        : scoreDetails['todayScore'].toString();
+    final totalScoreValue = scoreDetails['totalScore']?.toString() ?? '0';
+    final totalScoreInt = scoreDetails['totalScore'] as int? ?? 0;
 
-    if (hasNoGoalInProgress()) {
+    debugPrint('Today Score Value: "$todayScoreValue" (empty: ${todayScoreValue.isEmpty})');
+    debugPrint('Total Score Value: $totalScoreValue');
+    debugPrint('===========================');
+
+    final activeGoal = getActiveGoal();
+    final hasActiveGoal = activeGoal != null;
+
+    // Determine labels
+    String totalLabel = 'Total Score';
+    
+    if (!hasActiveGoal) {
+      // No active goal - show last completed goal's score
+      if (isGoalEndedYesterday()) {
+        totalLabel = 'Final Score';
+      } else {
+        totalLabel = 'Your Last Score';
+      }
+      todayScore = '0'; // No today score if no active goal
       totalScore = totalScoreValue;
-      totalPercentageIndicatorLabel =
-          isGoalEndedYesterday() ? 'Final Score' : 'Your Last Score';
+    } else {
+      // Active goal in progress
+      todayScore = todayScoreValue;
+      totalScore = totalScoreValue;
+      totalLabel = 'Total Score';
     }
 
-    double indicatorRadius = 50.0;
-    Widget leftSideTodayScoreIndicator = (canHideTodayPercentageIndicator)
-        ? const SizedBox.shrink()
-        : percentageIndicator(indicatorRadius, todayScoreValue, 'Today Score');
-    Widget rightSideTotalScoreIndicator = (canHideTotalPercentageIndicator)
-        ? const SizedBox.shrink()
-        : percentageIndicator(70.0, totalScore, totalPercentageIndicatorLabel);
-
-    // Inside a build method of a Widget
-    double screenHeight = MediaQuery.of(context).size.height;
-    // You can adjust the factor (0.15 in this case) to fit the circle avatar in your layout properly
-    double avatarRadius = screenHeight * 0.115;
-
-    predictReward = findGoalPrize(totalScoreNumberValue);
+    // Calculate predicted reward
+    if (hasActiveGoal && totalScoreInt > 0) {
+      predictReward = findGoalPrize(totalScoreInt);
+    } else {
+      predictReward = '';
+    }
 
     final List<Widget> homePanes = [
       if (containsRewards && containsTypes)
         Center(
           child: GestureDetector(
-            onTap: () async {
-              await getGoalImage();
-            },
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: avatarRadius,
-              child: getSelectedImage(),
-            ),
+            onTap: hasActiveGoal ? getGoalImage : null,
+            child: getSelectedImage(),
           ),
         ),
       if (containsRewards)
@@ -230,26 +313,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       if (containsRewards && containsTypes)
         twoColumnGreyCards(
-            leftSideTodayScoreIndicator, rightSideTotalScoreIndicator),
-      if (_canDebug)
-        greyCard(Column(
-          children: [
-            Text('Last: $lastGoalTitle ($lastGoalRewardId)'),
-            Text('$currentGoalTitle ($currentGoalRewardId)'),
-            Text('Today date: ${todayDateValue.toString()}'),
-            Text('Goal Start Count: ${getGoalStartDayCount()}'),
-            Text('Goal End Count: ${getGoalEndDayCount()}'),
-            Text('Total Activity Days: $totalActivityDays'),
-            Text('Total Activity Scores: $totalActivityScore'),
-            Text('Total Activities: $totalActivities'),
-            Text('Total Score: $totalScoreValue'),
-            Text('Maximum Score for the day: $maximumTotalScore'),
-            Text('Actual Score for the day: $actualTotalScore'),
-            Text('containsRewards: $containsRewards'),
-            Text('containsTypes: $containsTypes'),
-          ],
-        )),
-      if (containsRewards && containsTypes && predictReward != '')
+          hasActiveGoal 
+            ? percentageIndicator(50.0, todayScore, 'Today Score')
+            : const SizedBox.shrink(),
+          percentageIndicator(70.0, totalScore, totalLabel),
+        ),
+      if (containsRewards && containsTypes && predictReward.isNotEmpty)
         Center(
           child: Text(
             predictReward,
@@ -265,8 +334,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           onPressed: () {
             goToGoalsForm(context);
           },
-          // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
-          // child: Text(t(context).addGoals),
           child: const Text('Add your Goal details'),
         ),
       if (containsRewards && !containsTypes)
@@ -274,8 +341,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           onPressed: () {
             goToActivityTypeFormScreen(context);
           },
-          // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
-          // child: Text(t(context).addActivityTypes),
           child: const Text('Add your Activity Types'),
         ),
     ];
@@ -283,110 +348,154 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return homePanes;
   }
 
-  void setGoalPicturePath(RewardsModel rewardDetails) {
-    if (rewardDetails.rewardPicture != '') {
-      _goalPicture = rewardDetails.rewardPicture!;
-    }
+  // --------------------------------------------------
+  // ACTIVITY
+  // --------------------------------------------------
+  String getTodayActivityId() {
+    final t = DateTime.now();
+    // Match your existing format: activity_202618 (no padding)
+    return 'activity_${t.year}${t.month}${t.day}';
   }
 
   bool isTodayActivityExist() {
-    DateTime today = DateTime.now();
-    String todayActivityId = 'activity_${today.year}${today.month}${today.day}';
-    return activityBox.containsKey(todayActivityId);
+    final activityId = getTodayActivityId();
+    debugPrint('🔍 Checking for activity: $activityId');
+    debugPrint('🔍 Activity exists: ${activityBox.containsKey(activityId)}');
+    return activityBox.containsKey(activityId);
   }
 
   Future<void> _updateScores() async {
-    // Get reference to an already opened box
     rewardBox = Hive.box('rewards');
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
 
-    DateTime today = DateTime.now();
-    String activityId = getTodayActivityId();
-    bool canCreateNewActivity = true;
+    containsRewards = rewardBox.isNotEmpty;
+    containsTypes = activityTypeBox.isNotEmpty;
 
-    Map rewardBoxMap = rewardBox.toMap();
-    if (rewardBoxMap.isNotEmpty) {
-      containsRewards = true;
-    }
+    final activeGoal = getActiveGoal();
 
-    if (activityTypeBox.isNotEmpty) {
-      containsTypes = true;
-    }
-
-    if (rewardBox.isEmpty || activityTypeBox.isEmpty) {
-      canCreateNewActivity = false;
-    }
-
-    bool isTodayActivityExist = activityBox.containsKey(activityId);
-    if (isTodayActivityExist) {
-      Activity todayActivity = activityBox.get(activityId);
-      if (todayActivity.activityItems.isNotEmpty) {
-        canCreateNewActivity = false;
-        Iterable<ActivityItem> todayNonEmptyActivityItems =
-            todayActivity.activityItems.where((element) => element.score != '');
-        if (todayNonEmptyActivityItems.isNotEmpty) {}
-      }
-    }
-
-    Map<String, dynamic> scoreDetails = getScoreDetails();
-    todayScore = scoreDetails['todayScore'];
-
-    dynamic rewardScore = scoreDetails['totalScore'];
-
-    // TODO: Need a better reusable function to generate prize and message.
-    if (rewardScore > 0) {
-      totalScore = rewardScore.toString();
-
-      if (rewardBoxMap.isNotEmpty) {
-        // TODO: Fix to get iterated / active Reward details instead of first one.
-        RewardsModel rewardDetails = rewardBoxMap.values.last;
-        setGoalPicturePath(rewardDetails);
-      }
-    }
-
-    if (isGoalEndedYesterday() ||
-        isGoalEndedMoreThanADay() ||
-        isGoalStartInFuture()) {
+    // Set goal ended status
+    if (activeGoal == null) {
       _isGoalEnded = true;
-      canCreateNewActivity = false;
+    } else {
+      _isGoalEnded = isGoalEnded(activeGoal);
+      
+      // Load goal picture if available
+      if (_goalPicture.isEmpty) {
+        setGoalPicturePath(activeGoal);
+      }
     }
 
-    // Create New Activity.
-    if (canCreateNewActivity) {
-      RewardsModel rewardDetails = rewardBoxMap.values.last;
-      String rewardId = rewardDetails.rewardId?.toString() ?? '';
+    // Only create new activity if there's an active goal and prerequisites are met
+    if (activeGoal != null && 
+        !_isGoalEnded && 
+        !isGoalStartInFuture(activeGoal) &&
+        containsRewards && 
+        containsTypes) {
+      
+      final activityId = getTodayActivityId();
 
-      final activityTypeKeys = activityTypeBox.keys;
-      final List<ActivityItem> activityItems = [];
-      for (var activityTypeKey in activityTypeKeys) {
-        ActivityItem newActivityItem = ActivityItem(activityTypeKey, '');
-        activityItems.add(newActivityItem);
+      if (!activityBox.containsKey(activityId)) {
+        final items = activityTypeBox.keys
+            .map((k) => ActivityItem(k.toString(), ''))
+            .toList();
+
+        final activity = Activity(
+          activityId,
+          items,
+          '',
+          DateTime.now(),
+          activeGoal.rewardId ?? '',
+        );
+
+        await activityBox.put(activityId, activity);
+        debugPrint('✅ Created today activity with rewardId: ${activeGoal.rewardId}');
+        if (mounted) {
+          showToastMessage(context, 'Today Activity created');
+        }
+      } else {
+        // Check if existing activity needs goalId update
+        final existingActivity = activityBox.get(activityId) as Activity;
+        
+        debugPrint('📋 Existing activity goalId: ${existingActivity.goalId}');
+        debugPrint('📋 Active goal rewardId: ${activeGoal.rewardId}');
+        
+        // Check if goalId needs updating
+        if (existingActivity.goalId != activeGoal.rewardId) {
+          debugPrint('⚠️ Activity has wrong goalId!');
+          debugPrint('🔧 Fixing goalId from ${existingActivity.goalId} to ${activeGoal.rewardId}...');
+          
+          // Create updated activity with correct goalId
+          final updatedActivity = Activity(
+            existingActivity.activityId,      // activityId
+            existingActivity.activityItems,   // activityItems
+            existingActivity.score,           // score
+            existingActivity.activityDate,    // activityDate
+            activeGoal.rewardId,              // goalId (FIXED)
+          );
+          
+          await activityBox.put(activityId, updatedActivity);
+          debugPrint('✅ Fixed goalId to: ${activeGoal.rewardId}');
+          
+          if (mounted) {
+            showToastMessage(context, 'Fixed activity link to current goal');
+          }
+        } else {
+          debugPrint('✅ Activity goalId is correct');
+        }
       }
-      Activity newActivity =
-          Activity(activityId, activityItems, '', DateTime.now(), rewardId);
-      activityBox.put(activityId, newActivity);
-      showToastMessage(context, 'Today Activity created');
     }
   }
 
+  // --------------------------------------------------
+  // FAB
+  // --------------------------------------------------
+  Widget getFloatingButton(BuildContext context) {
+    // Don't show FAB if prerequisites aren't met
+    if (!containsRewards || !containsTypes) {
+      return Container();
+    }
+
+    final activeGoal = getActiveGoal();
+    
+    // Don't show FAB if no active goal or goal hasn't started yet
+    if (activeGoal == null || isGoalStartInFuture(activeGoal)) {
+      return Container();
+    }
+
+    // Don't show FAB if goal has ended
+    if (_isGoalEnded) {
+      return Container();
+    }
+
+    final hasTodayActivity = isTodayActivityExist();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 70),
+      child: FloatingActionButton(
+        backgroundColor: Colors.lightGreen,
+        onPressed: () {
+          if (hasTodayActivity) {
+            goToUpdateActivityScreen(context);
+          } else {
+            goToGoalsForm(context);
+          }
+        },
+        child: Icon(hasTodayActivity ? Icons.edit : Icons.add),
+      ),
+    );
+  }
+
+  // --------------------------------------------------
+  // LIFECYCLE
+  // --------------------------------------------------
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
-    // set up the notification permissions class
-    // set up the future to fetch the notification data
     permissionStatusFuture = getCheckNotificationPermStatus();
-
     askCameraPermission();
     _updateScores();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 
   @override
@@ -398,74 +507,48 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Widget getFloatingButton(BuildContext context) {
-    if (_isGoalEnded && !containsRewards ||
-        !containsTypes ||
-        activityBox.length == 0 ||
-        isGoalStartInFuture()) {
-      return Container();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 70), // Adjust the value as needed
-      child: FloatingActionButton(
-        onPressed: () {
-          if (isTodayActivityExist()) {
-            goToUpdateActivityScreen(context);
-            return;
-          }
-          goToGoalsForm(context);
-        },
-        backgroundColor: Colors.lightGreen,
-        child: Icon(isTodayActivityExist() ? Icons.edit : Icons.add),
-      ),
-    );
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: Listenable.merge([
-        Hive.box('rewards').listenable(),
-        Hive.box('activity').listenable(),
-        Hive.box('activity_type').listenable(),
-      ]),
-      builder: (context, _) {
-        List<Widget> homePanes = getHomeBlocks('100');
+    return WillPopScope(
+      onWillPop: () async {
+        // Exit app when back pressed on home screen
+        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+        return false;
+      },
+      child: AnimatedBuilder(
+        animation: Listenable.merge([
+          Hive.box('rewards').listenable(),
+          Hive.box('activity').listenable(),
+          Hive.box('activity_type').listenable(),
+        ]),
+        builder: (context, _) {
+          final homePanes = getHomeBlocks('100');
 
-        return PopScope(
-          canPop: true,
-          child: Scaffold(
+          return Scaffold(
             appBar: customAppBar(
-              // TODO: Fix localization setup as per flutter 3.16.5 from 3.7.10 changes
-              // title: t(context).appName,
               title: 'Steppy',
-              actions: [
-                // if (containsRewards && containsTypes)
-                settingsLinkIconButton(context),
-              ],
+              actions: [settingsLinkIconButton(context)],
             ),
             body: ListView.builder(
               itemCount: homePanes.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      child: homePanes[index],
-                    ),
-                  ),
-                );
-              },
+              itemBuilder: (_, i) => Padding(
+                padding: const EdgeInsets.all(8),
+                child: homePanes[i],
+              ),
             ),
             floatingActionButton: getFloatingButton(context),
-          ),
-          onPopInvokedWithResult: (bool didPop, dynamic result) {
-            SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-            return;
-          },
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
