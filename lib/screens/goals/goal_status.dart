@@ -18,6 +18,10 @@ import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/utils/color.dart';
 
 class GoalStatusScreen extends StatefulWidget {
+  final String? goalId;
+
+  const GoalStatusScreen({Key? key, this.goalId}) : super(key: key);
+
   @override
   _GoalStatusScreenState createState() => _GoalStatusScreenState();
 }
@@ -58,6 +62,16 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   RewardsModel? _getActiveGoal() {
     if (rewardBox.isEmpty) return null;
 
+    // If a specific goalId is provided, return that goal
+    if (widget.goalId != null && widget.goalId!.isNotEmpty) {
+      for (final goal in rewardBox.values.cast<RewardsModel>()) {
+        if (goal.rewardId == widget.goalId) {
+          return goal;
+        }
+      }
+    }
+
+    // Otherwise, find the currently active goal
     final today = DateTime.now();
     final normalizedToday = DateTime(today.year, today.month, today.day);
 
@@ -108,7 +122,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     for (var activity in activities) {
       int dayScore = _calculateDayScore(activity);
       cumulativeScore += dayScore;
-      
+
       dailyProgress.add(DailyProgress(
         date: activity.activityDate ?? DateTime.now(),
         score: dayScore,
@@ -142,9 +156,9 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
 
   String _getPrizeForScore(int score) {
     if (activeGoal == null) return 'No Goal';
-    
+
     int avgScore = totalDays > 0 ? (score / totalDays).round() : 0;
-    
+
     if (avgScore >= 90) return activeGoal!.firstPrice;
     if (avgScore >= 70) return activeGoal!.secondPrice;
     if (avgScore >= 50) return activeGoal!.thirdPrice;
@@ -241,7 +255,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
             const Divider(height: 24),
             _buildStatRow('Days Completed', '$daysCompleted / $totalDays'),
             _buildStatRow('Days Remaining', '$daysRemaining'),
-            _buildStatRow('Average Score', '${averageScore.toStringAsFixed(1)}%'),
+            _buildStatRow(
+                'Average Score', '${averageScore.toStringAsFixed(1)}%'),
             _buildStatRow('Total Score', '${totalScore.toStringAsFixed(0)}'),
             const SizedBox(height: 16),
             Container(
@@ -309,8 +324,9 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   }
 
   Widget _buildActivityAnalysis() {
-    List<MapEntry<String, ActivityTypeStats>> sortedStats = activityStats.entries.toList()
-      ..sort((a, b) => b.value.percentage.compareTo(a.value.percentage));
+    List<MapEntry<String, ActivityTypeStats>> sortedStats =
+        activityStats.entries.toList()
+          ..sort((a, b) => b.value.percentage.compareTo(a.value.percentage));
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -406,8 +422,9 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   }
 
   Widget _buildInsights() {
-    List<MapEntry<String, ActivityTypeStats>> sortedStats = activityStats.entries.toList()
-      ..sort((a, b) => b.value.percentage.compareTo(a.value.percentage));
+    List<MapEntry<String, ActivityTypeStats>> sortedStats =
+        activityStats.entries.toList()
+          ..sort((a, b) => b.value.percentage.compareTo(a.value.percentage));
 
     List<ActivityTypeStats> excellent = sortedStats
         .where((e) => e.value.percentage >= 80)
@@ -438,24 +455,27 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            if (excellent.isNotEmpty) _buildInsightSection(
-              '🌟 Excellent Progress',
-              excellent.map((e) => e.name).toList(),
-              Colors.green,
-              'You\'re doing amazing in these areas! Keep up the great work!',
-            ),
-            if (needsAttention.isNotEmpty) _buildInsightSection(
-              '⚠️ Needs Attention',
-              needsAttention.map((e) => e.name).toList(),
-              Colors.orange,
-              'These areas could use more focus. Try to improve consistency.',
-            ),
-            if (critical.isNotEmpty) _buildInsightSection(
-              '🚨 Critical Areas',
-              critical.map((e) => e.name).toList(),
-              Colors.red,
-              'Priority focus needed here! Small improvements will make a big difference.',
-            ),
+            if (excellent.isNotEmpty)
+              _buildInsightSection(
+                '🌟 Excellent Progress',
+                excellent.map((e) => e.name).toList(),
+                Colors.green,
+                'You\'re doing amazing in these areas! Keep up the great work!',
+              ),
+            if (needsAttention.isNotEmpty)
+              _buildInsightSection(
+                '⚠️ Needs Attention',
+                needsAttention.map((e) => e.name).toList(),
+                Colors.orange,
+                'These areas could use more focus. Try to improve consistency.',
+              ),
+            if (critical.isNotEmpty)
+              _buildInsightSection(
+                '🚨 Critical Areas',
+                critical.map((e) => e.name).toList(),
+                Colors.red,
+                'Priority focus needed here! Small improvements will make a big difference.',
+              ),
             const SizedBox(height: 16),
             _buildMotivationalMessage(),
           ],
@@ -523,7 +543,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     } else if (averageScore >= 40) {
       message = '🎯 You can do this! Focus on consistency and you\'ll improve!';
     } else {
-      message = '🌱 Every journey starts somewhere. Small steps lead to big changes!';
+      message =
+          '🌱 Every journey starts somewhere. Small steps lead to big changes!';
     }
 
     return Container(
@@ -566,6 +587,12 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
         appBar: customAppBar(
           title: 'Goal Status',
           actions: [],
+          leading: IconButton(
+            onPressed: () {
+              goToHomeScreen(context);
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
         ),
         body: activeGoal == null
             ? const Center(
