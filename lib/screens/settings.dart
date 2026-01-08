@@ -46,6 +46,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  Future<bool> _showConfirmDialog({
+    required BuildContext context,
+    required String title,
+    required String message,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // user must choose Yes / No
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('No'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result ?? false;
+  }
+
   Future<void> _checkBiometric() async {
     bool canCheckBiometric = false;
 
@@ -156,72 +185,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
+                      final confirmed = await _showConfirmDialog(
+                        context: context,
+                        title: 'Clear Activity Scores',
+                        message:
+                            'Are you sure you want to delete all activities?',
+                      );
+
+                      if (!confirmed) return;
+
                       await activityBox.clear();
+
                       setState(() {
                         activityCount = '0';
-
-                        if (activityBox.isNotEmpty) {
-                          activityCount = activityBox.length.toString();
-                        }
                       });
                     },
                     child: const Text(
-                      'Clear all Activity',
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
+                      'Clear all Activity Scores',
+                      style: TextStyle(fontSize: 20),
                     ),
                   ),
                 ),
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
+                      final confirmed = await _showConfirmDialog(
+                        context: context,
+                        title: 'Clear Activity',
+                        message:
+                            'This will remove all activity types. Continue?',
+                      );
+
+                      if (!confirmed) return;
+
                       await activityTypeBox.clear();
+
                       setState(() {
                         activityTypeCount = '0';
-
-                        if (activityTypeBox.isNotEmpty) {
-                          activityTypeCount = activityTypeBox.length.toString();
-                        }
                       });
                     },
                     child: const Text(
-                      'Clear all Types',
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
+                      'Clear all Activities',
+                      style: TextStyle(fontSize: 20),
                     ),
                   ),
                 ),
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
+                      final confirmed = await _showConfirmDialog(
+                        context: context,
+                        title: 'Clear Everything',
+                        message:
+                            'This will permanently delete goals, activities, and activity types.\n\nAre you absolutely sure?',
+                      );
+
+                      if (!confirmed) return;
+
                       await rewardBox.clear();
                       await activityTypeBox.clear();
                       await activityBox.clear();
+
                       setState(() {
                         rewardExist = 'No';
                         activityCount = '0';
                         activityTypeCount = '0';
-
-                        if (rewardBox.isNotEmpty) {
-                          rewardExist = '';
-                        }
-
-                        if (activityBox.isNotEmpty) {
-                          activityCount = activityBox.length.toString();
-                        }
-
-                        if (activityTypeBox.isNotEmpty) {
-                          activityTypeCount = activityTypeBox.length.toString();
-                        }
                       });
                     },
                     child: const Text(
                       'Clear All',
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
+                      style: TextStyle(fontSize: 20),
                     ),
                   ),
                 ),
