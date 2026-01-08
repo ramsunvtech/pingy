@@ -64,6 +64,59 @@ class _GoalListScreenState extends State<GoalListScreen> {
     return (rewardDetails.rewardPicture == '') ? 'No' : 'Yes';
   }
 
+  bool isGoalActive(RewardsModel goal) {
+    try {
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+
+      final start = _parseDate(goal.startPeriod);
+      final end = _parseDate(goal.endPeriod);
+
+      return !normalizedToday.isBefore(start) && !normalizedToday.isAfter(end);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool isGoalEnded(RewardsModel goal) {
+    try {
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+      final end = _parseDate(goal.endPeriod);
+      return normalizedToday.isAfter(end);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  DateTime _parseDate(String date) {
+    final parts = date.split('/');
+    final day = int.parse(parts[0]);
+    final month = int.parse(parts[1]);
+    final year = int.parse(parts[2]);
+    return DateTime(year, month, day);
+  }
+
+  String getGoalStatusText(RewardsModel goal) {
+    if (isGoalActive(goal)) {
+      return 'Active';
+    } else if (isGoalEnded(goal)) {
+      return 'Completed';
+    } else {
+      return 'Upcoming';
+    }
+  }
+
+  Color getGoalStatusColor(RewardsModel goal) {
+    if (isGoalActive(goal)) {
+      return Colors.green;
+    } else if (isGoalEnded(goal)) {
+      return Colors.blue;
+    } else {
+      return Colors.orange;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -89,18 +142,90 @@ class _GoalListScreenState extends State<GoalListScreen> {
                 itemBuilder: (context, index) {
                   var currentBox = rewardsBox;
                   RewardsModel rewardsData = currentBox.getAt(index)!;
-                  return InkWell(
-                      onTap: () => {},
-                      child: ListTile(
-                        title: Text(rewardsData.title),
-                        subtitle: Text('${rewardsData.startPeriod}'
-                            ' to ${rewardsData.endPeriod}\n'
-                            'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
-                            'Second Prize (85%): ${getPrize(rewardsData.secondPrice)}\n'
-                            'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}\n'
-                            '${getGoalResult(rewardsData)}'
-                            'Goal Picture: ${isPictureExist(rewardsData)}\n'),
-                      ));
+                  String statusText = getGoalStatusText(rewardsData);
+                  Color statusColor = getGoalStatusColor(rewardsData);
+
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  rewardsData.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: statusColor),
+                                ),
+                                child: Text(
+                                  statusText,
+                                  style: TextStyle(
+                                    color: statusColor,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              '${rewardsData.startPeriod} to ${rewardsData.endPeriod}\n'
+                              'First Prize (95%): ${getPrize(rewardsData.firstPrice)}\n'
+                              'Second Prize (85%): ${getPrize(rewardsData.secondPrice)}\n'
+                              'Third Prize (75%): ${getPrize(rewardsData.thirdPrice)}\n'
+                              '${getGoalResult(rewardsData)}'
+                              'Goal Picture: ${isPictureExist(rewardsData)}',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () {
+                                  goToGoalStatusScreenWithId(
+                                    context,
+                                    rewardsData.rewardId ?? '',
+                                  );
+                                },
+                                icon: const Icon(
+                                  Icons.analytics_outlined,
+                                  size: 18,
+                                ),
+                                label: const Text('View Status'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.blue,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               );
             }
