@@ -579,9 +579,10 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (bool didPop, dynamic result) {
-        if (didPop) {
-          goToHomeScreen(context);
-        }
+        // If the system already handled the pop, do nothing
+        if (didPop) return;
+        goToGoalsListScreen(context);
+        return;
       },
       child: Scaffold(
         appBar: customAppBar(
@@ -589,7 +590,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
           actions: [],
           leading: IconButton(
             onPressed: () {
-              goToHomeScreen(context);
+              goToGoalsListScreen(context);
             },
             icon: const Icon(Icons.arrow_back),
           ),
