@@ -36,6 +36,36 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     }
   }
 
+  Future<bool> _confirmDeleteActivity(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Score'),
+          content: const Text(
+            'Are you sure you want to delete this score?\n\nThis action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('No'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result ?? false;
+  }
+
   Widget getListTileTrailingIconButton(String activityId) {
     var today = DateTime.now();
     var todayActivityId = 'activity_${today.year}${today.month}${today.day}';
@@ -53,10 +83,13 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
     }
 
     return IconButton(
-      onPressed: () {
-        activityBox.delete(activityId);
-        String toastMessage = 'Score removed successfully!';
-        showToastMessage(context, toastMessage);
+      onPressed: () async {
+        final confirmed = await _confirmDeleteActivity(context);
+        if (!confirmed) return;
+
+        await activityBox.delete(activityId);
+
+        showToastMessage(context, 'Score removed successfully!');
       },
       icon: const Icon(
         Icons.delete,
