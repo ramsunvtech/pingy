@@ -23,7 +23,7 @@ import 'package:pingy/utils/color.dart';
 import 'package:pingy/utils/permissions.dart';
 
 // Services
-import 'package:pingy/services/goals.dart';
+import 'package:pingy/services/goals.dart' as goal_service;
 import 'package:pingy/services/activity.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -75,46 +75,71 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  bool isGoalActive(RewardsModel goal) {
-    final today = normalize(DateTime.now());
-    final start = normalize(parseDate(goal.startPeriod));
-    final end = normalize(parseDate(goal.endPeriod));
+  // bool isGoalActive(RewardsModel goal) {
+  //   final today = normalize(DateTime.now());
+  //   final start = normalize(parseDate(goal.startPeriod));
+  //   final end = normalize(parseDate(goal.endPeriod));
 
-    // Goal is active if today is between start and end (inclusive)
-    return !today.isBefore(start) && !today.isAfter(end);
+  //   // Goal is active if today is between start and end (inclusive)
+  //   return !today.isBefore(start) && !today.isAfter(end);
+  // }
+
+  // bool isGoalEnded(RewardsModel goal) {
+  //   final today = normalize(DateTime.now());
+  //   final end = normalize(parseDate(goal.endPeriod));
+  //   return today.isAfter(end);
+  // }
+
+  // bool isGoalStartInFuture(RewardsModel goal) {
+  //   final today = normalize(DateTime.now());
+  //   final start = normalize(parseDate(goal.startPeriod));
+  //   return today.isBefore(start);
+  // }
+
+  bool isGoalActive() {
+    return goal_service.isGoalInProgress();
   }
 
-  bool isGoalEnded(RewardsModel goal) {
-    final today = normalize(DateTime.now());
-    final end = normalize(parseDate(goal.endPeriod));
-    return today.isAfter(end);
+  bool isGoalEnded() {
+    return goal_service.hasNoGoalInProgress();
   }
 
-  bool isGoalStartInFuture(RewardsModel goal) {
-    final today = normalize(DateTime.now());
-    final start = normalize(parseDate(goal.startPeriod));
-    return today.isBefore(start);
+  bool isGoalStartInFuture() {
+    return goal_service.isGoalStartInFuture();
+  }
+
+  bool isGoalLastDay() {
+    return goal_service.isGoalLastDay();
   }
 
   // --------------------------------------------------
   // GOAL HELPERS
   // --------------------------------------------------
-  RewardsModel? getActiveGoal() {
-    if (rewardBox.isEmpty) return null;
+  // RewardsModel? getActiveGoal() {
+  //   if (rewardBox.isEmpty) return null;
 
-    for (final goal in rewardBox.values.cast<RewardsModel>()) {
-      if (isGoalActive(goal)) {
-        return goal;
-      }
+  //   for (final goal in rewardBox.values.cast<RewardsModel>()) {
+  //     if (isGoalActive(goal)) {
+  //       return goal;
+  //     }
+  //   }
+  //   return null;
+  // }
+  RewardsModel? getActiveGoal() {
+    if (goal_service.hasNoGoalInProgress()) {
+      return null;
     }
-    return null;
+    return goal_service.getCurrentGoal();
   }
 
-  RewardsModel? getLastCompletedGoal() {
-    if (rewardBox.isEmpty) return null;
+  // RewardsModel? getLastCompletedGoal() {
+  //   if (rewardBox.isEmpty) return null;
 
-    // Return the last goal in the box (most recent)
-    return rewardBox.values.last as RewardsModel;
+  //   // Return the last goal in the box (most recent)
+  //   return rewardBox.values.last as RewardsModel;
+  // }
+  RewardsModel? getLastCompletedGoal() {
+    return goal_service.getLastCompletedGoal();
   }
 
   // --------------------------------------------------
@@ -214,31 +239,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<Widget> getHomeBlocks(String score) {
     final scoreDetails = getScoreDetails();
 
-    // Debug output
-    debugPrint('=== Score Details Debug ===');
-    debugPrint('scoreDetails: $scoreDetails');
-    debugPrint('Active Goal: ${getActiveGoal()?.title}');
-    debugPrint('Active Goal RewardId: ${getActiveGoal()?.rewardId}');
-    debugPrint('Activity Box Keys: ${activityBox.keys.toList()}');
-    debugPrint('Today Activity ID: ${getTodayActivityId()}');
-    debugPrint('Today Activity Exists: ${isTodayActivityExist()}');
-
-    // Check today's activity details
-    if (isTodayActivityExist()) {
-      final todayActivity = activityBox.get(getTodayActivityId());
-      debugPrint('📋 Today Activity: $todayActivity');
-
-      // Check if it's an Activity object with activityItems
-      if (todayActivity is Activity) {
-        debugPrint(
-            '📋 Activity Items Count: ${todayActivity.activityItems.length}');
-        for (var item in todayActivity.activityItems) {
-          debugPrint('📋 Item: ${item.activityItemId} = "${item.score}"');
-        }
-      }
-    }
-
-    // Handle empty string scores
     final todayScoreValue =
         (scoreDetails['todayScore']?.toString() ?? '0').isEmpty
             ? '0'
@@ -246,36 +246,42 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final totalScoreValue = scoreDetails['totalScore']?.toString() ?? '0';
     final totalScoreInt = scoreDetails['totalScore'] as int? ?? 0;
 
-    debugPrint(
-        'Today Score Value: "$todayScoreValue" (empty: ${todayScoreValue.isEmpty})');
-    debugPrint('Total Score Value: $totalScoreValue');
-    debugPrint('===========================');
-
     final activeGoal = getActiveGoal();
-    final hasActiveGoal = activeGoal != null;
+    final hasActiveGoal = activeGoal != null && !isGoalEnded();
 
-    // Determine labels
-    String totalLabel = 'Total Score';
+    // Determine labels based on goal state
+    String totalLabel = 'Goal Score';
+    String todayScoreDisplay = '0';
 
-    if (!hasActiveGoal) {
-      // No active goal - show last completed goal's score
-      if (isGoalEndedYesterday()) {
-        totalLabel = 'Final Score';
-      } else {
-        totalLabel = 'Your Last Score';
-      }
-      todayScore = '0'; // No today score if no active goal
-      totalScore = totalScoreValue;
-    } else {
+    if (hasActiveGoal) {
       // Active goal in progress
-      todayScore = todayScoreValue;
-      totalScore = totalScoreValue;
-      totalLabel = 'Total Score';
+      todayScoreDisplay = todayScoreValue;
+
+      if (isGoalLastDay()) {
+        totalLabel = 'Final Score (Today!)';
+      } else {
+        totalLabel = 'Goal Score';
+      }
+    } else if (goal_service.isGoalEndedYesterday()) {
+      // Goal ended yesterday - show yesterday's final score
+      todayScoreDisplay = '0';
+      totalLabel = 'Final Score';
+    } else if (goal_service.isGoalEndedMoreThanADay()) {
+      // Goal ended more than a day ago
+      todayScoreDisplay = '0';
+      totalLabel = 'Your Last Score';
+    } else {
+      // No goal yet or waiting to start
+      todayScoreDisplay = '0';
+      totalLabel = 'Goal Score';
     }
 
-    // Calculate predicted reward
-    if (hasActiveGoal && totalScoreInt > 0) {
-      predictReward = findGoalPrize(totalScoreInt);
+    totalScore = totalScoreValue;
+    todayScore = todayScoreDisplay;
+
+    // Calculate predicted/actual reward
+    if (totalScoreInt > 0) {
+      predictReward = goal_service.findGoalPrize(totalScoreInt);
     } else {
       predictReward = '';
     }
@@ -385,24 +391,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     final activeGoal = getActiveGoal();
 
-    // Set goal ended status
-    if (activeGoal == null) {
-      _isGoalEnded = true;
-    } else {
-      _isGoalEnded = isGoalEnded(activeGoal);
+    // Set goal ended status using service method
+    _isGoalEnded = isGoalEnded();
 
+    // Only create/update activity if there's an active goal
+    if (activeGoal != null &&
+        !_isGoalEnded &&
+        containsRewards &&
+        containsTypes) {
       // Load goal picture if available
       if (_goalPicture.isEmpty) {
         setGoalPicturePath(activeGoal);
       }
-    }
 
-    // Only create new activity if there's an active goal and prerequisites are met
-    if (activeGoal != null &&
-        !_isGoalEnded &&
-        !isGoalStartInFuture(activeGoal) &&
-        containsRewards &&
-        containsTypes) {
       final activityId = getTodayActivityId();
 
       if (!activityBox.containsKey(activityId)) {
@@ -419,41 +420,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
 
         await activityBox.put(activityId, activity);
-        debugPrint(
-            '✅ Created today activity with rewardId: ${activeGoal.rewardId}');
         if (mounted) {
           showToastMessage(context, 'Today Activity created');
-        }
-      } else {
-        // Check if existing activity needs goalId update
-        final existingActivity = activityBox.get(activityId) as Activity;
-
-        debugPrint('📋 Existing activity goalId: ${existingActivity.goalId}');
-        debugPrint('📋 Active goal rewardId: ${activeGoal.rewardId}');
-
-        // Check if goalId needs updating
-        if (existingActivity.goalId != activeGoal.rewardId) {
-          debugPrint('⚠️ Activity has wrong goalId!');
-          debugPrint(
-              '🔧 Fixing goalId from ${existingActivity.goalId} to ${activeGoal.rewardId}...');
-
-          // Create updated activity with correct goalId
-          final updatedActivity = Activity(
-            existingActivity.activityId, // activityId
-            existingActivity.activityItems, // activityItems
-            existingActivity.score, // score
-            existingActivity.activityDate, // activityDate
-            activeGoal.rewardId, // goalId (FIXED)
-          );
-
-          await activityBox.put(activityId, updatedActivity);
-          debugPrint('✅ Fixed goalId to: ${activeGoal.rewardId}');
-
-          if (mounted) {
-            showToastMessage(context, 'Fixed activity link to current goal');
-          }
-        } else {
-          debugPrint('✅ Activity goalId is correct');
         }
       }
     }
@@ -471,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final activeGoal = getActiveGoal();
 
     // Don't show FAB if no active goal or goal hasn't started yet
-    if (activeGoal == null || isGoalStartInFuture(activeGoal)) {
+    if (activeGoal == null || isGoalStartInFuture()) {
       return Container();
     }
 
