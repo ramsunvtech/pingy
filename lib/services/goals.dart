@@ -117,13 +117,12 @@ bool isGoalInProgress() {
 
 String getFirstPrizeMessage(prize) {
   if (isGoalLastDay()) {
-    return "First prize is almost yours; let today's dedication be the key to victory.";
+    setRewardResult(prize);
+    return "🎉 Congrats! You've achieved your $prize (1st prize) milestone 🥇. Time to reward yourself! Keep going strong! 💪🌟";
   } else if (isGoalEndedYesterday()) {
-    setRewardResult(prize);
-    return "🎉 Congrats! You've achieved your $prize (1st prize) milestone 🥇. Time to reward yourself! Keep going strong until the end! 💪🌟";
+    return "🎉 You won $prize (1st Prize) yesterday! Well done! Start your next goal to keep the momentum.";
   } else if (isGoalEndedMoreThanADay()) {
-    setRewardResult(prize);
-    return "Great job on winning $prize (1st Prize) last time! Begin your next goal to keep consistency.";
+    return "Great job on winning $prize (1st Prize)! Begin your next goal to keep consistency.";
   }
 
   return 'Getting there! Keep going, You are close to get $prize.';
@@ -131,13 +130,12 @@ String getFirstPrizeMessage(prize) {
 
 String getSecondPrizeMessage(prize) {
   if (isGoalLastDay()) {
-    return "Second prize is up for grabs; today's the day to make a decisive move.";
+    setRewardResult(prize);
+    return "🥳 Congrats! You've hit your $prize (2nd prize) milestone 🥈. Time for a reward! Keep the momentum! 🚀🌟";
   } else if (isGoalEndedYesterday()) {
-    setRewardResult(prize);
-    return "🥳 Congrats! You've hit your $prize (2nd prize) milestone 🥈. Time for a reward! Don't stop, keep the momentum to the end! 🚀🌟";
+    return "🥳 You won $prize (2nd Prize) yesterday! Awesome work! Start your next goal.";
   } else if (isGoalEndedMoreThanADay()) {
-    setRewardResult(prize);
-    return "Great job on winning $prize (2nd Prize) last time! Begin your next goal to focus for 1st Prize.";
+    return "Great job on winning $prize (2nd Prize)! Begin your next goal to focus for 1st Prize.";
   }
 
   return 'Getting there! Keep going, You are close to get $prize.';
@@ -145,13 +143,12 @@ String getSecondPrizeMessage(prize) {
 
 String geThirdPrizeMessage(String prize) {
   if (isGoalLastDay()) {
-    return "Third prize awaits; strong performance today could be the difference between a near miss and a win.";
+    setRewardResult(prize);
+    return "🎉 Congrats! You've hit your $prize (3rd prize) milestone 🏆. Time for a treat! Keep going! 💪🌟";
   } else if (isGoalEndedYesterday()) {
-    setRewardResult(prize);
-    return "🎉 Congrats! You've hit your $prize (3rd prize) milestone 🏆. Time for a treat! Keep the momentum going till the end! 💪🌟";
+    return "🎉 You won $prize (3rd Prize) yesterday! Great effort! Start your next goal.";
   } else if (isGoalEndedMoreThanADay()) {
-    setRewardResult(prize);
-    return "Great job on winning $prize (3rd Prize) last time! Begin your next goal to for focus for 2nd / 1st Prize.";
+    return "Great job on winning $prize (3rd Prize)! Begin your next goal to focus for 2nd / 1st Prize.";
   }
 
   return 'Getting there! Keep going, You are close to get $prize.';
@@ -159,13 +156,12 @@ String geThirdPrizeMessage(String prize) {
 
 String getNoPrizeMessage(String prize) {
   if (isGoalLastDay()) {
-    return "Final day! No prize, but remember: 'Success is small efforts repeated.' - Collier. You've done well!";
+    setRewardResult(prize);
+    return "Goal complete! No prize this time 🏆, but great effort! 'Success is small efforts repeated.' - Collier";
   } else if (isGoalEndedYesterday()) {
-    setRewardResult(prize);
-    return "No prize this time 🏆, great effort though! On to the next one 🚀";
+    return "Yesterday's goal: No prize, but solid work! On to the next one 🚀";
   } else if (isGoalEndedMoreThanADay()) {
-    setRewardResult(prize);
-    return "Kickstart a new goal, Its been more than a day! Your previous progress was impressive. 'Great things from small things.' - Van Gogh.";
+    return "Kickstart a new goal! Your previous progress was impressive. 'Great things from small things.' - Van Gogh.";
   }
 
   return "It's time to get back on track. 'The secret of getting ahead is starting.' - Twain. Your next milestone awaits!";
