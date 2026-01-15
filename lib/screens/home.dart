@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String predictReward = '';
 
   String _goalPicture = '';
-  bool _goalPictureSelected = false;
+  String? _lastCheckedActivityId;
 
   // --------------------------------------------------
   // DATE HELPERS
@@ -176,7 +176,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     setState(() {
       _goalPicture = picked.path;
-      _goalPictureSelected = true;
     });
   }
 
@@ -405,6 +404,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
 
       final activityId = getTodayActivityId();
+      _lastCheckedActivityId = activityId;
 
       if (!activityBox.containsKey(activityId)) {
         final items = activityTypeBox.keys
@@ -421,6 +421,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         await activityBox.put(activityId, activity);
         if (mounted) {
+          setState(() {}); // Trigger UI rebuild
           showToastMessage(context, 'Today Activity created');
         }
       }
@@ -481,6 +482,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // Check when app comes to foreground
+      final currentActivityId = getTodayActivityId();
+      if (_lastCheckedActivityId != currentActivityId) {
+        _updateScores();
+      }
       setState(() {
         permissionStatusFuture = getCheckNotificationPermStatus();
       });
