@@ -146,9 +146,46 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // IMAGE
   // --------------------------------------------------
   Future<void> getGoalImage() async {
-    final picked = await goalPicturePicker.pickImage(
-      source: ImageSource.camera,
+    // Show bottom sheet to choose source
+    final ImageSource? source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.photo_library, color: purpleColor),
+                  title: Text('Choose from Gallery'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo_camera, color: purpleColor),
+                  title: Text('Take a Photo'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.camera),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
     );
+
+    if (source == null) return; // User cancelled
+
+    final picked = await goalPicturePicker.pickImage(
+      source: source,
+      maxWidth: 1800,
+      maxHeight: 1800,
+      imageQuality: 85,
+    );
+
     if (picked == null) return;
 
     final goal = getActiveGoal();
@@ -207,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return CircleAvatar(
       radius: 110,
       backgroundColor: greyColor,
-      child: Icon(Icons.camera_alt, size: 70, color: darkGreyColor),
+      child: Icon(Icons.photo_library, size: 70, color: darkGreyColor),
     );
   }
 
@@ -475,7 +512,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     permissionStatusFuture = getCheckNotificationPermStatus();
-    askCameraPermission();
+    // askCameraPermission();
     _updateScores();
   }
 
