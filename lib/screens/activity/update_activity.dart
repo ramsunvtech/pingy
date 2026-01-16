@@ -22,7 +22,8 @@ class UpdateTaskScreen extends StatefulWidget {
   _UpdateTaskScreenState createState() => _UpdateTaskScreenState();
 }
 
-class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
+class _UpdateTaskScreenState extends State<UpdateTaskScreen>
+    with WidgetsBindingObserver {
   int defaultActivityTabIndex = 1;
 
   Iterable<ActivityItem> missedActivities = [];
@@ -53,6 +54,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Get reference to an already opened box
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
@@ -61,7 +63,18 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Force rebuild when app comes back from background
+      setState(() {
+        splitActivitiesForTabs();
+      });
+    }
   }
 
   Widget getUpdateActivityForm(BuildContext content, dynamic todoActivity) {
