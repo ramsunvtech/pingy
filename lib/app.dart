@@ -27,6 +27,7 @@ class PingyAppState extends State<PingyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.light,
       theme: ThemeData(
         colorSchemeSeed: purpleColor,
         scaffoldBackgroundColor: whiteColor,
@@ -36,6 +37,9 @@ class PingyAppState extends State<PingyApp> {
           bodyMedium: TextStyle(color: Colors.black87),
           bodySmall: TextStyle(color: Colors.black87),
         ),
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.light, // 🔴 FORCE LIGHT EVEN IN DARK
       ),
       home: HomeScreen(),
       localizationsDelegates: const [
