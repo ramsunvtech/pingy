@@ -149,8 +149,6 @@ class NotificationService {
         ),
         getNotificationDetails(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
       );
       return true;
     } catch (e) {
@@ -168,10 +166,8 @@ class NotificationService {
     required int minute,
   }) async {
     try {
-      // Cancel existing notification with this ID first
       await _flutterLocalNotificationsPlugin.cancel(id);
       
-      // Get next weekday instance
       final DateTime nextNotification = nextWeekdayInstance(hour, minute);
       
       await _flutterLocalNotificationsPlugin.zonedSchedule(
@@ -181,8 +177,6 @@ class NotificationService {
         tz.TZDateTime.from(nextNotification, tz.local),
         getNotificationDetails(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
       );
       
       print('Weekday notification scheduled for: $nextNotification');
@@ -223,8 +217,6 @@ class NotificationService {
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
@@ -277,8 +269,6 @@ class NotificationService {
             iOS: DarwinNotificationDetails(),
           ),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
       } else {
@@ -323,8 +313,6 @@ class NotificationService {
             iOS: DarwinNotificationDetails(),
           ),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
         );
       } else {
         await _flutterLocalNotificationsPlugin.cancel(NotificationConfig.inactiveReminderId);
