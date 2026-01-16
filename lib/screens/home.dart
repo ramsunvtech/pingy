@@ -481,11 +481,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return Container();
     }
 
-    // Don't show FAB if goal has ended
-    if (_isGoalEnded) {
-      return Container();
-    }
-
     final hasTodayActivity = isTodayActivityExist();
 
     return Padding(
@@ -499,7 +494,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             goToGoalsForm(context);
           }
         },
-        child: Icon(hasTodayActivity ? Icons.edit : Icons.add),
+        child: Icon(_isGoalEnded ? Icons.add : Icons.edit),
       ),
     );
   }
