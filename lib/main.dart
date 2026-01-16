@@ -14,6 +14,7 @@ import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/services/notification.dart';
+import 'package:pingy/config/notification_config.dart';
 
 // App.
 import 'app.dart';
@@ -21,36 +22,44 @@ import 'app.dart';
 void main() async {
   // Initialize.
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService.initialize();
+  
   tz.initializeTimeZones();
+  await NotificationService.initialize();
 
   // Request exact alarm permission for Android
   bool permissionGranted = await NotificationService.requestExactAlarmPermission();
   
   if (permissionGranted) {
     try {
-      // Morning Reminder
-      await NotificationService().scheduleNotification(
-          id: 1,
-          title: 'Steppy Reminder',
-          body: 'Good Morning, Time to update your activities :)',
-          scheduledNotificationDateTime:
-              NotificationService().nextInstanceOfTenAM(10, 00));
+      // Weekday Reminder (Monday to Friday only)
+      await NotificationService().scheduleWeekdayNotification(
+          id: NotificationConfig.weekdayReminderId,
+          title: NotificationConfig.weekdayTitle,
+          body: NotificationConfig.weekdayBody,
+          hour: NotificationConfig.weekdayHour,
+          minute: NotificationConfig.weekdayMinute);
 
-      // Evening Reminder
+      // Evening Reminder (Every day)
       await NotificationService().scheduleNotification(
-          id: 2,
-          title: 'Steppy Reminder',
-          body: 'Good Evening, Time to update your activities :)',
+          id: NotificationConfig.eveningReminderId,
+          title: NotificationConfig.eveningTitle,
+          body: NotificationConfig.eveningBody,
           scheduledNotificationDateTime:
-              NotificationService().nextInstanceOfTenAM(20, 00));
+              NotificationService().nextInstanceOfTenAM(
+                NotificationConfig.eveningHour, 
+                NotificationConfig.eveningMinute));
       
-      print('Notifications scheduled successfully');
+      // Schedule smart notifications (new goals, inactive users)
+      await NotificationService.rescheduleAll();
+      
+      print('✅ Notifications scheduled successfully');
+      print('   Weekday: ${NotificationConfig.weekdayHour}:${NotificationConfig.weekdayMinute.toString().padLeft(2, '0')}');
+      print('   Evening: ${NotificationConfig.eveningHour}:${NotificationConfig.eveningMinute.toString().padLeft(2, '0')}');
     } catch (e) {
-      print('Failed to schedule notifications: $e');
+      print('❌ Failed to schedule notifications: $e');
     }
   } else {
-    print('Exact alarm permission not granted. Notifications will not be scheduled.');
+    print('❌ Exact alarm permission not granted.');
   }
 
   var path = "/assets/db";
