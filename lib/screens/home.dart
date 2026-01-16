@@ -474,10 +474,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return Container();
     }
 
-    final activeGoal = getActiveGoal();
-
     // Don't show FAB if no active goal or goal hasn't started yet
-    if (activeGoal == null || isGoalStartInFuture()) {
+    if (isGoalStartInFuture()) {
       return Container();
     }
 
