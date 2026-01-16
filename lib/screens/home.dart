@@ -459,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         await activityBox.put(activityId, activity);
         if (mounted) {
           setState(() {}); // Trigger UI rebuild
-          showToastMessage(context, 'Today Activity created');
+          showToastMessage(context, 'Today Activity created, Update Scores!');
         }
       }
     }
