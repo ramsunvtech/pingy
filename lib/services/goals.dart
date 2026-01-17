@@ -27,9 +27,14 @@ bool isRewardNotEmpty() {
   return rewardBox.isNotEmpty;
 }
 
-RewardsModel getCurrentGoal() {
+RewardsModel? getCurrentGoal() {  // Changed to nullable
   var rewardBox = Hive.box('rewards');
   Map rewardBoxMap = rewardBox.toMap();
+  
+  if (rewardBoxMap.values.isEmpty) {
+    return null;  // Safe return for first web launch (empty box)
+  }
+  
   RewardsModel rewardDetails = rewardBoxMap.values.last;
   return rewardDetails;
 }
