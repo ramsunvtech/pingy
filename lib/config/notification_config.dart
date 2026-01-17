@@ -10,7 +10,7 @@ class NotificationConfig {
   static const int eveningMinute = 0;
   
   // Motivation reminder (For users without goals - 9 AM daily)
-  static const int motivationHour = 9;
+  static const int motivationHour = 10;
   static const int motivationMinute = 0;
   
   // Inactive user reminder (For users who haven't logged today - 8 PM)
