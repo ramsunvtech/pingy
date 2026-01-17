@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       },
     );
 
-    if (source == null) return; // User cancelled
+    if (source == null) return;
 
     final picked = await goalPicturePicker.pickImage(
       source: source,
@@ -192,10 +192,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     if (picked == null) return;
 
-    final goal = getActiveGoal();
+    // ✅ FIX: Allow image upload for both active and future goals
+    final goal = getActiveGoal() ?? getLastCompletedGoal();
     if (goal == null) return;
 
-    // Find the index of the active goal
     final goalsList = rewardBox.values.toList().cast<RewardsModel>();
     final goalIndex = goalsList.indexWhere((g) => g.rewardId == goal.rewardId);
 
@@ -328,14 +328,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     final activeGoal = getActiveGoal();
     final hasActiveGoal = activeGoal != null && !isGoalEnded();
+    final goalStartsTomorrow = isGoalStartInFuture();
 
     // Determine labels based on goal state
     String totalLabel = 'Goal Score';
     String todayScoreDisplay = '0';
+    bool showTodayScore = false;
 
     if (hasActiveGoal) {
       // Active goal in progress
       todayScoreDisplay = todayScoreValue;
+      showTodayScore = true;
 
       if (isGoalLastDay()) {
         totalLabel = 'Final Score (Today!)';
@@ -346,14 +349,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // Goal ended yesterday - show yesterday's final score
       todayScoreDisplay = '0';
       totalLabel = 'Final Score';
+      showTodayScore = false;
     } else if (goal_service.isGoalEndedMoreThanADay()) {
       // Goal ended more than a day ago
       todayScoreDisplay = '0';
       totalLabel = 'Your Last Score';
+      showTodayScore = false;
+    } else if (goalStartsTomorrow) {
+      // Goal starts tomorrow - don't show today score
+      todayScoreDisplay = '0';
+      totalLabel = 'Goal Score';
+      showTodayScore = false;
     } else {
       // No goal yet or waiting to start
       todayScoreDisplay = '0';
       totalLabel = 'Goal Score';
+      showTodayScore = false;
     }
 
     totalScore = totalScoreValue;
@@ -370,7 +381,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (containsRewards && containsTypes)
         Center(
           child: GestureDetector(
-            onTap: hasActiveGoal ? getGoalImage : null,
+            // ✅ FIX: Allow image upload even if goal starts tomorrow
+            onTap: (hasActiveGoal || goalStartsTomorrow) ? getGoalImage : null,
             child: getSelectedImage(),
           ),
         ),
@@ -398,23 +410,62 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-      if (containsRewards && containsTypes)
-        twoColumnGreyCards(
-          hasActiveGoal
-              ? GestureDetector(
+
+      // ✅ FIX: Show centered single circle when goal starts tomorrow
+      if (containsRewards && containsTypes && goalStartsTomorrow)
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Column(
+              children: [
+                Text(
+                  '🎯 Goal starts tomorrow!',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: purpleColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Get ready to track your progress',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: greyColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+      // ✅ FIX: Only show percentage circles when goal is active or ended
+      if (containsRewards && containsTypes && !goalStartsTomorrow)
+        showTodayScore
+            ? twoColumnGreyCards(
+                GestureDetector(
                   onTap: () {
                     goToUpdateActivityScreen(context);
                   },
                   child: percentageIndicator(50.0, todayScore, 'Today Score'),
-                )
-              : const SizedBox.shrink(),
-          GestureDetector(
-            onTap: () {
-              goToGoalStatusScreen(context);
-            },
-            child: percentageIndicator(70.0, totalScore, totalLabel),
-          ),
-        ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    goToGoalStatusScreen(context);
+                  },
+                  child: percentageIndicator(70.0, totalScore, totalLabel),
+                ),
+              )
+            : Center(
+                // Single centered circle when no today score
+                child: GestureDetector(
+                  onTap: () {
+                    goToGoalStatusScreen(context);
+                  },
+                  child: percentageIndicator(70.0, totalScore, totalLabel),
+                ),
+              ),
+
       if (containsRewards && containsTypes && predictReward.isNotEmpty)
         Center(
           child: Text(
