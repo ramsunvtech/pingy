@@ -57,8 +57,18 @@ class _TaskTypeScreenState extends State<TaskTypeScreen> {
     );
 
     activityTypeBox.put(id, model);
-    showToastMessage(context, 'Activity Type Saved');
-    goToActivityTypeListScreen(context);
+    final rewardBox = Hive.box('rewards');
+    final hasRewards = rewardBox.isNotEmpty;
+    final isFirstActivityType =
+        activityTypeBox.length == 1 && formMode == 'add';
+
+    if (hasRewards && isFirstActivityType) {
+      showToastMessage(context, 'Setup complete! Add your activities, then update your score. Welcome to Steppy! 🎉');
+      goToHomeScreen(context);
+    } else {
+      showToastMessage(context, 'Activity Type Saved');
+      goToActivityTypeListScreen(context);
+    }
   }
 
   String _generateRank() {
