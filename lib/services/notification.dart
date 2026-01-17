@@ -5,6 +5,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:pingy/config/notification_config.dart';
+import 'package:flutter/foundation.dart'
+    show kIsWeb;
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
@@ -80,6 +82,8 @@ class NotificationService {
 
   // Request exact alarm permission for Android 12+
   static Future<bool> requestExactAlarmPermission() async {
+    if (kIsWeb) return false;
+
     if (Platform.isAndroid) {
       final androidImplementation = _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
