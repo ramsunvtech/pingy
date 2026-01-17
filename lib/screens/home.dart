@@ -592,6 +592,382 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  Widget buildEmptyState() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.purple.shade50,
+            Colors.white,
+          ],
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+
+              // Hero Icon/Illustration
+              Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.emoji_events,
+                  size: 80,
+                  color: Colors.purple.shade600,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Welcome Title
+              Text(
+                'Welcome to Steppy! 🎯',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.purple.shade700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              // Subtitle
+              Text(
+                'Track your daily activities and earn amazing rewards!',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 48),
+
+              // Step-by-step guide
+              _buildStepCard(
+                step: '1',
+                icon: Icons.flag,
+                title: 'Set Your Goal',
+                description:
+                    'Define what you want to achieve and the rewards you\'ll earn',
+                isCompleted: containsRewards,
+                onTap: () => goToGoalsForm(context),
+                buttonText: containsRewards ? 'Edit Goal' : 'Create Goal',
+              ),
+
+              const SizedBox(height: 16),
+
+              _buildStepCard(
+                step: '2',
+                icon: Icons.checklist,
+                title: 'Add Activity Types',
+                description:
+                    'Set up daily activities you want to track (e.g., exercise, reading)',
+                isCompleted: containsTypes,
+                onTap: containsRewards
+                    ? () => goToActivityTypeFormScreen(context)
+                    : null,
+                buttonText:
+                    containsTypes ? 'Manage Activities' : 'Add Activities',
+                isLocked: !containsRewards,
+              ),
+
+              const SizedBox(height: 16),
+
+              _buildStepCard(
+                step: '3',
+                icon: Icons.stars,
+                title: 'Track Daily Progress',
+                description:
+                    'Update your scores each day and watch your progress grow!',
+                isCompleted: false,
+                onTap: null,
+                buttonText: 'Coming Soon',
+                isLocked: !containsRewards || !containsTypes,
+              ),
+
+              const SizedBox(height: 40),
+
+              // Motivational quote
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.purple.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.format_quote,
+                      color: Colors.purple.shade400,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '"Success is the sum of small efforts repeated day in and day out"',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.purple.shade700,
+                        height: 1.6,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepCard({
+    required String step,
+    required IconData icon,
+    required String title,
+    required String description,
+    required bool isCompleted,
+    required VoidCallback? onTap,
+    required String buttonText,
+    bool isLocked = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: isCompleted
+              ? Colors.green.shade300
+              : isLocked
+                  ? Colors.grey.shade300
+                  : Colors.purple.shade200,
+          width: 2,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isLocked ? null : onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Step number badge
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? Colors.green.shade400
+                            : isLocked
+                                ? Colors.grey.shade300
+                                : Colors.purple.shade400,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: isCompleted
+                            ? const Icon(Icons.check,
+                                color: Colors.white, size: 24)
+                            : Text(
+                                step,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    // Icon
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? Colors.green.shade50
+                            : isLocked
+                                ? Colors.grey.shade100
+                                : Colors.purple.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isLocked ? Icons.lock_outline : icon,
+                        color: isCompleted
+                            ? Colors.green.shade600
+                            : isLocked
+                                ? Colors.grey.shade500
+                                : Colors.purple.shade600,
+                        size: 28,
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    // Status badge
+                    if (isCompleted)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              size: 16,
+                              color: Colors.green.shade700,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Done',
+                              style: TextStyle(
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    if (isLocked)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.lock,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Locked',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Title
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isLocked ? Colors.grey.shade600 : Colors.black87,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Description
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color:
+                        isLocked ? Colors.grey.shade500 : Colors.grey.shade700,
+                    height: 1.5,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Action button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLocked ? null : onTap,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isCompleted
+                          ? Colors.green.shade400
+                          : isLocked
+                              ? Colors.grey.shade300
+                              : Colors.purple.shade500,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: isLocked ? 0 : 2,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          buttonText,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (!isLocked && onTap != null) ...[
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward, size: 20),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // --------------------------------------------------
   // LIFECYCLE
   // --------------------------------------------------
@@ -631,7 +1007,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Exit app when back pressed on home screen
         SystemChannels.platform.invokeMethod('SystemNavigator.pop');
         return false;
       },
@@ -642,6 +1017,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Hive.box('activity_type').listenable(),
         ]),
         builder: (context, _) {
+          // ✅ Show beautiful empty state when not fully set up
+          if (!containsRewards || !containsTypes) {
+            return Scaffold(
+              appBar: customAppBar(
+                title: 'Steppy',
+                actions: [settingsLinkIconButton(context)],
+              ),
+              body: buildEmptyState(),
+            );
+          }
+
+          // ✅ Show normal home screen when set up
           final homePanes = getHomeBlocks('100');
 
           return Scaffold(
