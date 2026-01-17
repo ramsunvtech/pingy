@@ -22,44 +22,48 @@ import 'app.dart';
 void main() async {
   // Initialize.
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   tz.initializeTimeZones();
-  await NotificationService.initialize();
+  if (!kIsWeb) {
+    await NotificationService.initialize();
 
-  // Request exact alarm permission for Android
-  bool permissionGranted = await NotificationService.requestExactAlarmPermission();
-  
-  if (permissionGranted) {
-    try {
-      // Weekday Reminder (Monday to Friday only)
-      await NotificationService().scheduleWeekdayNotification(
-          id: NotificationConfig.weekdayReminderId,
-          title: NotificationConfig.weekdayTitle,
-          body: NotificationConfig.weekdayBody,
-          hour: NotificationConfig.weekdayHour,
-          minute: NotificationConfig.weekdayMinute);
+    // Request exact alarm permission for Android
+    bool permissionGranted =
+        await NotificationService.requestExactAlarmPermission();
 
-      // Evening Reminder (Every day)
-      await NotificationService().scheduleNotification(
-          id: NotificationConfig.eveningReminderId,
-          title: NotificationConfig.eveningTitle,
-          body: NotificationConfig.eveningBody,
-          scheduledNotificationDateTime:
-              NotificationService().nextInstanceOfTenAM(
-                NotificationConfig.eveningHour, 
-                NotificationConfig.eveningMinute));
-      
-      // Schedule smart notifications (new goals, inactive users)
-      await NotificationService.rescheduleAll();
-      
-      print('✅ Notifications scheduled successfully');
-      print('   Weekday: ${NotificationConfig.weekdayHour}:${NotificationConfig.weekdayMinute.toString().padLeft(2, '0')}');
-      print('   Evening: ${NotificationConfig.eveningHour}:${NotificationConfig.eveningMinute.toString().padLeft(2, '0')}');
-    } catch (e) {
-      print('❌ Failed to schedule notifications: $e');
+    if (permissionGranted) {
+      try {
+        // Weekday Reminder (Monday to Friday only)
+        await NotificationService().scheduleWeekdayNotification(
+            id: NotificationConfig.weekdayReminderId,
+            title: NotificationConfig.weekdayTitle,
+            body: NotificationConfig.weekdayBody,
+            hour: NotificationConfig.weekdayHour,
+            minute: NotificationConfig.weekdayMinute);
+
+        // Evening Reminder (Every day)
+        await NotificationService().scheduleNotification(
+            id: NotificationConfig.eveningReminderId,
+            title: NotificationConfig.eveningTitle,
+            body: NotificationConfig.eveningBody,
+            scheduledNotificationDateTime: NotificationService()
+                .nextInstanceOfTenAM(NotificationConfig.eveningHour,
+                    NotificationConfig.eveningMinute));
+
+        // Schedule smart notifications (new goals, inactive users)
+        await NotificationService.rescheduleAll();
+
+        print('✅ Notifications scheduled successfully');
+        print(
+            '   Weekday: ${NotificationConfig.weekdayHour}:${NotificationConfig.weekdayMinute.toString().padLeft(2, '0')}');
+        print(
+            '   Evening: ${NotificationConfig.eveningHour}:${NotificationConfig.eveningMinute.toString().padLeft(2, '0')}');
+      } catch (e) {
+        print('❌ Failed to schedule notifications: $e');
+      }
+    } else {
+      print('❌ Exact alarm permission not granted.');
     }
-  } else {
-    print('❌ Exact alarm permission not granted.');
   }
 
   var path = "/assets/db";
