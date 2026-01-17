@@ -577,7 +577,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final hasTodayActivity = isTodayActivityExist();
 
     return Padding(
-      padding: const EdgeInsets.only(top: 70),
+      padding: const EdgeInsets.only(top: 30),
       child: FloatingActionButton(
         backgroundColor: Colors.lightGreen,
         onPressed: () {
@@ -676,7 +676,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     'Set up daily activities you want to track (e.g., exercise, reading)',
                 isCompleted: containsTypes,
                 onTap: containsRewards
-                    ? () => goToActivityTypeFormScreen(context)
+                    ? () async {
+                        // ✅ Use existing navigator, then check if we should rebuild
+                        goToActivityTypeFormScreen(context);
+                        // Force rebuild to check completion status
+                        setState(() {});
+                      }
                     : null,
                 buttonText:
                     containsTypes ? 'Manage Activities' : 'Add Activities',
@@ -988,7 +993,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (_lastCheckedActivityId != currentActivityId) {
         _updateScores();
       }
+
+      // ✅ ADD THIS: Refresh boxes and containsRewards/containsTypes flags
       setState(() {
+        rewardBox = Hive.box('rewards');
+        activityBox = Hive.box('activity');
+        activityTypeBox = Hive.box('activity_type');
+        containsRewards = rewardBox.isNotEmpty;
+        containsTypes = activityTypeBox.isNotEmpty;
         permissionStatusFuture = getCheckNotificationPermStatus();
       });
     }
@@ -1017,6 +1029,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Hive.box('activity_type').listenable(),
         ]),
         builder: (context, _) {
+          rewardBox = Hive.box('rewards');
+          activityBox = Hive.box('activity');
+          activityTypeBox = Hive.box('activity_type');
+          containsRewards = rewardBox.isNotEmpty;
+          containsTypes = activityTypeBox.isNotEmpty;
+
           // ✅ Show beautiful empty state when not fully set up
           if (!containsRewards || !containsTypes) {
             return Scaffold(
