@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,8 @@ import 'package:pingy/utils/permissions.dart';
 import 'package:pingy/services/goals.dart' as goal_service;
 import 'package:pingy/services/activity.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -48,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String totalScore = '0';
   String predictReward = '';
 
+  Uint8List? _goalPictureBytes;
   String _goalPicture = '';
   String? _lastCheckedActivityId;
 
@@ -211,13 +215,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     rewardBox.putAt(goalIndex, editedGoal);
 
-    setState(() {
-      _goalPicture = picked.path;
-    });
+    if (kIsWeb) {
+      final bytes = await picked.readAsBytes();
+      setState(() {
+        _goalPictureBytes = bytes;
+        _goalPicture = 'web_image_${DateTime.now().millisecondsSinceEpoch}';
+      });
+    } else {
+      setState(() {
+        _goalPicture = picked.path;
+      });
+    }
   }
 
   Widget getSelectedImage() {
     if (_goalPicture.isNotEmpty) {
+      if (kIsWeb) {
+        // ✅ WEB: Use stored bytes from image picker
+        if (_goalPictureBytes != null && _goalPictureBytes!.isNotEmpty) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: 105,
+              backgroundImage: MemoryImage(_goalPictureBytes!), // ✅ SHOWS IMAGE
+            ),
+          );
+        }
+        // Fallback if no bytes
+        return CircleAvatar(
+          radius: 105,
+          backgroundColor: Colors.white,
+          child: Icon(Icons.image, size: 70, color: greyColor),
+        );
+      }
+
+      // Mobile: File logic (unchanged)
       final file = File(_goalPicture);
       if (file.existsSync()) {
         return Container(
@@ -241,6 +284,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
 
+    // Default placeholder
     return CircleAvatar(
       radius: 110,
       backgroundColor: greyColor,
