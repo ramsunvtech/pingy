@@ -5,7 +5,6 @@ import 'package:pingy/screens/home.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 import 'package:pingy/widgets/PaddedFormField.dart';
 
