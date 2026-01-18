@@ -11,6 +11,9 @@ import 'package:pingy/widgets/PaddedFormField.dart';
 
 import 'package:pingy/utils/navigators.dart';
 
+// Add this import
+import 'package:pingy/services/notification.dart';
+
 class GoalScreen extends StatefulWidget {
   @override
   GoalScreenState createState() => GoalScreenState();
@@ -72,7 +75,7 @@ class GoalScreenState extends State<GoalScreen> {
     });
   }
 
-  void _handleAddGoal() {
+  void _handleAddGoal() async {
     // Validate inputs
     if (_titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -116,16 +119,29 @@ class GoalScreenState extends State<GoalScreen> {
       yetToWin,
     );
 
-    rewardsBox.add(newRewards);
+    await rewardsBox.add(newRewards);
+
+    // 🔔 RESCHEDULE NOTIFICATIONS
+    // This will:
+    // 1. Switch from weekday (Mon-Fri 11:30 AM) to daily (10 AM & 8 PM)
+    // 2. Schedule auto-switch trigger for day after goal ends
+    await NotificationService.rescheduleAll();
+    
+    print('✅ Goal added: ${_titleController.text}');
+    print('   Period: $startDate to $endDate');
+    print('   Daily notifications active (10 AM & 8 PM)');
+    print('   Auto-switch scheduled for day after: $endDate');
 
     // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        behavior: SnackBarBehavior.fixed,
-        content: Text('Goal Added!'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.fixed,
+          content: Text('Goal Added!'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
 
     // Navigate after a short delay to avoid Navigator lock
     Future.delayed(const Duration(milliseconds: 500), () {
