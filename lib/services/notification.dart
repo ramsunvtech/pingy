@@ -1,52 +1,29 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:pingy/config/notification_config.dart';
-import 'package:flutter/foundation.dart'
-    show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:intl/intl.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   // Notification IDs
-  static const int dailyReminderId = 100;
-  static const int motivationReminderId = 101;
-  static const int inactiveReminderId = 102;
-
-  DateTime nextInstanceOfTenAM(int hour, int minutes) {
-    final DateTime now = DateTime.now();
-    DateTime scheduledDate = DateTime(now.year, now.month, now.day, hour, minutes);
-    
-    // If time has passed today, start checking from tomorrow
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-    
-    return scheduledDate;
-  }
-
-  // Get next weekday instance (Monday to Friday only)
-  DateTime nextWeekdayInstance(int hour, int minutes) {
-    final DateTime now = DateTime.now();
-    DateTime scheduledDate = DateTime(now.year, now.month, now.day, hour, minutes);
-    
-    // If time has passed today, start checking from tomorrow
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-    
-    // Skip to next weekday if it falls on weekend
-    while (scheduledDate.weekday == DateTime.saturday || 
-           scheduledDate.weekday == DateTime.sunday) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-    
-    return scheduledDate;
-  }
+  static const int dailyMorningReminderId = 100;
+  static const int dailyEveningReminderId = 101;
+  
+  // Weekday motivation notification IDs (Mon-Fri)
+  static const int motivationMondayId = 102;
+  static const int motivationTuesdayId = 103;
+  static const int motivationWednesdayId = 104;
+  static const int motivationThursdayId = 105;
+  static const int motivationFridayId = 106;
+  
+  // Goal expiry trigger notification (fires day after goal ends)
+  static const int goalExpiryTriggerId = 107;
 
   static Future<void> initialize() async {
     tz.initializeTimeZones();
@@ -65,22 +42,15 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        // When weekday notification is received, reschedule next one
-        if (response.id == NotificationConfig.weekdayReminderId) {
-          final service = NotificationService();
-          await service.scheduleWeekdayNotification(
-            id: NotificationConfig.weekdayReminderId,
-            title: NotificationConfig.weekdayTitle,
-            body: NotificationConfig.weekdayBody,
-            hour: NotificationConfig.weekdayHour,
-            minute: NotificationConfig.weekdayMinute,
-          );
+        // When goal expiry trigger fires, switch to weekday notifications
+        if (response.id == goalExpiryTriggerId) {
+          print('🔔 Goal expiry trigger fired - switching to weekday notifications');
+          await rescheduleAll();
         }
       },
     );
   }
 
-  // Request exact alarm permission for Android 12+
   static Future<bool> requestExactAlarmPermission() async {
     if (kIsWeb) return false;
 
@@ -123,114 +93,80 @@ class NotificationService {
     return notificationDetails;
   }
 
-  void display() async {
-    try {
-      Random random = Random();
-      int id = random.nextInt(1000);
-
-      await _flutterLocalNotificationsPlugin.show(
-          id, 'your title', 'your body', getNotificationDetails());
-    } catch (e) {
-      print('Error>>>$e');
-    }
-  }
-
-  Future<bool> scheduleNotification({
-    required int id,
-    String? title,
-    String? body,
-    String? payload,
-    required DateTime scheduledNotificationDateTime,
-  }) async {
+  // ========== DAILY REMINDERS (When goals exist) ==========
+  
+  static Future<void> scheduleDailyMorningReminder() async {
     try {
       await _flutterLocalNotificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(
-          scheduledNotificationDateTime,
-          tz.local,
+        dailyMorningReminderId,
+        'Time to update your progress! 🌅',
+        'Don\'t forget to log today\'s activities 📝',
+        _nextInstanceOfTime(
+          NotificationConfig.dailyMorningHour, 
+          NotificationConfig.dailyMorningMinute
         ),
-        getNotificationDetails(),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'daily_morning_reminder',
+            'Daily Morning Reminders',
+            channelDescription: 'Morning activity reminders',
+            importance: Importance.high,
+            priority: Priority.high,
+            enableVibration: true,
+            playSound: true,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
       );
-      return true;
+      
+      print('✅ Morning reminder scheduled for 10 AM daily (repeats forever)');
     } catch (e) {
-      print('Error scheduling notification: $e');
-      return false;
+      print('Error scheduling morning reminder: $e');
     }
   }
 
-  // Schedule weekday-only notification (Monday to Friday)
-  Future<bool> scheduleWeekdayNotification({
-    required int id,
-    String? title,
-    String? body,
-    required int hour,
-    required int minute,
-  }) async {
+  static Future<void> scheduleDailyEveningReminder() async {
     try {
-      await _flutterLocalNotificationsPlugin.cancel(id);
-      
-      final DateTime nextNotification = nextWeekdayInstance(hour, minute);
-      
       await _flutterLocalNotificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(nextNotification, tz.local),
-        getNotificationDetails(),
+        dailyEveningReminderId,
+        'Evening Check-in! 🌙',
+        'How did your day go? Update your activities!',
+        _nextInstanceOfTime(
+          NotificationConfig.dailyEveningHour, 
+          NotificationConfig.dailyEveningMinute
+        ),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'daily_evening_reminder',
+            'Daily Evening Reminders',
+            channelDescription: 'Evening activity reminders',
+            importance: Importance.high,
+            priority: Priority.high,
+            enableVibration: true,
+            playSound: true,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
       );
       
-      print('Weekday notification scheduled for: $nextNotification');
-      return true;
+      print('✅ Evening reminder scheduled for 8 PM daily (repeats forever)');
     } catch (e) {
-      print('Error scheduling weekday notification: $e');
-      return false;
+      print('Error scheduling evening reminder: $e');
     }
   }
 
-  // ========== NEW METHODS ==========
-
-  // Schedule daily reminder at specific time (repeats daily)
-  static Future<void> scheduleDailyReminder({
-    int? hour,
-    int? minute,
-    String? title,
-    String? body,
-  }) async {
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      NotificationConfig.dailyReminderId,
-      title ?? 'Time to update your progress!',
-      body ?? 'Don\'t forget to log today\'s activities 📝',
-      _nextInstanceOfTime(
-        hour ?? NotificationConfig.dailyHour, 
-        minute ?? NotificationConfig.dailyMinute
-      ),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'daily_reminder',
-          'Daily Reminders',
-          channelDescription: 'Daily activity reminders',
-          importance: Importance.high,
-          priority: Priority.high,
-          enableVibration: true,
-          playSound: true,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-  }
-
-  // Schedule motivation for users without goals
-  static Future<void> scheduleMotivationReminder() async {
+  // ========== WEEKDAY-ONLY MOTIVATION REMINDERS (When NO goals) ==========
+  
+  static Future<void> scheduleWeekdayMotivationReminders() async {
     try {
-      final rewardBox = Hive.box('rewards');
+      final rewardsBox = Hive.box('rewards');
 
-      if (rewardBox.isEmpty) {
+      if (rewardsBox.isEmpty) {
+        // Get random motivational message
         final messages = [
           {
             'title': 'Ready to start your journey? 🎯',
@@ -251,64 +187,134 @@ class NotificationService {
         ];
 
         final random = messages[DateTime.now().millisecond % messages.length];
-
-        await _flutterLocalNotificationsPlugin.zonedSchedule(
-          NotificationConfig.motivationReminderId,
-          random['title'],
-          random['body'],
-          _nextInstanceOfTime(
-            NotificationConfig.motivationHour, 
-            NotificationConfig.motivationMinute
-          ),
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'motivation',
-              'Motivation',
-              channelDescription: 'Motivational reminders for new users',
-              importance: Importance.high,
-              priority: Priority.high,
-              enableVibration: true,
-              playSound: true,
-            ),
-            iOS: DarwinNotificationDetails(),
-          ),
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time,
+        
+        // Schedule for MONDAY at 11:30 AM
+        await _scheduleWeekdayNotification(
+          id: motivationMondayId,
+          weekday: DateTime.monday,
+          title: random['title']!,
+          body: random['body']!,
         );
+        
+        // Schedule for TUESDAY at 11:30 AM
+        await _scheduleWeekdayNotification(
+          id: motivationTuesdayId,
+          weekday: DateTime.tuesday,
+          title: random['title']!,
+          body: random['body']!,
+        );
+        
+        // Schedule for WEDNESDAY at 11:30 AM
+        await _scheduleWeekdayNotification(
+          id: motivationWednesdayId,
+          weekday: DateTime.wednesday,
+          title: random['title']!,
+          body: random['body']!,
+        );
+        
+        // Schedule for THURSDAY at 11:30 AM
+        await _scheduleWeekdayNotification(
+          id: motivationThursdayId,
+          weekday: DateTime.thursday,
+          title: random['title']!,
+          body: random['body']!,
+        );
+        
+        // Schedule for FRIDAY at 11:30 AM
+        await _scheduleWeekdayNotification(
+          id: motivationFridayId,
+          weekday: DateTime.friday,
+          title: random['title']!,
+          body: random['body']!,
+        );
+        
+        print('✅ Weekday motivation reminders scheduled (Mon-Fri at 11:30 AM, repeats forever)');
       } else {
-        await _flutterLocalNotificationsPlugin.cancel(NotificationConfig.motivationReminderId);
+        // Cancel all weekday motivation notifications if user has goals
+        await cancelWeekdayMotivationReminders();
+        print('❌ Weekday motivation reminders cancelled - user has goals');
       }
     } catch (e) {
-      print('Error scheduling motivation reminder: $e');
+      print('Error scheduling weekday motivation reminders: $e');
     }
   }
 
-  // Schedule reminder for users who haven't logged activity today
-  static Future<void> scheduleInactiveUserReminder() async {
+  // Helper: Schedule a single weekday notification
+  static Future<void> _scheduleWeekdayNotification({
+    required int id,
+    required int weekday,
+    required String title,
+    required String body,
+  }) async {
+    final scheduledDate = _nextInstanceOfWeekday(
+      weekday: weekday,
+      hour: NotificationConfig.motivationHour,
+      minute: NotificationConfig.motivationMinute,
+    );
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'motivation',
+          'Motivation',
+          channelDescription: 'Motivational reminders for new users',
+          importance: Importance.high,
+          priority: Priority.high,
+          enableVibration: true,
+          playSound: true,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+    );
+  }
+
+  // Cancel all weekday motivation reminders
+  static Future<void> cancelWeekdayMotivationReminders() async {
+    await _flutterLocalNotificationsPlugin.cancel(motivationMondayId);
+    await _flutterLocalNotificationsPlugin.cancel(motivationTuesdayId);
+    await _flutterLocalNotificationsPlugin.cancel(motivationWednesdayId);
+    await _flutterLocalNotificationsPlugin.cancel(motivationThursdayId);
+    await _flutterLocalNotificationsPlugin.cancel(motivationFridayId);
+  }
+
+  // ========== SCHEDULE AUTO-SWITCH AFTER GOAL ENDS ==========
+  
+  /// Schedule a notification to fire the day after the last active goal ends
+  /// This triggers the switch from daily to weekday notifications
+  static Future<void> scheduleGoalExpiryTrigger(String endDateStr) async {
     try {
-      final activityBox = Hive.box('activity');
-      final rewardBox = Hive.box('rewards');
+      // Parse the end date (format: dd/MM/yyyy)
+      final endDate = DateFormat('dd/MM/yyyy').parse(endDateStr);
       
-      if (rewardBox.isEmpty) return;
-
-      final today = DateTime.now();
-      final todayId = 'activity_${today.year}${today.month}${today.day}';
-      final hasActivity = activityBox.containsKey(todayId);
+      // Schedule for 1 AM the day AFTER the goal ends
+      final triggerDate = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day + 1, // Day after goal ends
+        1, // 1 AM
+        0,
+      );
       
-      if (!hasActivity) {
+      final tzTriggerDate = tz.TZDateTime.from(triggerDate, tz.local);
+      
+      // Only schedule if it's in the future
+      if (tzTriggerDate.isAfter(tz.TZDateTime.now(tz.local))) {
         await _flutterLocalNotificationsPlugin.zonedSchedule(
-          NotificationConfig.inactiveReminderId,
-          'Don\'t break your streak! 🔥',
-          'You haven\'t updated your activities today. Keep going!',
-          _nextInstanceOfTime(
-            NotificationConfig.inactiveHour,
-            NotificationConfig.inactiveMinute
-          ),
+          goalExpiryTriggerId,
+          'Goal Completed! 🎉',
+          'Time to set new goals and keep the momentum going!',
+          tzTriggerDate,
           const NotificationDetails(
             android: AndroidNotificationDetails(
-              'inactive_reminder',
-              'Activity Reminders',
-              channelDescription: 'Reminders for users who haven\'t logged activities',
+              'goal_expiry',
+              'Goal Completion',
+              channelDescription: 'Notifications when goals are completed',
               importance: Importance.high,
               priority: Priority.high,
               enableVibration: true,
@@ -318,15 +324,16 @@ class NotificationService {
           ),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         );
-      } else {
-        await _flutterLocalNotificationsPlugin.cancel(NotificationConfig.inactiveReminderId);
+        
+        print('✅ Goal expiry trigger scheduled for: $triggerDate');
       }
     } catch (e) {
-      print('Error scheduling inactive reminder: $e');
+      print('Error scheduling goal expiry trigger: $e');
     }
   }
 
-  // Helper to get next instance of specific time
+  // ========== HELPER METHODS ==========
+
   static tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate = tz.TZDateTime(
@@ -338,7 +345,6 @@ class NotificationService {
       minute,
     );
 
-    // If time has passed today, schedule for tomorrow
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
@@ -346,24 +352,90 @@ class NotificationService {
     return scheduledDate;
   }
 
-  // Cancel all notifications
+  static tz.TZDateTime _nextInstanceOfWeekday({
+    required int weekday,
+    required int hour,
+    required int minute,
+  }) {
+    var scheduledDate = _nextInstanceOfTime(hour, minute);
+
+    while (scheduledDate.weekday != weekday) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    return scheduledDate;
+  }
+
   static Future<void> cancelAll() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
   }
 
-  // Cancel specific notification
   static Future<void> cancel(int id) async {
     await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
-  // Reschedule all notifications (call when app opens/resumes)
+  // ========== MAIN RESCHEDULE METHOD ==========
+  
   static Future<void> rescheduleAll() async {
     try {
-      await scheduleDailyReminder(); // Uses config values
-      await scheduleMotivationReminder(); // Uses config values
-      await scheduleInactiveUserReminder(); // Uses config values
+      final rewardsBox = Hive.box('rewards');
+      
+      if (rewardsBox.isEmpty) {
+        // NO GOALS: Cancel daily reminders, schedule weekday motivation
+        await cancel(dailyMorningReminderId);
+        await cancel(dailyEveningReminderId);
+        await cancel(goalExpiryTriggerId);
+        await scheduleWeekdayMotivationReminders();
+        print('🔄 Rescheduled: Weekday motivation mode (no goals)');
+      } else {
+        // HAS GOALS: Cancel weekday motivation, schedule daily reminders
+        await cancelWeekdayMotivationReminders();
+        await scheduleDailyMorningReminder();
+        await scheduleDailyEveningReminder();
+        
+        // Find the latest goal end date and schedule auto-switch
+        String? latestEndDate;
+        DateTime? latestDate;
+        
+        for (var goal in rewardsBox.values) {
+          if (goal.endDate != null && goal.endDate.isNotEmpty) {
+            try {
+              final endDate = DateFormat('dd/MM/yyyy').parse(goal.endDate);
+              if (latestDate == null || endDate.isAfter(latestDate)) {
+                latestDate = endDate;
+                latestEndDate = goal.endDate;
+              }
+            } catch (e) {
+              print('Error parsing end date: $e');
+            }
+          }
+        }
+        
+        // Schedule the auto-switch trigger
+        if (latestEndDate != null) {
+          await scheduleGoalExpiryTrigger(latestEndDate);
+        }
+        
+        print('🔄 Rescheduled: Daily reminder mode (has goals)');
+      }
+      
+      // Verify what's scheduled
+      await verifyScheduledNotifications();
     } catch (e) {
       print('Error rescheduling notifications: $e');
+    }
+  }
+
+  // Verify pending notifications (for debugging)
+  static Future<void> verifyScheduledNotifications() async {
+    try {
+      final pending = await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+      print('📋 Pending notifications: ${pending.length}');
+      for (var notification in pending) {
+        print('  - ID ${notification.id}: ${notification.title}');
+      }
+    } catch (e) {
+      print('Error verifying notifications: $e');
     }
   }
 }
