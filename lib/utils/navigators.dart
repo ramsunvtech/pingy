@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:pingy/screens/activity/list_activity_type.dart';
 import 'package:pingy/screens/activity/list_activities.dart';
-import 'package:pingy/screens/home.dart';
 import 'package:pingy/screens/goals/list_goals.dart';
 import 'package:pingy/screens/goals/goal_status.dart';
 import 'package:pingy/screens/settings.dart';
