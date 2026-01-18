@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
    <application
-        android:label="pingy"
+        android:label="steppy"
         android:name="${applicationName}"
         android:icon="@mipmap/icons">
         <activity
