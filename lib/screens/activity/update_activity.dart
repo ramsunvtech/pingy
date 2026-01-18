@@ -8,7 +8,6 @@ import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
-import 'package:pingy/widgets/PaddedFormField.dart';
 import 'package:pingy/widgets/ProgressSelector.dart';
 
 import 'package:pingy/utils/color.dart';
