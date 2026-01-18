@@ -1,11 +1,11 @@
 {
     "name": "pingy",
-    "short_name": "pingy",
+    "short_name": "steppy",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Pingy - Kids Rewards Project",
+    "description": "Steppy - Kids Rewards Project",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
