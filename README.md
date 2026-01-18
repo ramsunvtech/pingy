@@ -1,6 +1,6 @@
-# pingy
+# Steppy alias pingy
 
-Pingy - Kids Rewards Project
+Steppy alias Pingy - Kids Rewards Project
 
 ## On Every change in lib/l10n/app_en.arb, run the below command.
 flutter gen-l10n
