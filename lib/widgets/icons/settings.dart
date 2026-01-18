@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:pingy/screens/settings.dart';
 import 'package:pingy/utils/navigators.dart';
 import 'package:pingy/utils/color.dart';
 
