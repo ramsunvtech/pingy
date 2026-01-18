@@ -14,7 +14,6 @@ import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/services/notification.dart';
-import 'package:pingy/config/notification_config.dart';
 
 // App.
 import 'app.dart';
@@ -24,47 +23,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   tz.initializeTimeZones();
-  if (!kIsWeb) {
-    await NotificationService.initialize();
-
-    // Request exact alarm permission for Android
-    bool permissionGranted =
-        await NotificationService.requestExactAlarmPermission();
-
-    if (permissionGranted) {
-      try {
-        // Weekday Reminder (Monday to Friday only)
-        await NotificationService().scheduleWeekdayNotification(
-            id: NotificationConfig.weekdayReminderId,
-            title: NotificationConfig.weekdayTitle,
-            body: NotificationConfig.weekdayBody,
-            hour: NotificationConfig.weekdayHour,
-            minute: NotificationConfig.weekdayMinute);
-
-        // Evening Reminder (Every day)
-        await NotificationService().scheduleNotification(
-            id: NotificationConfig.eveningReminderId,
-            title: NotificationConfig.eveningTitle,
-            body: NotificationConfig.eveningBody,
-            scheduledNotificationDateTime: NotificationService()
-                .nextInstanceOfTenAM(NotificationConfig.eveningHour,
-                    NotificationConfig.eveningMinute));
-
-        // Schedule smart notifications (new goals, inactive users)
-        await NotificationService.rescheduleAll();
-
-        print('✅ Notifications scheduled successfully');
-        print(
-            '   Weekday: ${NotificationConfig.weekdayHour}:${NotificationConfig.weekdayMinute.toString().padLeft(2, '0')}');
-        print(
-            '   Evening: ${NotificationConfig.eveningHour}:${NotificationConfig.eveningMinute.toString().padLeft(2, '0')}');
-      } catch (e) {
-        print('❌ Failed to schedule notifications: $e');
-      }
-    } else {
-      print('❌ Exact alarm permission not granted.');
-    }
-  }
 
   var path = "/assets/db";
   if (!kIsWeb) {
@@ -87,6 +45,32 @@ void main() async {
   await Hive.openBox('activity_type');
   await Hive.openBox('rewards');
   await Hive.openBox('activity');
+
+  // ========== INITIALIZE NOTIFICATIONS ==========
+  if (!kIsWeb) {
+    await NotificationService.initialize();
+
+    // Request exact alarm permission for Android
+    bool permissionGranted =
+        await NotificationService.requestExactAlarmPermission();
+
+    if (permissionGranted) {
+      try {
+        // Use the new unified rescheduleAll method
+        // This automatically schedules the right notifications based on whether goals exist
+        await NotificationService.rescheduleAll();
+
+        print('✅ Notifications scheduled successfully');
+        
+        // Debug: Show what's scheduled
+        await NotificationService.verifyScheduledNotifications();
+      } catch (e) {
+        print('❌ Failed to schedule notifications: $e');
+      }
+    } else {
+      print('❌ Exact alarm permission not granted.');
+    }
+  }
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
