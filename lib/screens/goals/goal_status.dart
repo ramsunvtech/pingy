@@ -6,16 +6,13 @@ import 'package:pingy/widgets/CustomAppBar.dart';
 
 // Models
 import 'package:pingy/models/hive/activity.dart';
-import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
 // Services
-import 'package:pingy/services/goals.dart';
 import 'package:pingy/services/activity.dart';
 
 // Utils
 import 'package:pingy/utils/navigators.dart';
-import 'package:pingy/utils/color.dart';
 
 class GoalStatusScreen extends StatefulWidget {
   final String? goalId;
