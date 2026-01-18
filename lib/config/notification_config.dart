@@ -1,37 +1,26 @@
 class NotificationConfig {
-  // ========== NOTIFICATION TIMES - Change these to test ==========
+  // ========== NOTIFICATION TIMES ==========
   
-  // Weekday reminder (Monday-Friday only)
-  static const int weekdayHour = 12;
-  static const int weekdayMinute = 35;
+  // Daily morning reminder (10 AM - every day including weekends, when goals exist)
+  static const int dailyMorningHour = 10;
+  static const int dailyMorningMinute = 0;
   
-  // Evening reminder (Every day)
-  static const int eveningHour = 20;
-  static const int eveningMinute = 0;
+  // Daily evening reminder (8 PM - every day including weekends, when goals exist)
+  static const int dailyEveningHour = 20;
+  static const int dailyEveningMinute = 0;
   
-  // Motivation reminder (For users without goals - 9 AM daily)
-  static const int motivationHour = 10;
-  static const int motivationMinute = 0;
+  // Motivation reminder (11:30 AM - weekdays only, when NO goals exist)
+  static const int motivationHour = 11;
+  static const int motivationMinute = 30;
   
-  // Inactive user reminder (For users who haven't logged today - 8 PM)
-  static const int inactiveHour = 20;
-  static const int inactiveMinute = 0;
+  // ========== NOTIFICATION IDs ==========
+  static const int dailyMorningReminderId = 100;
+  static const int dailyEveningReminderId = 101;
   
-  // Daily reminder (For all users with goals - 9 PM)
-  static const int dailyHour = 21;
-  static const int dailyMinute = 0;
-  
-  // ========== NOTIFICATION IDs (Don't change these) ==========
-  static const int weekdayReminderId = 1;
-  static const int eveningReminderId = 2;
-  static const int dailyReminderId = 100;
-  static const int motivationReminderId = 101;
-  static const int inactiveReminderId = 102;
-  
-  // ========== NOTIFICATION MESSAGES ==========
-  static const String weekdayTitle = 'Steppy Reminder';
-  static const String weekdayBody = 'Time to update your activities! Keep going! 💪';
-  
-  static const String eveningTitle = 'Steppy Reminder';
-  static const String eveningBody = 'Good Evening, Time to update your activities :)';
+  // Weekday motivation IDs (Mon-Fri)
+  static const int motivationMondayId = 102;
+  static const int motivationTuesdayId = 103;
+  static const int motivationWednesdayId = 104;
+  static const int motivationThursdayId = 105;
+  static const int motivationFridayId = 106;
 }
