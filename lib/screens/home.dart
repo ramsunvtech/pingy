@@ -309,10 +309,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void setGoalPicturePath(RewardsModel rewardDetails) {
+  void setGoalPicturePath(RewardsModel rewardDetails) async {
     if (rewardDetails.rewardPicture != null &&
         rewardDetails.rewardPicture!.isNotEmpty) {
-      _goalPicture = rewardDetails.rewardPicture!;
+      setState(() {
+        _goalPicture = rewardDetails.rewardPicture!;
+      });
+
+      // ✅ For web, try to load the bytes if the file exists
+      if (kIsWeb) {
+        try {
+          final file = File(rewardDetails.rewardPicture!);
+          if (await file.exists()) {
+            final bytes = await file.readAsBytes();
+            if (mounted) {
+              setState(() {
+                _goalPictureBytes = bytes;
+              });
+            }
+          }
+        } catch (e) {
+          debugPrint('Could not load goal picture bytes: $e');
+        }
+      }
     }
   }
 
@@ -521,20 +540,48 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     containsTypes = activityTypeBox.isNotEmpty;
 
     final activeGoal = getActiveGoal();
+    final lastCompletedGoal = getLastCompletedGoal();
 
     // Set goal ended status using service method
     _isGoalEnded = isGoalEnded();
+
+    // ✅ FIX: Load goal picture for both active and last completed goals
+    if (activeGoal != null && !_isGoalEnded) {
+      // Active goal - load its picture
+      if (_goalPicture.isEmpty) {
+        setGoalPicturePath(activeGoal);
+      }
+    } else if (lastCompletedGoal != null && _isGoalEnded) {
+      // ✅ Goal ended - load the last completed goal's picture
+      if (_goalPicture.isEmpty ||
+          _goalPicture != lastCompletedGoal.rewardPicture) {
+        setGoalPicturePath(lastCompletedGoal);
+
+        // ✅ For web, we need to reload the image bytes
+        if (kIsWeb &&
+            lastCompletedGoal.rewardPicture != null &&
+            lastCompletedGoal.rewardPicture!.isNotEmpty) {
+          // Try to load from file if it exists
+          try {
+            final file = File(lastCompletedGoal.rewardPicture!);
+            if (await file.exists()) {
+              final bytes = await file.readAsBytes();
+              setState(() {
+                _goalPictureBytes = bytes;
+              });
+            }
+          } catch (e) {
+            debugPrint('Could not load goal picture bytes: $e');
+          }
+        }
+      }
+    }
 
     // Only create/update activity if there's an active goal
     if (activeGoal != null &&
         !_isGoalEnded &&
         containsRewards &&
         containsTypes) {
-      // Load goal picture if available
-      if (_goalPicture.isEmpty) {
-        setGoalPicturePath(activeGoal);
-      }
-
       final activityId = getTodayActivityId();
       _lastCheckedActivityId = activityId;
 
@@ -986,15 +1033,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
       // Check when app comes to foreground
       final currentActivityId = getTodayActivityId();
       if (_lastCheckedActivityId != currentActivityId) {
-        _updateScores();
+        await _updateScores();
       }
 
-      // ✅ ADD THIS: Refresh boxes and containsRewards/containsTypes flags
+      // ✅ Refresh boxes and reload goal picture
       setState(() {
         rewardBox = Hive.box('rewards');
         activityBox = Hive.box('activity');
@@ -1003,6 +1050,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         containsTypes = activityTypeBox.isNotEmpty;
         permissionStatusFuture = getCheckNotificationPermStatus();
       });
+
+      // ✅ Reload goal picture for ended goals
+      if (isGoalEnded()) {
+        final lastGoal = getLastCompletedGoal();
+        if (lastGoal != null) {
+          setGoalPicturePath(lastGoal);
+        }
+      }
     }
   }
 
@@ -1023,48 +1078,65 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         return false;
       },
       child: AnimatedBuilder(
-        animation: Listenable.merge([
-          Hive.box('rewards').listenable(),
-          Hive.box('activity').listenable(),
-          Hive.box('activity_type').listenable(),
-        ]),
-        builder: (context, _) {
-          rewardBox = Hive.box('rewards');
-          activityBox = Hive.box('activity');
-          activityTypeBox = Hive.box('activity_type');
-          containsRewards = rewardBox.isNotEmpty;
-          containsTypes = activityTypeBox.isNotEmpty;
+          animation: Listenable.merge([
+            Hive.box('rewards').listenable(),
+            Hive.box('activity').listenable(),
+            Hive.box('activity_type').listenable(),
+          ]),
+          builder: (context, _) {
+            rewardBox = Hive.box('rewards');
+            activityBox = Hive.box('activity');
+            activityTypeBox = Hive.box('activity_type');
+            containsRewards = rewardBox.isNotEmpty;
+            containsTypes = activityTypeBox.isNotEmpty;
 
-          // ✅ Show beautiful empty state when not fully set up
-          if (!containsRewards || !containsTypes) {
+            // ✅ Reload goal picture when boxes change
+            if (containsRewards) {
+              final activeGoal = getActiveGoal();
+              final lastGoal = getLastCompletedGoal();
+
+              if (activeGoal != null && !isGoalEnded()) {
+                if (_goalPicture.isEmpty ||
+                    _goalPicture != activeGoal.rewardPicture) {
+                  setGoalPicturePath(activeGoal);
+                }
+              } else if (lastGoal != null && isGoalEnded()) {
+                if (_goalPicture.isEmpty ||
+                    _goalPicture != lastGoal.rewardPicture) {
+                  setGoalPicturePath(lastGoal);
+                }
+              }
+            }
+
+            // ✅ Show beautiful empty state when not fully set up
+            if (!containsRewards || !containsTypes) {
+              return Scaffold(
+                appBar: customAppBar(
+                  title: 'Steppy',
+                  actions: [settingsLinkIconButton(context)],
+                ),
+                body: buildEmptyState(),
+              );
+            }
+
+            // ✅ Show normal home screen when set up
+            final homePanes = getHomeBlocks('100');
+
             return Scaffold(
               appBar: customAppBar(
                 title: 'Steppy',
                 actions: [settingsLinkIconButton(context)],
               ),
-              body: buildEmptyState(),
-            );
-          }
-
-          // ✅ Show normal home screen when set up
-          final homePanes = getHomeBlocks('100');
-
-          return Scaffold(
-            appBar: customAppBar(
-              title: 'Steppy',
-              actions: [settingsLinkIconButton(context)],
-            ),
-            body: ListView.builder(
-              itemCount: homePanes.length,
-              itemBuilder: (_, i) => Padding(
-                padding: const EdgeInsets.all(8),
-                child: homePanes[i],
+              body: ListView.builder(
+                itemCount: homePanes.length,
+                itemBuilder: (_, i) => Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: homePanes[i],
+                ),
               ),
-            ),
-            floatingActionButton: getFloatingButton(context),
-          );
-        },
-      ),
+              floatingActionButton: getFloatingButton(context),
+            );
+          }),
     );
   }
 }
