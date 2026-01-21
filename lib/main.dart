@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/foundation.dart'
     show PlatformDispatcher, kDebugMode, kIsWeb, kReleaseMode;
 
@@ -21,8 +20,6 @@ import 'app.dart';
 void main() async {
   // Initialize.
   WidgetsFlutterBinding.ensureInitialized();
-
-  tz.initializeTimeZones();
 
   var path = "/assets/db";
   if (!kIsWeb) {
@@ -48,6 +45,7 @@ void main() async {
 
   // ========== INITIALIZE NOTIFICATIONS ==========
   if (!kIsWeb) {
+    // Initialize notification service (this handles timezone setup)
     await NotificationService.initialize();
 
     // Request exact alarm permission for Android
