@@ -26,7 +26,14 @@ class NotificationService {
   static const int goalExpiryTriggerId = 107;
 
   static Future<void> initialize() async {
+    // IMPORTANT: Initialize timezone data first
     tz.initializeTimeZones();
+    
+    // Set local timezone - this is crucial for correct scheduling
+    final String timeZoneName = await _getLocalTimeZone();
+    tz.setLocalLocation(tz.getLocation(timeZoneName));
+    
+    print('🌍 Timezone set to: $timeZoneName');
     
     DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
@@ -49,6 +56,39 @@ class NotificationService {
         }
       },
     );
+  }
+
+  // Get the device's local timezone name
+  static Future<String> _getLocalTimeZone() async {
+    try {
+      // Get the system timezone name
+      final now = DateTime.now();
+      final timeZoneName = now.timeZoneName;
+      
+      // Try to find matching timezone in tz database
+      try {
+        tz.getLocation(timeZoneName);
+        return timeZoneName;
+      } catch (e) {
+        // If exact name not found, try common mappings
+        if (timeZoneName.contains('SGT') || timeZoneName.contains('Singapore')) {
+          return 'Asia/Singapore';
+        } else if (timeZoneName.contains('IST') || timeZoneName.contains('India')) {
+          return 'Asia/Kolkata';
+        } else if (timeZoneName.contains('PST') || timeZoneName.contains('PDT')) {
+          return 'America/Los_Angeles';
+        } else if (timeZoneName.contains('EST') || timeZoneName.contains('EDT')) {
+          return 'America/New_York';
+        }
+        
+        // Default to UTC if can't determine
+        print('⚠️ Could not determine timezone, defaulting to UTC');
+        return 'UTC';
+      }
+    } catch (e) {
+      print('⚠️ Error getting timezone: $e');
+      return 'UTC';
+    }
   }
 
   static Future<bool> requestExactAlarmPermission() async {
@@ -77,12 +117,17 @@ class NotificationService {
 
   NotificationDetails getNotificationDetails() {
     const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails('my-channel', 'Steppy Notifications',
-            importance: Importance.max,
-            priority: Priority.high,
-            autoCancel: false,
-            enableVibration: true,
-            playSound: true);
+        AndroidNotificationDetails(
+          'pingy_channel', 
+          'Pingy Notifications',
+          channelDescription: 'Activity tracking reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+          autoCancel: false,
+          enableVibration: true,
+          playSound: true,
+          icon: '@mipmap/ic_launcher', // Ensure this matches your app icon
+        );
     const iOSChannelSpecifics = DarwinNotificationDetails();
 
     const NotificationDetails notificationDetails = NotificationDetails(
@@ -97,14 +142,18 @@ class NotificationService {
   
   static Future<void> scheduleDailyMorningReminder() async {
     try {
+      final scheduledTime = _nextInstanceOfTime(
+        NotificationConfig.dailyMorningHour, 
+        NotificationConfig.dailyMorningMinute
+      );
+      
+      print('📅 Scheduling morning reminder for: ${scheduledTime.toString()}');
+      
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         dailyMorningReminderId,
         'Time to update your progress! 🌅',
         'Don\'t forget to log today\'s activities 📝',
-        _nextInstanceOfTime(
-          NotificationConfig.dailyMorningHour, 
-          NotificationConfig.dailyMorningMinute
-        ),
+        scheduledTime,
         const NotificationDetails(
           android: AndroidNotificationDetails(
             'daily_morning_reminder',
@@ -114,29 +163,35 @@ class NotificationService {
             priority: Priority.high,
             enableVibration: true,
             playSound: true,
+            icon: '@mipmap/ic_launcher',
           ),
           iOS: DarwinNotificationDetails(),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
       
-      print('✅ Morning reminder scheduled for 10 AM daily (repeats forever)');
+      print('✅ Morning reminder scheduled for 10:00 AM (user local time)');
     } catch (e) {
-      print('Error scheduling morning reminder: $e');
+      print('❌ Error scheduling morning reminder: $e');
     }
   }
 
   static Future<void> scheduleDailyEveningReminder() async {
     try {
+      final scheduledTime = _nextInstanceOfTime(
+        NotificationConfig.dailyEveningHour, 
+        NotificationConfig.dailyEveningMinute
+      );
+      
+      print('📅 Scheduling evening reminder for: ${scheduledTime.toString()}');
+      
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         dailyEveningReminderId,
         'Evening Check-in! 🌙',
         'How did your day go? Update your activities!',
-        _nextInstanceOfTime(
-          NotificationConfig.dailyEveningHour, 
-          NotificationConfig.dailyEveningMinute
-        ),
+        scheduledTime,
         const NotificationDetails(
           android: AndroidNotificationDetails(
             'daily_evening_reminder',
@@ -146,16 +201,18 @@ class NotificationService {
             priority: Priority.high,
             enableVibration: true,
             playSound: true,
+            icon: '@mipmap/ic_launcher',
           ),
           iOS: DarwinNotificationDetails(),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
       
-      print('✅ Evening reminder scheduled for 8 PM daily (repeats forever)');
+      print('✅ Evening reminder scheduled for 8:00 PM (user local time)');
     } catch (e) {
-      print('Error scheduling evening reminder: $e');
+      print('❌ Error scheduling evening reminder: $e');
     }
   }
 
@@ -228,14 +285,14 @@ class NotificationService {
           body: random['body']!,
         );
         
-        print('✅ Weekday motivation reminders scheduled (Mon-Fri at 11:30 AM, repeats forever)');
+        print('✅ Weekday motivation reminders scheduled (Mon-Fri at 11:30 AM, user local time)');
       } else {
         // Cancel all weekday motivation notifications if user has goals
         await cancelWeekdayMotivationReminders();
         print('❌ Weekday motivation reminders cancelled - user has goals');
       }
     } catch (e) {
-      print('Error scheduling weekday motivation reminders: $e');
+      print('❌ Error scheduling weekday motivation reminders: $e');
     }
   }
 
@@ -252,6 +309,8 @@ class NotificationService {
       minute: NotificationConfig.motivationMinute,
     );
 
+    print('📅 Scheduling weekday notification (ID: $id) for: ${scheduledDate.toString()}');
+
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
@@ -266,11 +325,13 @@ class NotificationService {
           priority: Priority.high,
           enableVibration: true,
           playSound: true,
+          icon: '@mipmap/ic_launcher',
         ),
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -303,6 +364,8 @@ class NotificationService {
       
       final tzTriggerDate = tz.TZDateTime.from(triggerDate, tz.local);
       
+      print('📅 Goal expiry trigger calculated for: ${tzTriggerDate.toString()}');
+      
       // Only schedule if it's in the future
       if (tzTriggerDate.isAfter(tz.TZDateTime.now(tz.local))) {
         await _flutterLocalNotificationsPlugin.zonedSchedule(
@@ -319,16 +382,20 @@ class NotificationService {
               priority: Priority.high,
               enableVibration: true,
               playSound: true,
+              icon: '@mipmap/ic_launcher',
             ),
             iOS: DarwinNotificationDetails(),
           ),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         );
         
         print('✅ Goal expiry trigger scheduled for: $triggerDate');
+      } else {
+        print('⚠️ Goal expiry date is in the past, not scheduling');
       }
     } catch (e) {
-      print('Error scheduling goal expiry trigger: $e');
+      print('❌ Error scheduling goal expiry trigger: $e');
     }
   }
 
@@ -349,6 +416,7 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
+    print('🕐 Next instance of ${hour}:${minute.toString().padLeft(2, '0')} is: ${scheduledDate.toString()}');
     return scheduledDate;
   }
 
@@ -368,27 +436,33 @@ class NotificationService {
 
   static Future<void> cancelAll() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
+    print('🗑️ All notifications cancelled');
   }
 
   static Future<void> cancel(int id) async {
     await _flutterLocalNotificationsPlugin.cancel(id);
+    print('🗑️ Notification $id cancelled');
   }
 
   // ========== MAIN RESCHEDULE METHOD ==========
   
   static Future<void> rescheduleAll() async {
     try {
+      print('🔄 Starting notification reschedule...');
+      
       final rewardsBox = Hive.box('rewards');
       
       if (rewardsBox.isEmpty) {
         // NO GOALS: Cancel daily reminders, schedule weekday motivation
+        print('📊 No goals found - switching to weekday motivation mode');
         await cancel(dailyMorningReminderId);
         await cancel(dailyEveningReminderId);
         await cancel(goalExpiryTriggerId);
         await scheduleWeekdayMotivationReminders();
-        print('🔄 Rescheduled: Weekday motivation mode (no goals)');
+        print('✅ Rescheduled: Weekday motivation mode (no goals)');
       } else {
         // HAS GOALS: Cancel weekday motivation, schedule daily reminders
+        print('📊 Goals found - switching to daily reminder mode');
         await cancelWeekdayMotivationReminders();
         await scheduleDailyMorningReminder();
         await scheduleDailyEveningReminder();
@@ -406,7 +480,7 @@ class NotificationService {
                 latestEndDate = goal.endDate;
               }
             } catch (e) {
-              print('Error parsing end date: $e');
+              print('⚠️ Error parsing end date: $e');
             }
           }
         }
@@ -416,13 +490,13 @@ class NotificationService {
           await scheduleGoalExpiryTrigger(latestEndDate);
         }
         
-        print('🔄 Rescheduled: Daily reminder mode (has goals)');
+        print('✅ Rescheduled: Daily reminder mode (has goals)');
       }
       
       // Verify what's scheduled
       await verifyScheduledNotifications();
     } catch (e) {
-      print('Error rescheduling notifications: $e');
+      print('❌ Error rescheduling notifications: $e');
     }
   }
 
@@ -430,12 +504,23 @@ class NotificationService {
   static Future<void> verifyScheduledNotifications() async {
     try {
       final pending = await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
-      print('📋 Pending notifications: ${pending.length}');
+      final now = tz.TZDateTime.now(tz.local);
+      
+      print('📋 ========== SCHEDULED NOTIFICATIONS ==========');
+      print('📋 Current time: ${now.toString()}');
+      print('📋 Timezone: ${now.timeZoneName}');
+      print('📋 Total pending: ${pending.length}');
+      
       for (var notification in pending) {
-        print('  - ID ${notification.id}: ${notification.title}');
+        print('  ✓ ID ${notification.id}: ${notification.title}');
+        if (notification.body != null) {
+          print('    Body: ${notification.body}');
+        }
       }
+      
+      print('📋 ===============================================');
     } catch (e) {
-      print('Error verifying notifications: $e');
+      print('❌ Error verifying notifications: $e');
     }
   }
 }
