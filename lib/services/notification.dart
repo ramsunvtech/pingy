@@ -126,7 +126,7 @@ class NotificationService {
           autoCancel: false,
           enableVibration: true,
           playSound: true,
-          icon: '@mipmap/ic_launcher', // Ensure this matches your app icon
+          icon: '@mipmap/ic_launcher',
         );
     const iOSChannelSpecifics = DarwinNotificationDetails();
 
@@ -169,7 +169,6 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
       
       print('✅ Morning reminder scheduled for 10:00 AM (user local time)');
@@ -207,7 +206,6 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
       
       print('✅ Evening reminder scheduled for 8:00 PM (user local time)');
@@ -331,7 +329,6 @@ class NotificationService {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -387,7 +384,6 @@ class NotificationService {
             iOS: DarwinNotificationDetails(),
           ),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         );
         
         print('✅ Goal expiry trigger scheduled for: $triggerDate');
