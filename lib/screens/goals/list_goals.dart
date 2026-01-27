@@ -222,7 +222,8 @@ class _GoalListScreenState extends State<GoalListScreen> {
       onPopInvokedWithResult: (bool didPop, dynamic result) {
         // If the system already handled the pop, do nothing
         if (didPop) return;
-        goToSettingScreen(context);
+        // goToSettingScreen(context);
+        Navigator.pop(context);
         return;
       },
     );
