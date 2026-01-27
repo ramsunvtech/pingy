@@ -137,13 +137,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Scaffold(
         appBar: customAppBar(
           title: 'Settings',
-          leading: GestureDetector(
-            onTap: () {
-              goToHomeScreen(context);
-            },
-            child: const Icon(
-              Icons.home_rounded, // add custom icons also
-            ),
+          // leading: GestureDetector(
+          //   onTap: () {
+          //     goToHomeScreen(context);
+          //   },
+          //   child: const Icon(
+          //     Icons.home_rounded, // add custom icons also
+          //   ),
+          // ),
+          leading: IconButton(
+            icon: const Icon(Icons.home_rounded),
+            onPressed: () => Navigator.pop(context), // ✅
           ),
         ),
         body: SafeArea(
@@ -268,7 +272,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
       onPopInvokedWithResult: (bool didPop, dynamic result) {
-        goToHomeScreen(context);
+        if (didPop) return;
+        Navigator.pop(context);
         return;
       },
     );
