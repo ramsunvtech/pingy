@@ -54,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Uint8List? _goalPictureBytes;
   String _goalPicture = '';
   String? _lastCheckedActivityId;
+  String? _currentLoadedGoalId;
 
   // --------------------------------------------------
   // DATE HELPERS
@@ -79,27 +80,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  // bool isGoalActive(RewardsModel goal) {
-  //   final today = normalize(DateTime.now());
-  //   final start = normalize(parseDate(goal.startPeriod));
-  //   final end = normalize(parseDate(goal.endPeriod));
-
-  //   // Goal is active if today is between start and end (inclusive)
-  //   return !today.isBefore(start) && !today.isAfter(end);
-  // }
-
-  // bool isGoalEnded(RewardsModel goal) {
-  //   final today = normalize(DateTime.now());
-  //   final end = normalize(parseDate(goal.endPeriod));
-  //   return today.isAfter(end);
-  // }
-
-  // bool isGoalStartInFuture(RewardsModel goal) {
-  //   final today = normalize(DateTime.now());
-  //   final start = normalize(parseDate(goal.startPeriod));
-  //   return today.isBefore(start);
-  // }
-
   bool isGoalActive() {
     return goal_service.isGoalInProgress();
   }
@@ -119,16 +99,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // --------------------------------------------------
   // GOAL HELPERS
   // --------------------------------------------------
-  // RewardsModel? getActiveGoal() {
-  //   if (rewardBox.isEmpty) return null;
-
-  //   for (final goal in rewardBox.values.cast<RewardsModel>()) {
-  //     if (isGoalActive(goal)) {
-  //       return goal;
-  //     }
-  //   }
-  //   return null;
-  // }
   RewardsModel? getActiveGoal() {
     if (goal_service.hasNoGoalInProgress()) {
       return null;
@@ -136,14 +106,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return goal_service.getCurrentGoal();
   }
 
-  // RewardsModel? getLastCompletedGoal() {
-  //   if (rewardBox.isEmpty) return null;
-
-  //   // Return the last goal in the box (most recent)
-  //   return rewardBox.values.last as RewardsModel;
-  // }
   RewardsModel? getLastCompletedGoal() {
-    return goal_service.getLastCompletedGoal();
+    if (rewardBox.isEmpty) return null;
+    final today = normalize(DateTime.now());
+    RewardsModel? lastCompleted;
+    DateTime? lastEndDate;
+    for (final goal in rewardBox.values.cast<RewardsModel>()) {
+      try {
+        final endDate = normalize(parseDate(goal.endPeriod));
+        if (endDate.isBefore(today)) {
+          if (lastEndDate == null || endDate.isAfter(lastEndDate)) {
+            lastEndDate = endDate;
+            lastCompleted = goal;
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing goal dates: $e');
+      }
+    }
+    return lastCompleted;
+  }
+
+  RewardsModel? getDisplayGoal() {
+    final activeGoal = getActiveGoal();
+    if (activeGoal != null) return activeGoal;
+    if (isGoalStartInFuture()) {
+      final futureGoal = goal_service.getCurrentGoal();
+      if (futureGoal != null) return futureGoal;
+    }
+    return getLastCompletedGoal();
   }
 
   // --------------------------------------------------
@@ -192,8 +183,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     if (picked == null) return;
 
-    // ✅ FIX: Allow image upload for both active and future goals
-    final goal = getActiveGoal() ?? getLastCompletedGoal();
+    final goal = getDisplayGoal();
     if (goal == null) return;
 
     final goalsList = rewardBox.values.toList().cast<RewardsModel>();
@@ -231,7 +221,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget getSelectedImage() {
     if (_goalPicture.isNotEmpty) {
       if (kIsWeb) {
-        // ✅ WEB: Use stored bytes from image picker
         if (_goalPictureBytes != null && _goalPictureBytes!.isNotEmpty) {
           return Container(
             decoration: BoxDecoration(
@@ -248,11 +237,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
             child: CircleAvatar(
               radius: 105,
-              backgroundImage: MemoryImage(_goalPictureBytes!), // ✅ SHOWS IMAGE
+              backgroundImage: MemoryImage(_goalPictureBytes!),
             ),
           );
         }
-        // Fallback if no bytes
         return CircleAvatar(
           radius: 105,
           backgroundColor: Colors.white,
@@ -260,7 +248,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
       }
 
-      // Mobile: File logic (unchanged)
       final file = File(_goalPicture);
       if (file.existsSync()) {
         return Container(
@@ -284,7 +271,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
 
-    // Default placeholder
     return CircleAvatar(
       radius: 110,
       backgroundColor: greyColor,
@@ -296,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // DISPLAY HELPERS
   // --------------------------------------------------
   String getGoalDetails(String field) {
-    final goal = getActiveGoal() ?? getLastCompletedGoal();
+    final goal = getDisplayGoal();
     if (goal == null) return '';
 
     switch (field) {
@@ -309,14 +295,66 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void setGoalPicturePath(RewardsModel rewardDetails) async {
+  String _getGoalStartMessage() {
+    final goal = getDisplayGoal();
+    if (goal == null) return '🎯 Goal starts soon!';
+
+    try {
+      final startDate = normalize(parseDate(goal.startPeriod));
+      final today = normalize(DateTime.now());
+      final daysUntil = startDate.difference(today).inDays;
+
+      if (daysUntil == 0) {
+        return '🎯 Goal starts today!';
+      } else if (daysUntil == 1) {
+        return '🎯 Goal starts tomorrow!';
+      } else if (daysUntil > 1) {
+        return '🎯 Goal starts in $daysUntil days!';
+      } else {
+        return '🎯 Goal is active!';
+      }
+    } catch (e) {
+      debugPrint('Error calculating goal start: $e');
+      return '🎯 Goal starts soon!';
+    }
+  }
+
+  String _getGoalStartSubtitle() {
+    final goal = getDisplayGoal();
+    if (goal == null) return 'Get ready to track your progress';
+
+    try {
+      final startDate = normalize(parseDate(goal.startPeriod));
+      final today = normalize(DateTime.now());
+      final daysUntil = startDate.difference(today).inDays;
+
+      if (daysUntil == 0) {
+        return 'You can start tracking now!';
+      } else if (daysUntil == 1) {
+        return 'Get ready to track your progress';
+      } else if (daysUntil <= 7) {
+        return 'Mark your calendar and prepare!';
+      } else {
+        return 'Plenty of time to get organized';
+      }
+    } catch (e) {
+      return 'Get ready to track your progress';
+    }
+  }
+
+  Future<void> setGoalPicturePath(RewardsModel rewardDetails) async {
+    if (_currentLoadedGoalId == rewardDetails.rewardId &&
+        _goalPicture == rewardDetails.rewardPicture) {
+      return;
+    }
+
     if (rewardDetails.rewardPicture != null &&
         rewardDetails.rewardPicture!.isNotEmpty) {
       setState(() {
         _goalPicture = rewardDetails.rewardPicture!;
+        _currentLoadedGoalId = rewardDetails.rewardId;
       });
 
-      // ✅ For web, try to load the bytes if the file exists
       if (kIsWeb) {
         try {
           final file = File(rewardDetails.rewardPicture!);
@@ -349,13 +387,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final hasActiveGoal = activeGoal != null && !isGoalEnded();
     final goalStartsTomorrow = isGoalStartInFuture();
 
-    // Determine labels based on goal state
     String totalLabel = 'Goal Score';
     String todayScoreDisplay = '0';
     bool showTodayScore = false;
 
     if (hasActiveGoal) {
-      // Active goal in progress
       todayScoreDisplay = todayScoreValue;
       showTodayScore = true;
 
@@ -365,22 +401,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         totalLabel = 'Goal Score';
       }
     } else if (goal_service.isGoalEndedYesterday()) {
-      // Goal ended yesterday - show yesterday's final score
       todayScoreDisplay = '0';
       totalLabel = 'Final Score';
       showTodayScore = false;
     } else if (goal_service.isGoalEndedMoreThanADay()) {
-      // Goal ended more than a day ago
       todayScoreDisplay = '0';
       totalLabel = 'Your Last Score';
       showTodayScore = false;
     } else if (goalStartsTomorrow) {
-      // Goal starts tomorrow - don't show today score
       todayScoreDisplay = '0';
       totalLabel = 'Goal Score';
       showTodayScore = false;
     } else {
-      // No goal yet or waiting to start
       todayScoreDisplay = '0';
       totalLabel = 'Goal Score';
       showTodayScore = false;
@@ -389,7 +421,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     totalScore = totalScoreValue;
     todayScore = todayScoreDisplay;
 
-    // Calculate predicted/actual reward
     if (totalScoreInt > 0) {
       predictReward = goal_service.findGoalPrize(totalScoreInt);
     } else {
@@ -400,7 +431,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (containsRewards && containsTypes)
         Center(
           child: GestureDetector(
-            // ✅ FIX: Allow image upload even if goal starts tomorrow
             onTap: (hasActiveGoal || goalStartsTomorrow) ? getGoalImage : null,
             child: getSelectedImage(),
           ),
@@ -430,7 +460,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
 
-      // ✅ FIX: Show centered single circle when goal starts tomorrow
       if (containsRewards && containsTypes && goalStartsTomorrow)
         Center(
           child: Padding(
@@ -438,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Column(
               children: [
                 Text(
-                  '🎯 Goal starts tomorrow!',
+                  _getGoalStartMessage(),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -447,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Get ready to track your progress',
+                  _getGoalStartSubtitle(),
                   style: TextStyle(
                     fontSize: 14,
                     color: greyColor,
@@ -458,7 +487,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
 
-      // ✅ FIX: Only show percentage circles when goal is active or ended
       if (containsRewards && containsTypes && !goalStartsTomorrow)
         showTodayScore
             ? twoColumnGreyCards(
@@ -476,7 +504,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               )
             : Center(
-                // Single centered circle when no today score
                 child: GestureDetector(
                   onTap: () {
                     goToGoalStatusScreen(context);
@@ -520,7 +547,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // --------------------------------------------------
   String getTodayActivityId() {
     final t = DateTime.now();
-    // Match your existing format: activity_202618 (no padding)
     return 'activity_${t.year}${t.month}${t.day}';
   }
 
@@ -539,45 +565,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     containsRewards = rewardBox.isNotEmpty;
     containsTypes = activityTypeBox.isNotEmpty;
 
-    final activeGoal = getActiveGoal();
-    final lastCompletedGoal = getLastCompletedGoal();
-
-    // Set goal ended status using service method
+    final displayGoal = getDisplayGoal();
     _isGoalEnded = isGoalEnded();
 
-    // ✅ FIX: Load goal picture for both active and last completed goals
-    if (activeGoal != null && !_isGoalEnded) {
-      // Active goal - load its picture
-      if (_goalPicture.isEmpty) {
-        setGoalPicturePath(activeGoal);
-      }
-    } else if (lastCompletedGoal != null && _isGoalEnded) {
-      // ✅ Goal ended - load the last completed goal's picture
-      if (_goalPicture.isEmpty ||
-          _goalPicture != lastCompletedGoal.rewardPicture) {
-        setGoalPicturePath(lastCompletedGoal);
-
-        // ✅ For web, we need to reload the image bytes
-        if (kIsWeb &&
-            lastCompletedGoal.rewardPicture != null &&
-            lastCompletedGoal.rewardPicture!.isNotEmpty) {
-          // Try to load from file if it exists
-          try {
-            final file = File(lastCompletedGoal.rewardPicture!);
-            if (await file.exists()) {
-              final bytes = await file.readAsBytes();
-              setState(() {
-                _goalPictureBytes = bytes;
-              });
-            }
-          } catch (e) {
-            debugPrint('Could not load goal picture bytes: $e');
-          }
-        }
-      }
+    if (displayGoal != null) {
+      await setGoalPicturePath(displayGoal);
     }
 
-    // Only create/update activity if there's an active goal
+    final activeGoal = getActiveGoal();
     if (activeGoal != null &&
         !_isGoalEnded &&
         containsRewards &&
@@ -600,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         await activityBox.put(activityId, activity);
         if (mounted) {
-          setState(() {}); // Trigger UI rebuild
+          setState(() {});
           showToastMessage(context, 'Today Activity created, Update Scores!');
         }
       }
@@ -611,12 +606,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // FAB
   // --------------------------------------------------
   Widget getFloatingButton(BuildContext context) {
-    // Don't show FAB if prerequisites aren't met
     if (!containsRewards || !containsTypes) {
       return Container();
     }
 
-    // Don't show FAB if no active goal or goal hasn't started yet
     if (isGoalStartInFuture()) {
       return Container();
     }
@@ -657,8 +650,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           child: Column(
             children: [
               const SizedBox(height: 40),
-
-              // Hero Icon/Illustration
               Container(
                 width: 160,
                 height: 160,
@@ -672,10 +663,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   color: Colors.purple.shade600,
                 ),
               ),
-
               const SizedBox(height: 32),
-
-              // Welcome Title
               Text(
                 'Welcome to Steppy! 🎯',
                 style: TextStyle(
@@ -685,10 +673,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 textAlign: TextAlign.center,
               ),
-
               const SizedBox(height: 12),
-
-              // Subtitle
               Text(
                 'Track your daily activities and earn amazing rewards!',
                 style: TextStyle(
@@ -698,10 +683,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 textAlign: TextAlign.center,
               ),
-
               const SizedBox(height: 48),
-
-              // Step-by-step guide
               _buildStepCard(
                 step: '1',
                 icon: Icons.flag,
@@ -712,9 +694,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 onTap: () => goToGoalsForm(context),
                 buttonText: containsRewards ? 'Edit Goal' : 'Create Goal',
               ),
-
               const SizedBox(height: 16),
-
               _buildStepCard(
                 step: '2',
                 icon: Icons.checklist,
@@ -724,9 +704,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 isCompleted: containsTypes,
                 onTap: containsRewards
                     ? () async {
-                        // ✅ Use existing navigator, then check if we should rebuild
                         goToActivityTypeFormScreen(context);
-                        // Force rebuild to check completion status
                         setState(() {});
                       }
                     : null,
@@ -734,9 +712,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     containsTypes ? 'Manage Activities' : 'Add Activities',
                 isLocked: !containsRewards,
               ),
-
               const SizedBox(height: 16),
-
               _buildStepCard(
                 step: '3',
                 icon: Icons.stars,
@@ -748,10 +724,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 buttonText: 'Coming Soon',
                 isLocked: !containsRewards || !containsTypes,
               ),
-
               const SizedBox(height: 40),
-
-              // Motivational quote
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -780,7 +753,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
             ],
           ),
@@ -831,7 +803,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               children: [
                 Row(
                   children: [
-                    // Step number badge
                     Container(
                       width: 40,
                       height: 40,
@@ -857,10 +828,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               ),
                       ),
                     ),
-
                     const SizedBox(width: 16),
-
-                    // Icon
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -881,10 +849,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         size: 28,
                       ),
                     ),
-
                     const SizedBox(width: 16),
-
-                    // Status badge
                     if (isCompleted)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -915,7 +880,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ],
                         ),
                       ),
-
                     if (isLocked)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -948,10 +912,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
-
-                // Title
                 Text(
                   title,
                   style: TextStyle(
@@ -960,10 +921,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     color: isLocked ? Colors.grey.shade600 : Colors.black87,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
-                // Description
                 Text(
                   description,
                   style: TextStyle(
@@ -973,10 +931,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     height: 1.5,
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // Action button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -1028,20 +983,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     permissionStatusFuture = getCheckNotificationPermStatus();
-    // askCameraPermission();
     _updateScores();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
-      // Check when app comes to foreground
       final currentActivityId = getTodayActivityId();
       if (_lastCheckedActivityId != currentActivityId) {
         await _updateScores();
       }
 
-      // ✅ Refresh boxes and reload goal picture
       setState(() {
         rewardBox = Hive.box('rewards');
         activityBox = Hive.box('activity');
@@ -1051,12 +1003,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         permissionStatusFuture = getCheckNotificationPermStatus();
       });
 
-      // ✅ Reload goal picture for ended goals
-      if (isGoalEnded()) {
-        final lastGoal = getLastCompletedGoal();
-        if (lastGoal != null) {
-          setGoalPicturePath(lastGoal);
-        }
+      final displayGoal = getDisplayGoal();
+      if (displayGoal != null) {
+        await setGoalPicturePath(displayGoal);
       }
     }
   }
@@ -1090,25 +1039,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             containsRewards = rewardBox.isNotEmpty;
             containsTypes = activityTypeBox.isNotEmpty;
 
-            // ✅ Reload goal picture when boxes change
             if (containsRewards) {
-              final activeGoal = getActiveGoal();
-              final lastGoal = getLastCompletedGoal();
-
-              if (activeGoal != null && !isGoalEnded()) {
-                if (_goalPicture.isEmpty ||
-                    _goalPicture != activeGoal.rewardPicture) {
-                  setGoalPicturePath(activeGoal);
-                }
-              } else if (lastGoal != null && isGoalEnded()) {
-                if (_goalPicture.isEmpty ||
-                    _goalPicture != lastGoal.rewardPicture) {
-                  setGoalPicturePath(lastGoal);
-                }
+              final displayGoal = getDisplayGoal();
+              if (displayGoal != null &&
+                  _currentLoadedGoalId != displayGoal.rewardId) {
+                setGoalPicturePath(displayGoal);
               }
             }
 
-            // ✅ Show beautiful empty state when not fully set up
             if (!containsRewards || !containsTypes) {
               return Scaffold(
                 appBar: customAppBar(
@@ -1119,7 +1057,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               );
             }
 
-            // ✅ Show normal home screen when set up
             final homePanes = getHomeBlocks('100');
 
             return Scaffold(
