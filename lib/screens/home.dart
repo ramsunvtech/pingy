@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pingy/services/notification.dart';
 
 // Widgets
 import 'package:pingy/widgets/icons/settings.dart';
@@ -459,7 +460,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-
       if (containsRewards && containsTypes && goalStartsTomorrow)
         Center(
           child: Padding(
@@ -486,7 +486,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-
       if (containsRewards && containsTypes && !goalStartsTomorrow)
         showTodayScore
             ? twoColumnGreyCards(
@@ -511,7 +510,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   child: percentageIndicator(70.0, totalScore, totalLabel),
                 ),
               ),
-
       if (containsRewards && containsTypes && predictReward.isNotEmpty)
         Center(
           child: Text(
@@ -984,11 +982,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     permissionStatusFuture = getCheckNotificationPermStatus();
     _updateScores();
+    _updateOngoingNotification();
+  }
+
+  Future<void> _updateOngoingNotification() async {
+    try {
+      final scoreDetails = getScoreDetails();
+      final activeGoal = getActiveGoalForActivities();
+
+      if (activeGoal != null) {
+        await NotificationService.showOngoingProgress(
+          todayScore: scoreDetails['todayScore']?.toString() ?? '0',
+          totalScore: scoreDetails['totalScore']?.toString() ?? '0',
+          goalTitle: activeGoal.title,
+        );
+      } else {
+        // No active goal - hide the notification
+        await NotificationService.hideOngoingProgress();
+      }
+    } catch (e) {
+      print('Error updating ongoing notification: $e');
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
+      _updateOngoingNotification();
+
       final currentActivityId = getTodayActivityId();
       if (_lastCheckedActivityId != currentActivityId) {
         await _updateScores();
