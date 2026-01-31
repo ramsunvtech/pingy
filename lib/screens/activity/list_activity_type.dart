@@ -39,9 +39,12 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
       onPressed: () {
         goToActivityTypeEditScreen(context, activityTypeId);
       },
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
       icon: const Icon(
         Icons.edit,
         color: Colors.red,
+        size: 20,
       ),
     );
   }
@@ -152,18 +155,23 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
 
   /// Update all ranks after reordering via drag-and-drop
   /// This ensures ranks stay sequential (1, 2, 3, 4...)
+  /// IMPORTANT: Preserves existing Hive keys to maintain references
   Future<void> updateActivityTypeRanks(List<ActivityTypeModel> reorderedList) async {
     for (int i = 0; i < reorderedList.length; i++) {
       final activityType = reorderedList[i];
       final newRank = (i + 1).toString();
       
-      // Find the Hive key for this activity type
-      final key = activityTypeBox.keys.firstWhere(
-        (k) => (activityTypeBox.get(k) as ActivityTypeModel).activityTypeId == activityType.activityTypeId,
-        orElse: () => null,
-      );
+      // Find the existing Hive key for this activity type ID
+      dynamic existingKey;
+      for (var key in activityTypeBox.keys) {
+        final item = activityTypeBox.get(key) as ActivityTypeModel?;
+        if (item?.activityTypeId == activityType.activityTypeId) {
+          existingKey = key;
+          break;
+        }
+      }
       
-      if (key != null) {
+      if (existingKey != null) {
         // Create updated model with new rank
         final updatedActivityType = ActivityTypeModel(
           activityType.activityTypeId,
@@ -172,8 +180,8 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
           newRank,
         );
         
-        // Save to Hive
-        await activityTypeBox.put(key, updatedActivityType);
+        // Update at the SAME key - this preserves references in activities
+        await activityTypeBox.put(existingKey, updatedActivityType);
       }
     }
   }
@@ -204,6 +212,8 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                 return ReorderableListView.builder(
                   itemCount: activityTypeList.length,
                   physics: const AlwaysScrollableScrollPhysics(),
+                  // Add padding to bottom to prevent FAB overlap
+                  padding: const EdgeInsets.only(bottom: 80),
                   onReorder: (int oldIndex, int newIndex) async {
                     setState(() {
                       // Adjust newIndex if moving item down the list
