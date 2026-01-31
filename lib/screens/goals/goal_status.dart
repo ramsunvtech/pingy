@@ -34,7 +34,10 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   int totalDays = 0;
   int daysRemaining = 0;
   double averageScore = 0.0;
+  String currentPrize = '';
   String projectedPrize = '';
+  bool isGoalEnded = false;
+  bool isGoalStarted = false;
   List<DailyProgress> dailyProgress = [];
   Map<String, ActivityTypeStats> activityStats = {};
 
@@ -99,12 +102,29 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     final start = _parseDate(activeGoal!.startPeriod);
     final end = _parseDate(activeGoal!.endPeriod);
     final today = DateTime.now();
+    final normalizedToday = DateTime(today.year, today.month, today.day);
+
+    // Check if goal has started and ended
+    isGoalStarted = !normalizedToday.isBefore(start);
+    isGoalEnded = normalizedToday.isAfter(end);
 
     totalDays = end.difference(start).inDays + 1;
-    daysCompleted = today.difference(start).inDays;
-    if (daysCompleted > totalDays) daysCompleted = totalDays;
-    daysRemaining = totalDays - daysCompleted;
-    if (daysRemaining < 0) daysRemaining = 0;
+    
+    if (!isGoalStarted) {
+      // Goal hasn't started yet
+      daysCompleted = 0;
+      daysRemaining = totalDays;
+    } else if (isGoalEnded) {
+      // Goal has ended
+      daysCompleted = totalDays;
+      daysRemaining = 0;
+    } else {
+      // Goal is active
+      daysCompleted = normalizedToday.difference(start).inDays + 1;
+      daysRemaining = end.difference(normalizedToday).inDays;
+      if (daysCompleted > totalDays) daysCompleted = totalDays;
+      if (daysRemaining < 0) daysRemaining = 0;
+    }
 
     // Get activities for this goal
     final activities = activityBox.values
@@ -112,30 +132,51 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
         .where((a) => a.goalId == activeGoal!.rewardId)
         .toList();
 
-    // Calculate daily progress
+    // FIX: Calculate daily progress correctly
     dailyProgress.clear();
-    int cumulativeScore = 0;
+    int totalScoreSum = 0;
+    int validDaysCount = 0;
 
     for (var activity in activities) {
       int dayScore = _calculateDayScore(activity);
-      cumulativeScore += dayScore;
+      if (dayScore > 0) {
+        totalScoreSum += dayScore;
+        validDaysCount++;
+      }
 
       dailyProgress.add(DailyProgress(
         date: activity.activityDate ?? DateTime.now(),
         score: dayScore,
-        cumulativeScore: cumulativeScore,
+        cumulativeScore: totalScoreSum,
       ));
     }
 
-    totalScore = cumulativeScore;
-    averageScore = activities.isNotEmpty ? totalScore / activities.length : 0;
+    // FIX: Total score is the cumulative sum, average is per day
+    totalScore = totalScoreSum;
+    
+    // FIX: Average should be based on days with activities, not all days
+    averageScore = validDaysCount > 0 ? totalScoreSum / validDaysCount : 0;
 
-    // Project final score
-    if (daysRemaining > 0 && averageScore > 0) {
-      int projectedTotal = totalScore + (averageScore * daysRemaining).round();
-      projectedPrize = _getPrizeForScore(projectedTotal);
+    // Determine current and projected prize
+    if (isGoalEnded) {
+      // Goal ended - show final result
+      currentPrize = _getPrizeForScore(averageScore.round());
+      projectedPrize = ''; // No projection for ended goals
+    } else if (!isGoalStarted) {
+      // Goal hasn't started
+      currentPrize = '';
+      projectedPrize = 'Goal starts on ${activeGoal!.startPeriod}';
     } else {
-      projectedPrize = _getPrizeForScore(totalScore);
+      // Goal in progress
+      currentPrize = _getPrizeForScore(averageScore.round());
+      
+      // FIX: Project based on current average, not adding more
+      if (daysRemaining > 0 && averageScore > 0) {
+        // Assume same performance continues
+        projectedPrize = _getPrizeForScore(averageScore.round());
+      } else {
+        projectedPrize = currentPrize;
+      }
     }
   }
 
@@ -151,15 +192,48 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     return ((score / maxScore) * 100).round();
   }
 
-  String _getPrizeForScore(int score) {
+  String _getPrizeForScore(int avgScore) {
     if (activeGoal == null) return 'No Goal';
 
-    int avgScore = totalDays > 0 ? (score / totalDays).round() : 0;
-
+    // FIX: avgScore is already the average, no need to divide again
     if (avgScore >= 90) return activeGoal!.firstPrice;
     if (avgScore >= 70) return activeGoal!.secondPrice;
     if (avgScore >= 50) return activeGoal!.thirdPrice;
-    return 'Keep trying!';
+    
+    // FIX: If goal is in progress, show what they're on track for
+    if (!isGoalEnded && avgScore > 0) {
+      return 'Below target - Push harder!';
+    }
+    
+    return 'No prize earned';
+  }
+
+  IconData _getPrizeIcon(String prize) {
+    if (activeGoal == null) return Icons.emoji_events;
+    
+    if (prize == activeGoal!.firstPrice) {
+      return Icons.emoji_events; // Gold trophy
+    } else if (prize == activeGoal!.secondPrice) {
+      return Icons.workspace_premium; // Silver medal
+    } else if (prize == activeGoal!.thirdPrice) {
+      return Icons.military_tech; // Bronze medal
+    }
+    
+    return Icons.flag; // Default flag for others
+  }
+
+  Color _getPrizeColor(String prize) {
+    if (activeGoal == null) return Colors.grey;
+    
+    if (prize == activeGoal!.firstPrice) {
+      return Colors.amber; // Gold
+    } else if (prize == activeGoal!.secondPrice) {
+      return Colors.blueGrey; // Silver
+    } else if (prize == activeGoal!.thirdPrice) {
+      return Colors.brown; // Bronze
+    }
+    
+    return Colors.grey;
   }
 
   void _analyzeActivities() {
@@ -183,8 +257,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
         for (var item in activity.activityItems) {
           if (item.activityItemId == typeKey) {
             int points = int.tryParse(item.score ?? '0') ?? 0;
-            if (points > 0) {
-              totalPoints += points;
+            totalPoints += points;
+            if (points >= 0) { // Count all days, not just >0
               daysTracked++;
             }
           }
@@ -226,6 +300,25 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   }
 
   Widget _buildOverviewCard() {
+    // FIX: Determine the status message
+    String statusMessage = '';
+    Color statusColor = Colors.grey;
+    IconData statusIcon = Icons.info;
+
+    if (!isGoalStarted) {
+      statusMessage = 'Goal hasn\'t started yet';
+      statusColor = Colors.blue;
+      statusIcon = Icons.schedule;
+    } else if (isGoalEnded) {
+      statusMessage = 'Goal Completed';
+      statusColor = Colors.green;
+      statusIcon = Icons.check_circle;
+    } else {
+      statusMessage = 'Goal In Progress';
+      statusColor = Colors.orange;
+      statusIcon = Icons.trending_up;
+    }
+
     return Card(
       margin: const EdgeInsets.all(16),
       elevation: 4,
@@ -234,12 +327,41 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              activeGoal?.title ?? 'No Active Goal',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    activeGoal?.title ?? 'No Active Goal',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: statusColor),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(statusIcon, size: 16, color: statusColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        statusMessage,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
@@ -252,48 +374,181 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
             const Divider(height: 24),
             _buildStatRow('Days Completed', '$daysCompleted / $totalDays'),
             _buildStatRow('Days Remaining', '$daysRemaining'),
-            _buildStatRow(
-                'Average Score', '${averageScore.toStringAsFixed(1)}%'),
-            _buildStatRow('Total Score', '${totalScore.toStringAsFixed(0)}'),
+            _buildStatRow('Average Score', '${averageScore.toStringAsFixed(1)}%'),
+            _buildStatRow('Cumulative Score', '${totalScore.toStringAsFixed(0)}'),
+            
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.emoji_events, color: Colors.green[700]),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Projected Prize',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          projectedPrize,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green[700],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            
+            // FIX: Show different sections based on goal status
+            if (isGoalEnded)
+              _buildFinalPrizeSection()
+            else if (isGoalStarted)
+              _buildProjectedPrizeSection()
+            else
+              _buildNotStartedSection(),
           ],
         ),
+      ),
+    );
+  }
+
+  // FIX: Final prize for completed goals
+  Widget _buildFinalPrizeSection() {
+    Color prizeColor = _getPrizeColor(currentPrize);
+    IconData prizeIcon = _getPrizeIcon(currentPrize);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: prizeColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: prizeColor, width: 2),
+      ),
+      child: Row(
+        children: [
+          Icon(prizeIcon, color: prizeColor, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '🎉 Final Prize Earned',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  currentPrize,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: prizeColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // FIX: Projected prize for goals in progress
+  Widget _buildProjectedPrizeSection() {
+    Color currentPrizeColor = _getPrizeColor(currentPrize);
+    IconData currentPrizeIcon = _getPrizeIcon(currentPrize);
+
+    return Column(
+      children: [
+        // Current standing
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: currentPrizeColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: currentPrizeColor),
+          ),
+          child: Row(
+            children: [
+              Icon(currentPrizeIcon, color: currentPrizeColor, size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Current Standing',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      currentPrize,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: currentPrizeColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Projection message
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.blue[200]!),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.trending_up, color: Colors.blue[700]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  projectedPrize == currentPrize
+                      ? 'Maintain this pace to earn: $projectedPrize!'
+                      : 'On track for: $projectedPrize',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.blue[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // FIX: Not started message
+  Widget _buildNotStartedSection() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue[200]!),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.schedule, color: Colors.blue[700]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Goal Not Started',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  'Starts on ${activeGoal?.startPeriod}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[700],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -321,6 +576,10 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   }
 
   Widget _buildActivityAnalysis() {
+    if (activityStats.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     List<MapEntry<String, ActivityTypeStats>> sortedStats =
         activityStats.entries.toList()
           ..sort((a, b) => b.value.percentage.compareTo(a.value.percentage));
@@ -405,7 +664,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
               ),
               const Spacer(),
               Text(
-                'Avg: ${stats.averageScore.toStringAsFixed(1)}/${stats.maxPossible}',
+                'Avg: ${stats.averageScore.toStringAsFixed(1)}/${stats.maxPossible} • ${stats.daysTracked} days',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[600],
@@ -419,6 +678,10 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   }
 
   Widget _buildInsights() {
+    if (activityStats.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     List<MapEntry<String, ActivityTypeStats>> sortedStats =
         activityStats.entries.toList()
           ..sort((a, b) => b.value.percentage.compareTo(a.value.percentage));
@@ -533,15 +796,40 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
 
   Widget _buildMotivationalMessage() {
     String message = '';
-    if (averageScore >= 80) {
-      message = '🎉 Outstanding! You\'re on track for your top prize!';
-    } else if (averageScore >= 60) {
-      message = '💪 Great effort! A little more push to reach excellence!';
-    } else if (averageScore >= 40) {
-      message = '🎯 You can do this! Focus on consistency and you\'ll improve!';
+    IconData icon = Icons.lightbulb;
+    
+    if (!isGoalStarted) {
+      message = '🎯 Get ready! Your goal starts soon. Prepare yourself mentally!';
+      icon = Icons.schedule;
+    } else if (isGoalEnded) {
+      if (averageScore >= 90) {
+        message = '🎉 Phenomenal! You crushed this goal! Enjoy your reward!';
+        icon = Icons.celebration;
+      } else if (averageScore >= 70) {
+        message = '👏 Great job! You completed the goal successfully!';
+        icon = Icons.thumb_up;
+      } else if (averageScore >= 50) {
+        message = '💪 Good effort! You finished the goal. Next time aim higher!';
+        icon = Icons.verified;
+      } else {
+        message = '🌱 You completed it! Learn from this and do better next time!';
+        icon = Icons.emoji_events;
+      }
     } else {
-      message =
-          '🌱 Every journey starts somewhere. Small steps lead to big changes!';
+      // In progress
+      if (averageScore >= 90) {
+        message = '🎉 Outstanding! You\'re on track for your top prize! Keep this up!';
+        icon = Icons.rocket_launch;
+      } else if (averageScore >= 70) {
+        message = '💪 Great effort! Push a bit more to reach the top prize!';
+        icon = Icons.trending_up;
+      } else if (averageScore >= 50) {
+        message = '🎯 Good start! Focus on consistency to improve your standing!';
+        icon = Icons.flag;
+      } else {
+        message = '🌱 Don\'t give up! Every day is a new chance to improve!';
+        icon = Icons.eco;
+      }
     }
 
     return Container(
@@ -554,7 +842,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.lightbulb, color: Colors.white),
+          Icon(icon, color: Colors.white, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -576,7 +864,6 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (bool didPop, dynamic result) {
-        // If the system already handled the pop, do nothing
         if (didPop) return;
         goToGoalsListScreen(context);
         return;
@@ -599,13 +886,20 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                   style: TextStyle(fontSize: 18),
                 ),
               )
-            : ListView(
-                children: [
-                  _buildOverviewCard(),
-                  _buildActivityAnalysis(),
-                  _buildInsights(),
-                  const SizedBox(height: 20),
-                ],
+            : RefreshIndicator(
+                onRefresh: () async {
+                  setState(() {
+                    _loadData();
+                  });
+                },
+                child: ListView(
+                  children: [
+                    _buildOverviewCard(),
+                    _buildActivityAnalysis(),
+                    _buildInsights(),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
       ),
     );
