@@ -5,6 +5,8 @@ import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/activity_item.dart';
 import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
+import 'package:pingy/services/notification.dart';
+import 'package:pingy/services/activity.dart';
 
 import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
@@ -271,6 +273,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                                       await todayActivity.save();
                                     }
 
+                                    // ✅ UPDATE ONGOING NOTIFICATION
+                                    await _updateOngoingNotification();
+
                                     _fullScoreController.clear();
                                     setState(() => defaultActivityTabIndex = 2);
                                     Navigator.pop(context, true);
@@ -322,6 +327,25 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
   Activity getActivityDetails() {
     Activity todayActivity = activityBox.get(getActivityId());
     return todayActivity;
+  }
+
+  /// Helper method to update ongoing notification after activity is logged
+  Future<void> _updateOngoingNotification() async {
+    try {
+      final scoreDetails = getScoreDetails();
+      final activeGoal = getActiveGoalForActivities();
+      
+      if (activeGoal != null) {
+        await NotificationService.showOngoingProgress(
+          todayScore: scoreDetails['todayScore']?.toString() ?? '0',
+          totalScore: scoreDetails['totalScore']?.toString() ?? '0',
+          goalTitle: activeGoal.title,
+        );
+        print('✅ Ongoing notification updated');
+      }
+    } catch (e) {
+      print('❌ Error updating ongoing notification: $e');
+    }
   }
 
   @override
@@ -475,6 +499,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                                       [updatedMissedActivity]);
                                   await todayActivity.save();
                                 }
+
+                                // ✅ UPDATE ONGOING NOTIFICATION
+                                await _updateOngoingNotification();
 
                                 // Update Box with score.
                                 splitActivitiesForTabs();
