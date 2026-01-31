@@ -6,6 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:pingy/config/notification_config.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
+import 'package:pingy/models/hive/rewards.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
@@ -22,8 +23,8 @@ class NotificationService {
   static const int motivationThursdayId = 105;
   static const int motivationFridayId = 106;
   
-  // Goal expiry trigger notification (fires day after goal ends)
-  static const int goalExpiryTriggerId = 107;
+  // Ongoing progress notification (Android only)
+  static const int ongoingProgressId = 200;
 
   static Future<void> initialize() async {
     // IMPORTANT: Initialize timezone data first
@@ -49,11 +50,7 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        // When goal expiry trigger fires, switch to weekday notifications
-        if (response.id == goalExpiryTriggerId) {
-          print('🔔 Goal expiry trigger fired - switching to weekday notifications');
-          await rescheduleAll();
-        }
+        print('🔔 Notification tapped: ID ${response.id}');
       },
     );
   }
@@ -61,32 +58,72 @@ class NotificationService {
   // Get the device's local timezone name
   static Future<String> _getLocalTimeZone() async {
     try {
-      // Get the system timezone name
+      // Get timezone info from device
       final now = DateTime.now();
-      final timeZoneName = now.timeZoneName;
+      final offset = now.timeZoneOffset;
       
-      // Try to find matching timezone in tz database
+      print('🌍 Raw timezone offset: ${offset.inHours}h ${offset.inMinutes % 60}m');
+      print('🌍 Raw timezone name: ${now.timeZoneName}');
+      
+      // Determine timezone based on offset (more reliable than name)
+      final offsetHours = offset.inHours;
+      final offsetMinutes = offset.inMinutes;
+      
+      String timeZoneName;
+      
+      // Map common offsets to reliable timezone names
+      if (offsetHours == 8 && offsetMinutes == 480) {
+        // Singapore, Malaysia, Philippines, Perth, Hong Kong
+        timeZoneName = 'Asia/Singapore';
+        print('🌍 Detected: Singapore/SEA timezone');
+      } else if (offsetMinutes == 330) {
+        // India (UTC+5:30)
+        timeZoneName = 'Asia/Kolkata';
+        print('🌍 Detected: India timezone');
+      } else if (offsetHours == 0 || offsetHours == 1) {
+        // UK (UTC or UTC+1 during BST)
+        timeZoneName = 'Europe/London';
+        print('🌍 Detected: UK timezone');
+      } else if (offsetHours == -8 || offsetHours == -7) {
+        // Pacific Time (US West)
+        timeZoneName = 'America/Los_Angeles';
+        print('🌍 Detected: US Pacific timezone');
+      } else if (offsetHours == -5 || offsetHours == -4) {
+        // Eastern Time (US East)
+        timeZoneName = 'America/New_York';
+        print('🌍 Detected: US Eastern timezone');
+      } else if (offsetHours == 9) {
+        // Japan, Korea
+        timeZoneName = 'Asia/Tokyo';
+        print('🌍 Detected: Japan/Korea timezone');
+      } else if (offsetHours == 7) {
+        // Thailand, Vietnam
+        timeZoneName = 'Asia/Bangkok';
+        print('🌍 Detected: Thailand/Vietnam timezone');
+      } else {
+        // Try to use system timezone name
+        print('⚠️ Unusual offset, trying system timezone name');
+        try {
+          timeZoneName = now.timeZoneName;
+          tz.getLocation(timeZoneName); // Test if it exists
+        } catch (e) {
+          print('⚠️ System timezone not found in database, defaulting to UTC');
+          timeZoneName = 'UTC';
+        }
+      }
+      
+      print('🌍 Selected timezone: $timeZoneName');
+      
+      // Verify timezone exists in database
       try {
         tz.getLocation(timeZoneName);
         return timeZoneName;
       } catch (e) {
-        // If exact name not found, try common mappings
-        if (timeZoneName.contains('SGT') || timeZoneName.contains('Singapore')) {
-          return 'Asia/Singapore';
-        } else if (timeZoneName.contains('IST') || timeZoneName.contains('India')) {
-          return 'Asia/Kolkata';
-        } else if (timeZoneName.contains('PST') || timeZoneName.contains('PDT')) {
-          return 'America/Los_Angeles';
-        } else if (timeZoneName.contains('EST') || timeZoneName.contains('EDT')) {
-          return 'America/New_York';
-        }
-        
-        // Default to UTC if can't determine
-        print('⚠️ Could not determine timezone, defaulting to UTC');
+        print('❌ Timezone not found in database: $timeZoneName, using UTC');
         return 'UTC';
       }
     } catch (e) {
-      print('⚠️ Error getting timezone: $e');
+      print('❌ Error getting timezone: $e');
       return 'UTC';
     }
   }
@@ -115,27 +152,46 @@ class NotificationService {
     return true;
   }
 
-  NotificationDetails getNotificationDetails() {
-    const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(
-          'pingy_channel', 
-          'Pingy Notifications',
-          channelDescription: 'Activity tracking reminders',
-          importance: Importance.max,
-          priority: Priority.high,
-          autoCancel: false,
-          enableVibration: true,
-          playSound: true,
-          icon: '@mipmap/ic_launcher',
-        );
-    const iOSChannelSpecifics = DarwinNotificationDetails();
+  // ========== CHECK IF ACTIVE GOAL EXISTS ==========
+  
+  static bool _hasActiveGoal() {
+    try {
+      final rewardsBox = Hive.box('rewards');
+      
+      if (rewardsBox.isEmpty) {
+        print('📊 No goals in box');
+        return false;
+      }
 
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidNotificationDetails,
-      iOS: iOSChannelSpecifics,
-    );
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
 
-    return notificationDetails;
+      // Check if any goal is currently active
+      for (final goal in rewardsBox.values.cast<RewardsModel>()) {
+        final start = _parseDate(goal.startPeriod);
+        final end = _parseDate(goal.endPeriod);
+
+        // Goal is active if today is between start and end (inclusive)
+        if (!normalizedToday.isBefore(start) && !normalizedToday.isAfter(end)) {
+          print('✅ Active goal found: ${goal.title}');
+          return true;
+        }
+      }
+
+      print('📊 No active goals (may have future or past goals)');
+      return false;
+    } catch (e) {
+      print('❌ Error checking active goal: $e');
+      return false;
+    }
+  }
+
+  static DateTime _parseDate(String date) {
+    final parts = date.split('/');
+    final day = int.parse(parts[0]);
+    final month = int.parse(parts[1]);
+    final year = int.parse(parts[2]);
+    return DateTime(year, month, day);
   }
 
   // ========== DAILY REMINDERS (When goals exist) ==========
@@ -169,9 +225,10 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
       
-      print('✅ Morning reminder scheduled for 10:00 AM (user local time)');
+      print('✅ Morning reminder scheduled for 10:00 AM daily');
     } catch (e) {
       print('❌ Error scheduling morning reminder: $e');
     }
@@ -206,9 +263,10 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
       
-      print('✅ Evening reminder scheduled for 8:00 PM (user local time)');
+      print('✅ Evening reminder scheduled for 8:00 PM daily');
     } catch (e) {
       print('❌ Error scheduling evening reminder: $e');
     }
@@ -218,77 +276,69 @@ class NotificationService {
   
   static Future<void> scheduleWeekdayMotivationReminders() async {
     try {
-      final rewardsBox = Hive.box('rewards');
+      // Get random motivational message
+      final messages = [
+        {
+          'title': 'Ready to start your journey? 🎯',
+          'body': 'Set your first goal and start tracking your progress!'
+        },
+        {
+          'title': 'Your success story starts here! ⭐',
+          'body': 'Create your first goal and begin your transformation!'
+        },
+        {
+          'title': 'Today is the perfect day! 💪',
+          'body': 'Don\'t wait! Start setting goals and achieving them!'
+        },
+        {
+          'title': 'Great things start with a goal! 🚀',
+          'body': 'Take the first step - add your goal now!'
+        },
+      ];
 
-      if (rewardsBox.isEmpty) {
-        // Get random motivational message
-        final messages = [
-          {
-            'title': 'Ready to start your journey? 🎯',
-            'body': 'Set your first goal and start tracking your progress!'
-          },
-          {
-            'title': 'Your success story starts here! ⭐',
-            'body': 'Create your first goal and begin your transformation!'
-          },
-          {
-            'title': 'Today is the perfect day! 💪',
-            'body': 'Don\'t wait! Start setting goals and achieving them!'
-          },
-          {
-            'title': 'Great things start with a goal! 🚀',
-            'body': 'Take the first step - add your goal now!'
-          },
-        ];
-
-        final random = messages[DateTime.now().millisecond % messages.length];
-        
-        // Schedule for MONDAY at 11:30 AM
-        await _scheduleWeekdayNotification(
-          id: motivationMondayId,
-          weekday: DateTime.monday,
-          title: random['title']!,
-          body: random['body']!,
-        );
-        
-        // Schedule for TUESDAY at 11:30 AM
-        await _scheduleWeekdayNotification(
-          id: motivationTuesdayId,
-          weekday: DateTime.tuesday,
-          title: random['title']!,
-          body: random['body']!,
-        );
-        
-        // Schedule for WEDNESDAY at 11:30 AM
-        await _scheduleWeekdayNotification(
-          id: motivationWednesdayId,
-          weekday: DateTime.wednesday,
-          title: random['title']!,
-          body: random['body']!,
-        );
-        
-        // Schedule for THURSDAY at 11:30 AM
-        await _scheduleWeekdayNotification(
-          id: motivationThursdayId,
-          weekday: DateTime.thursday,
-          title: random['title']!,
-          body: random['body']!,
-        );
-        
-        // Schedule for FRIDAY at 11:30 AM
-        await _scheduleWeekdayNotification(
-          id: motivationFridayId,
-          weekday: DateTime.friday,
-          title: random['title']!,
-          body: random['body']!,
-        );
-        
-        print('✅ Weekday motivation reminders scheduled (Mon-Fri at 11:30 AM, user local time)');
-      } else {
-        // Cancel all weekday motivation notifications if user has goals
-        await cancelWeekdayMotivationReminders();
-        print('❌ Weekday motivation reminders cancelled - user has goals');
-      }
+      final random = messages[DateTime.now().millisecond % messages.length];
+      
+      // Schedule for MONDAY at 11:30 AM
+      await _scheduleWeekdayNotification(
+        id: motivationMondayId,
+        weekday: DateTime.monday,
+        title: random['title']!,
+        body: random['body']!,
+      );
+      
+      // Schedule for TUESDAY at 11:30 AM
+      await _scheduleWeekdayNotification(
+        id: motivationTuesdayId,
+        weekday: DateTime.tuesday,
+        title: random['title']!,
+        body: random['body']!,
+      );
+      
+      // Schedule for WEDNESDAY at 11:30 AM
+      await _scheduleWeekdayNotification(
+        id: motivationWednesdayId,
+        weekday: DateTime.wednesday,
+        title: random['title']!,
+        body: random['body']!,
+      );
+      
+      // Schedule for THURSDAY at 11:30 AM
+      await _scheduleWeekdayNotification(
+        id: motivationThursdayId,
+        weekday: DateTime.thursday,
+        title: random['title']!,
+        body: random['body']!,
+      );
+      
+      // Schedule for FRIDAY at 11:30 AM
+      await _scheduleWeekdayNotification(
+        id: motivationFridayId,
+        weekday: DateTime.friday,
+        title: random['title']!,
+        body: random['body']!,
+      );
+      
+      print('✅ Weekday motivation reminders scheduled (Mon-Fri at 11:30 AM)');
     } catch (e) {
       print('❌ Error scheduling weekday motivation reminders: $e');
     }
@@ -329,6 +379,7 @@ class NotificationService {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -339,60 +390,74 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.cancel(motivationWednesdayId);
     await _flutterLocalNotificationsPlugin.cancel(motivationThursdayId);
     await _flutterLocalNotificationsPlugin.cancel(motivationFridayId);
+    print('🗑️ Weekday motivation reminders cancelled');
   }
 
-  // ========== SCHEDULE AUTO-SWITCH AFTER GOAL ENDS ==========
+  // ========== ONGOING NOTIFICATION (Android Only) ==========
   
-  /// Schedule a notification to fire the day after the last active goal ends
-  /// This triggers the switch from daily to weekday notifications
-  static Future<void> scheduleGoalExpiryTrigger(String endDateStr) async {
+  /// Show persistent notification when goal is active
+  /// This stays in notification area until dismissed or goal ends
+  static Future<void> showOngoingProgress({
+    required String todayScore,
+    required String totalScore,
+    required String goalTitle,
+  }) async {
+    if (!Platform.isAndroid) return;
+
     try {
-      // Parse the end date (format: dd/MM/yyyy)
-      final endDate = DateFormat('dd/MM/yyyy').parse(endDateStr);
-      
-      // Schedule for 1 AM the day AFTER the goal ends
-      final triggerDate = DateTime(
-        endDate.year,
-        endDate.month,
-        endDate.day + 1, // Day after goal ends
-        1, // 1 AM
-        0,
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'ongoing_progress',
+        'Ongoing Progress',
+        channelDescription: 'Shows your current progress',
+        importance: Importance.low,
+        priority: Priority.low,
+        ongoing: true, // Makes it persistent
+        autoCancel: false, // Won't dismiss when tapped
+        showWhen: false,
+        icon: '@mipmap/ic_launcher',
+        // Optional: Add actions
+        styleInformation: BigTextStyleInformation(
+          'Today: $todayScore% | Total: $totalScore%',
+          contentTitle: '📊 $goalTitle',
+          summaryText: 'Keep going!',
+        ),
       );
-      
-      final tzTriggerDate = tz.TZDateTime.from(triggerDate, tz.local);
-      
-      print('📅 Goal expiry trigger calculated for: ${tzTriggerDate.toString()}');
-      
-      // Only schedule if it's in the future
-      if (tzTriggerDate.isAfter(tz.TZDateTime.now(tz.local))) {
-        await _flutterLocalNotificationsPlugin.zonedSchedule(
-          goalExpiryTriggerId,
-          'Goal Completed! 🎉',
-          'Time to set new goals and keep the momentum going!',
-          tzTriggerDate,
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'goal_expiry',
-              'Goal Completion',
-              channelDescription: 'Notifications when goals are completed',
-              importance: Importance.high,
-              priority: Priority.high,
-              enableVibration: true,
-              playSound: true,
-              icon: '@mipmap/ic_launcher',
-            ),
-            iOS: DarwinNotificationDetails(),
-          ),
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        );
-        
-        print('✅ Goal expiry trigger scheduled for: $triggerDate');
-      } else {
-        print('⚠️ Goal expiry date is in the past, not scheduling');
-      }
+
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: androidDetails,
+      );
+
+      await _flutterLocalNotificationsPlugin.show(
+        ongoingProgressId,
+        '📊 $goalTitle',
+        'Today: $todayScore% | Total: $totalScore%',
+        notificationDetails,
+      );
+
+      print('✅ Ongoing progress notification shown');
     } catch (e) {
-      print('❌ Error scheduling goal expiry trigger: $e');
+      print('❌ Error showing ongoing notification: $e');
     }
+  }
+
+  /// Update the ongoing notification with new scores
+  static Future<void> updateOngoingProgress({
+    required String todayScore,
+    required String totalScore,
+    required String goalTitle,
+  }) async {
+    // Just call showOngoingProgress again - it will update the existing notification
+    await showOngoingProgress(
+      todayScore: todayScore,
+      totalScore: totalScore,
+      goalTitle: goalTitle,
+    );
+  }
+
+  /// Hide the ongoing notification
+  static Future<void> hideOngoingProgress() async {
+    await _flutterLocalNotificationsPlugin.cancel(ongoingProgressId);
+    print('🗑️ Ongoing progress notification hidden');
   }
 
   // ========== HELPER METHODS ==========
@@ -412,7 +477,6 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    print('🕐 Next instance of ${hour}:${minute.toString().padLeft(2, '0')} is: ${scheduledDate.toString()}');
     return scheduledDate;
   }
 
@@ -437,7 +501,6 @@ class NotificationService {
 
   static Future<void> cancel(int id) async {
     await _flutterLocalNotificationsPlugin.cancel(id);
-    print('🗑️ Notification $id cancelled');
   }
 
   // ========== MAIN RESCHEDULE METHOD ==========
@@ -446,47 +509,22 @@ class NotificationService {
     try {
       print('🔄 Starting notification reschedule...');
       
-      final rewardsBox = Hive.box('rewards');
+      // Cancel everything first to start fresh
+      await cancelAll();
       
-      if (rewardsBox.isEmpty) {
-        // NO GOALS: Cancel daily reminders, schedule weekday motivation
-        print('📊 No goals found - switching to weekday motivation mode');
-        await cancel(dailyMorningReminderId);
-        await cancel(dailyEveningReminderId);
-        await cancel(goalExpiryTriggerId);
-        await scheduleWeekdayMotivationReminders();
-        print('✅ Rescheduled: Weekday motivation mode (no goals)');
-      } else {
-        // HAS GOALS: Cancel weekday motivation, schedule daily reminders
-        print('📊 Goals found - switching to daily reminder mode');
-        await cancelWeekdayMotivationReminders();
+      final hasActiveGoal = _hasActiveGoal();
+      
+      if (hasActiveGoal) {
+        // HAS ACTIVE GOAL: Schedule daily reminders
+        print('📊 Active goal detected - scheduling daily reminders');
         await scheduleDailyMorningReminder();
         await scheduleDailyEveningReminder();
-        
-        // Find the latest goal end date and schedule auto-switch
-        String? latestEndDate;
-        DateTime? latestDate;
-        
-        for (var goal in rewardsBox.values) {
-          if (goal.endDate != null && goal.endDate.isNotEmpty) {
-            try {
-              final endDate = DateFormat('dd/MM/yyyy').parse(goal.endDate);
-              if (latestDate == null || endDate.isAfter(latestDate)) {
-                latestDate = endDate;
-                latestEndDate = goal.endDate;
-              }
-            } catch (e) {
-              print('⚠️ Error parsing end date: $e');
-            }
-          }
-        }
-        
-        // Schedule the auto-switch trigger
-        if (latestEndDate != null) {
-          await scheduleGoalExpiryTrigger(latestEndDate);
-        }
-        
-        print('✅ Rescheduled: Daily reminder mode (has goals)');
+        print('✅ Rescheduled: Daily reminder mode (10 AM & 8 PM)');
+      } else {
+        // NO ACTIVE GOAL: Schedule weekday motivation
+        print('📊 No active goal - scheduling weekday motivation');
+        await scheduleWeekdayMotivationReminders();
+        print('✅ Rescheduled: Weekday motivation mode (Mon-Fri 11:30 AM)');
       }
       
       // Verify what's scheduled
@@ -507,10 +545,14 @@ class NotificationService {
       print('📋 Timezone: ${now.timeZoneName}');
       print('📋 Total pending: ${pending.length}');
       
-      for (var notification in pending) {
-        print('  ✓ ID ${notification.id}: ${notification.title}');
-        if (notification.body != null) {
-          print('    Body: ${notification.body}');
+      if (pending.isEmpty) {
+        print('  ⚠️ No notifications scheduled!');
+      } else {
+        for (var notification in pending) {
+          print('  ✓ ID ${notification.id}: ${notification.title}');
+          if (notification.body != null) {
+            print('    Body: ${notification.body}');
+          }
         }
       }
       
