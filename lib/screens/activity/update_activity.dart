@@ -36,6 +36,22 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
   late final Box activityBox;
   late final Box activityTypeBox;
 
+  /// FIX: Safe method to get ActivityType by activityTypeId
+  /// Searches by activityTypeId field instead of relying on Hive key
+  ActivityTypeModel? getActivityTypeById(String activityTypeId) {
+    if (activityTypeBox.isEmpty) return null;
+    
+    // Search through all values to find matching activityTypeId
+    for (var key in activityTypeBox.keys) {
+      final activityType = activityTypeBox.get(key) as ActivityTypeModel?;
+      if (activityType?.activityTypeId == activityTypeId) {
+        return activityType;
+      }
+    }
+    
+    return null;
+  }
+
   void splitActivitiesForTabs() {
     dynamic todayActivity = activityBox.get(getActivityId());
     if (todayActivity != null && todayActivity.isInBox) {
@@ -80,8 +96,24 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
     Activity todayActivity = getActivityDetails();
     // ✅ RESET / PREFILL ACTIVITY SCORE
     _fullScoreController.text = todoActivity.score ?? '';
-    ActivityTypeModel todayActivityItemDetail =
-        activityTypeBox.get(todoActivity.activityItemId);
+    
+    // FIX: Use safe getter instead of direct .get()
+    ActivityTypeModel? todayActivityItemDetail =
+        getActivityTypeById(todoActivity.activityItemId);
+    
+    // Handle case where activity type is not found
+    if (todayActivityItemDetail == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Activity type not found. Please contact support.',
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+    }
+    
     final int fullScore = int.parse(todayActivityItemDetail.fullScore);
     final int currentScore = int.tryParse(todoActivity.score ?? '') ?? 0;
     final double? initialPercentage =
@@ -343,8 +375,16 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                       itemCount: missedActivities.length,
                       itemBuilder: (BuildContext context, int index) {
                         var missedActivity = missedActivities.elementAt(index);
-                        ActivityTypeModel missedActivityItemDetail =
-                            activityTypeBox.get(missedActivity.activityItemId);
+                        // FIX: Use safe getter
+                        ActivityTypeModel? missedActivityItemDetail =
+                            getActivityTypeById(missedActivity.activityItemId);
+                        
+                        if (missedActivityItemDetail == null) {
+                          return ListTile(
+                            title: Text('Unknown Activity'),
+                            subtitle: Text('Activity type not found'),
+                          );
+                        }
 
                         return taskItem(
                           'missed',
@@ -368,8 +408,16 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                       itemCount: todoActivities.length,
                       itemBuilder: (BuildContext context, int index) {
                         var todoActivity = todoActivities.elementAt(index);
-                        ActivityTypeModel todayActivityItemDetail =
-                            activityTypeBox.get(todoActivity.activityItemId);
+                        // FIX: Use safe getter
+                        ActivityTypeModel? todayActivityItemDetail =
+                            getActivityTypeById(todoActivity.activityItemId);
+                        
+                        if (todayActivityItemDetail == null) {
+                          return ListTile(
+                            title: Text('Unknown Activity'),
+                            subtitle: Text('Activity type not found'),
+                          );
+                        }
 
                         return Dismissible(
                             key: UniqueKey(),
@@ -472,9 +520,16 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                       itemBuilder: (BuildContext context, int index) {
                         var completedActivity =
                             completedActivities.elementAt(index);
-                        ActivityTypeModel completedActivityItemDetail =
-                            activityTypeBox
-                                .get(completedActivity.activityItemId);
+                        // FIX: Use safe getter
+                        ActivityTypeModel? completedActivityItemDetail =
+                            getActivityTypeById(completedActivity.activityItemId);
+                        
+                        if (completedActivityItemDetail == null) {
+                          return ListTile(
+                            title: Text('Unknown Activity'),
+                            subtitle: Text('Activity type not found'),
+                          );
+                        }
 
                         return taskItem(
                           'completed',
@@ -512,9 +567,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
       taskIcon = Icons.assignment_turned_in_outlined;
       String activityItemId = selectActivity.activityItemId;
       if (mark != '' && activityItemId.isNotEmpty) {
-        ActivityTypeModel activityTypeDetails =
-            activityTypeBox.get(activityItemId);
-        taskScore = 'You scored $mark out of ${activityTypeDetails.fullScore}';
+        // FIX: Use safe getter
+        ActivityTypeModel? activityTypeDetails =
+            getActivityTypeById(activityItemId);
+        if (activityTypeDetails != null) {
+          taskScore = 'You scored $mark out of ${activityTypeDetails.fullScore}';
+        } else {
+          taskScore = 'Score: $mark';
+        }
       }
     }
 
