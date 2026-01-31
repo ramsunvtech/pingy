@@ -80,13 +80,50 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     return diff.inDays;
   }
 
+  /// NEW: Check if today is the first day of the goal
+  bool isFirstDayOfGoal() {
+    Map rewardBoxMap = rewardBox.toMap();
+    if (rewardBoxMap.isEmpty) return false;
+
+    RewardsModel rewardDetails = rewardBoxMap.values.last;
+    DateTime today = DateTime.now();
+    DateTime normalizedToday = DateTime(today.year, today.month, today.day);
+
+    List startPeriod = rewardDetails.startPeriod.split('/').toList();
+    
+    // Parse start date: DD/MM/YYYY
+    String startDateString = '${startPeriod[2]}-${startPeriod[1]}-${startPeriod[0]}';
+    DateTime startDate = DateTime.parse(startDateString);
+    DateTime normalizedStartDate = DateTime(startDate.year, startDate.month, startDate.day);
+
+    return normalizedToday.isAtSameMomentAs(normalizedStartDate);
+  }
+
+  /// UPDATED: Show FAB if:
+  /// 1. No activities exist yet, OR
+  /// 2. Goal has ended (negative days), OR  
+  /// 3. No activities for current goal, OR
+  /// 4. TODAY IS FIRST DAY OF GOAL (NEW CONDITION)
   Widget getFloatingActionButton() {
+    // Show FAB if it's the first day of goal
+    if (isFirstDayOfGoal()) {
+      return FloatingActionButton(
+        onPressed: () {
+          goToActivityTypeFormScreen(context);
+        },
+        backgroundColor: Colors.lightGreen,
+        child: const Icon(Icons.add),
+      );
+    }
+
+    // Original logic: hide FAB if activities exist, goal is active, and has activities
     if (activityBox.isNotEmpty &&
         getGoalEndDayCount() > -1 &&
         getActivitiesCountByGoalId() > 0) {
       return Container();
     }
 
+    // Otherwise show FAB
     return FloatingActionButton(
       onPressed: () {
         goToActivityTypeFormScreen(context);
