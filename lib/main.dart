@@ -43,37 +43,37 @@ void main() async {
   await Hive.openBox('rewards');
   await Hive.openBox('activity');
 
-  // ========== INITIALIZE NOTIFICATIONS ==========
   if (!kIsWeb) {
-    // Initialize notification service (this handles timezone setup)
-    await NotificationService.initialize();
+    try {
+      // Initialize notification service (this handles timezone setup)
+      await NotificationService.initialize();
+      print('✅ Notification service initialized');
 
-    // Request exact alarm permission for Android
-    bool permissionGranted =
-        await NotificationService.requestExactAlarmPermission();
+      // Request exact alarm permission for Android
+      bool permissionGranted = await NotificationService.requestExactAlarmPermission();
 
-    if (permissionGranted) {
-      try {
-        // Use the new unified rescheduleAll method
-        // This automatically schedules the right notifications based on whether goals exist
+      if (permissionGranted) {
+        print('✅ Exact alarm permission granted');
+        
+        // Schedule notifications based on goals
         await NotificationService.rescheduleAll();
-
         print('✅ Notifications scheduled successfully');
         
-        // Debug: Show what's scheduled
+        // Verify what's scheduled (shows timezone info)
         await NotificationService.verifyScheduledNotifications();
-      } catch (e) {
-        print('❌ Failed to schedule notifications: $e');
+      } else {
+        print('❌ Exact alarm permission not granted');
       }
-    } else {
-      print('❌ Exact alarm permission not granted.');
+    } catch (e) {
+      print('❌ Failed to initialize notifications: $e');
+      print('Stack trace: ${StackTrace.current}');
     }
   }
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     if (kDebugMode) {
-      print('Steppy Error occurred: ${details.exception}');
+      print('Pingy Error occurred: ${details.exception}');
     }
     if (kReleaseMode) exit(1);
   };
