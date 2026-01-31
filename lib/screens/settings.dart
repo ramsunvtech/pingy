@@ -147,7 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // ),
           leading: IconButton(
             icon: const Icon(Icons.home_rounded),
-            onPressed: () => Navigator.pop(context), // ✅
+            onPressed: () => goToHomeScreen(context), // ✅
           ),
         ),
         body: SafeArea(
