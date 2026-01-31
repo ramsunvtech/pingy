@@ -96,6 +96,51 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
     );
   }
 
+  /// FIX: Proper numeric sorting instead of string sorting
+  /// Handles null/empty ranks gracefully by treating them as high values
+  List<ActivityTypeModel> getSortedActivityTypes() {
+    var activityTypeList = activityTypeBox.values.toList().cast<ActivityTypeModel>();
+    
+    // Sort by rank as INTEGER, not string
+    // This fixes: "1", "10", "2" → "1", "2", "10"
+    activityTypeList.sort((a, b) {
+      int rankA = int.tryParse(a.rank ?? '') ?? 999999;
+      int rankB = int.tryParse(b.rank ?? '') ?? 999999;
+      
+      return rankA.compareTo(rankB);
+    });
+    
+    return activityTypeList;
+  }
+
+  /// Update all ranks after reordering via drag-and-drop
+  /// This ensures ranks stay sequential (1, 2, 3, 4...)
+  Future<void> updateActivityTypeRanks(List<ActivityTypeModel> reorderedList) async {
+    for (int i = 0; i < reorderedList.length; i++) {
+      final activityType = reorderedList[i];
+      final newRank = (i + 1).toString();
+      
+      // Find the Hive key for this activity type
+      final key = activityTypeBox.keys.firstWhere(
+        (k) => (activityTypeBox.get(k) as ActivityTypeModel).activityTypeId == activityType.activityTypeId,
+        orElse: () => null,
+      );
+      
+      if (key != null) {
+        // Create updated model with new rank
+        final updatedActivityType = ActivityTypeModel(
+          activityType.activityTypeId,
+          activityType.activityName,
+          activityType.fullScore,
+          newRank,
+        );
+        
+        // Save to Hive
+        await activityTypeBox.put(key, updatedActivityType);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -115,33 +160,43 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
                   child: Text('Add your first Activity Type and have Fun!'),
                 );
               } else {
-                var activityTypeList = activityTypeBox.values.toList();
-                activityTypeList.sort((a, b) {
-                  if (a.rank == null || a.rank.isEmpty) {
-                    return 1; // put empty/null values at the end
-                  } else if (b.rank == null || b.rank.isEmpty) {
-                    return -1; // put empty/null values at the end
-                  }
+                // Get properly sorted list
+                var activityTypeList = getSortedActivityTypes();
 
-                  return a.rank.compareTo(b.rank);
-                });
-
-                return ListView.builder(
+                // Use ReorderableListView for drag-and-drop functionality
+                return ReorderableListView.builder(
                   itemCount: activityTypeList.length,
                   physics: const AlwaysScrollableScrollPhysics(),
+                  onReorder: (int oldIndex, int newIndex) async {
+                    setState(() {
+                      // Adjust newIndex if moving item down the list
+                      if (oldIndex < newIndex) {
+                        newIndex -= 1;
+                      }
+                      
+                      // Reorder in the list
+                      final item = activityTypeList.removeAt(oldIndex);
+                      activityTypeList.insert(newIndex, item);
+                    });
+                    
+                    // Save new order to database
+                    await updateActivityTypeRanks(activityTypeList);
+                  },
                   itemBuilder: (context, index) {
-                    var currentBox = activityTypeList;
-                    ActivityTypeModel activityTypeData =
-                        currentBox.elementAt(index)!;
+                    ActivityTypeModel activityTypeData = activityTypeList[index];
 
-                    return InkWell(
-                      onTap: () => {},
-                      child: ListTile(
-                        title: Text(activityTypeData.activityName),
-                        subtitle: Text(activityTypeData.fullScore),
-                        trailing: getListTileTrailingIconButton(
-                            activityTypeData.activityTypeId),
+                    return ListTile(
+                      // Unique key required for ReorderableListView
+                      key: ValueKey(activityTypeData.activityTypeId),
+                      // Drag handle for reordering
+                      leading: Icon(
+                        Icons.drag_handle,
+                        color: Colors.grey[600],
                       ),
+                      title: Text(activityTypeData.activityName),
+                      subtitle: Text('Full Score: ${activityTypeData.fullScore}'),
+                      trailing: getListTileTrailingIconButton(
+                          activityTypeData.activityTypeId),
                     );
                   },
                 );
@@ -152,7 +207,6 @@ class _ActivityTypeListScreenState extends State<ActivityTypeListScreen> {
           bottomNavigationBar: settingsBottomNavigationBar(context),
         ),
         onPopInvokedWithResult: (bool didPop, dynamic result) {
-          // If the system already handled the pop, do nothing
           if (didPop) return;
           goToSettingScreen(context);
           return;
