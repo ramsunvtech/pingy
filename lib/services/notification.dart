@@ -392,8 +392,58 @@ class NotificationService {
 
   // ========== ONGOING NOTIFICATION (Android Only) ==========
   
-  /// Show persistent notification when goal is active
-  /// This stays in notification area until dismissed or goal ends
+  /// Show ongoing notification with next pending activity
+  /// Only call this when today's activity is created
+  static Future<void> showOngoingWithNextActivity({
+    required String todayScore,
+    required String totalScore,
+    required String goalTitle,
+    required String nextActivityName,
+    required int pendingCount,
+    required int completedCount,
+    required int totalActivities,
+  }) async {
+    if (!Platform.isAndroid) return;
+
+    try {
+      // Build notification with next activity info
+      final androidDetails = AndroidNotificationDetails(
+        'ongoing_progress',
+        'Daily Progress',
+        channelDescription: 'Shows your daily progress and next activity',
+        importance: Importance.low,
+        priority: Priority.low,
+        ongoing: true,
+        autoCancel: false,
+        showWhen: false,
+        icon: '@mipmap/ic_launcher',
+        styleInformation: BigTextStyleInformation(
+          '📊 Today: $todayScore% | Overall: $totalScore%\n'
+          '✅ Completed: $completedCount/$totalActivities\n'
+          '⏭️ Next: $nextActivityName',
+          contentTitle: '$goalTitle - $pendingCount left',
+          summaryText: 'Tap to continue',
+        ),
+      );
+
+      final notificationDetails = NotificationDetails(
+        android: androidDetails,
+      );
+
+      await _flutterLocalNotificationsPlugin.show(
+        ongoingProgressId,
+        '$goalTitle - $completedCount/$totalActivities done',
+        '⏭️ Next: $nextActivityName',
+        notificationDetails,
+      );
+
+      print('✅ Ongoing notification shown: Next=$nextActivityName, Pending=$pendingCount');
+    } catch (e) {
+      print('❌ Error showing ongoing notification: $e');
+    }
+  }
+
+  /// Show simple ongoing notification (when all activities are done)
   static Future<void> showOngoingProgress({
     required String todayScore,
     required String totalScore,
@@ -402,21 +452,20 @@ class NotificationService {
     if (!Platform.isAndroid) return;
 
     try {
-      // Build notification details without const (due to string interpolation)
       final androidDetails = AndroidNotificationDetails(
         'ongoing_progress',
-        'Ongoing Progress',
+        'Daily Progress',
         channelDescription: 'Shows your current progress',
         importance: Importance.low,
         priority: Priority.low,
-        ongoing: true, // Makes it persistent
-        autoCancel: false, // Won't dismiss when tapped
+        ongoing: true,
+        autoCancel: false,
         showWhen: false,
         icon: '@mipmap/ic_launcher',
         styleInformation: BigTextStyleInformation(
           'Today: $todayScore% | Total: $totalScore%',
           contentTitle: '📊 $goalTitle',
-          summaryText: 'Keep going!',
+          summaryText: '🎉 All done for today!',
         ),
       );
 
@@ -427,11 +476,11 @@ class NotificationService {
       await _flutterLocalNotificationsPlugin.show(
         ongoingProgressId,
         '📊 $goalTitle',
-        'Today: $todayScore% | Total: $totalScore%',
+        '🎉 All activities completed! Today: $todayScore%',
         notificationDetails,
       );
 
-      print('✅ Ongoing progress notification shown');
+      print('✅ Ongoing notification shown (all done)');
     } catch (e) {
       print('❌ Error showing ongoing notification: $e');
     }
@@ -443,7 +492,6 @@ class NotificationService {
     required String totalScore,
     required String goalTitle,
   }) async {
-    // Just call showOngoingProgress again - it will update the existing notification
     await showOngoingProgress(
       todayScore: todayScore,
       totalScore: totalScore,
