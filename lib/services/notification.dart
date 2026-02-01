@@ -15,27 +15,27 @@ class NotificationService {
   // Notification IDs
   static const int dailyMorningReminderId = 100;
   static const int dailyEveningReminderId = 101;
-  
+
   // Weekday motivation notification IDs (Mon-Fri)
   static const int motivationMondayId = 102;
   static const int motivationTuesdayId = 103;
   static const int motivationWednesdayId = 104;
   static const int motivationThursdayId = 105;
   static const int motivationFridayId = 106;
-  
+
   // Ongoing progress notification (Android only)
   static const int ongoingProgressId = 200;
 
   static Future<void> initialize() async {
     // IMPORTANT: Initialize timezone data first
     tz.initializeTimeZones();
-    
+
     // Set local timezone - this is crucial for correct scheduling
     final String timeZoneName = await _getLocalTimeZone();
     tz.setLocalLocation(tz.getLocation(timeZoneName));
-    
+
     print('🌍 Timezone set to: $timeZoneName');
-    
+
     DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
             requestAlertPermission: true,
@@ -61,16 +61,17 @@ class NotificationService {
       // Get timezone info from device
       final now = DateTime.now();
       final offset = now.timeZoneOffset;
-      
-      print('🌍 Raw timezone offset: ${offset.inHours}h ${offset.inMinutes % 60}m');
+
+      print(
+          '🌍 Raw timezone offset: ${offset.inHours}h ${offset.inMinutes % 60}m');
       print('🌍 Raw timezone name: ${now.timeZoneName}');
-      
+
       // Determine timezone based on offset (more reliable than name)
       final offsetHours = offset.inHours;
       final offsetMinutes = offset.inMinutes;
-      
+
       String timeZoneName;
-      
+
       // Map common offsets to reliable timezone names
       if (offsetHours == 8 && offsetMinutes == 480) {
         // Singapore, Malaysia, Philippines, Perth, Hong Kong
@@ -111,9 +112,9 @@ class NotificationService {
           timeZoneName = 'UTC';
         }
       }
-      
+
       print('🌍 Selected timezone: $timeZoneName');
-      
+
       // Verify timezone exists in database
       try {
         tz.getLocation(timeZoneName);
@@ -153,11 +154,11 @@ class NotificationService {
   }
 
   // ========== CHECK IF ACTIVE GOAL EXISTS ==========
-  
+
   static bool _hasActiveGoal() {
     try {
       final rewardsBox = Hive.box('rewards');
-      
+
       if (rewardsBox.isEmpty) {
         print('📊 No goals in box');
         return false;
@@ -195,16 +196,15 @@ class NotificationService {
   }
 
   // ========== DAILY REMINDERS (When goals exist) ==========
-  
+
   static Future<void> scheduleDailyMorningReminder() async {
     try {
       final scheduledTime = _nextInstanceOfTime(
-        NotificationConfig.dailyMorningHour, 
-        NotificationConfig.dailyMorningMinute
-      );
-      
+          NotificationConfig.dailyMorningHour,
+          NotificationConfig.dailyMorningMinute);
+
       print('📅 Scheduling morning reminder for: ${scheduledTime.toString()}');
-      
+
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         dailyMorningReminderId,
         'Time to update your progress! 🌅',
@@ -226,7 +226,7 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
       );
-      
+
       print('✅ Morning reminder scheduled for 10:00 AM daily');
     } catch (e) {
       print('❌ Error scheduling morning reminder: $e');
@@ -236,12 +236,11 @@ class NotificationService {
   static Future<void> scheduleDailyEveningReminder() async {
     try {
       final scheduledTime = _nextInstanceOfTime(
-        NotificationConfig.dailyEveningHour, 
-        NotificationConfig.dailyEveningMinute
-      );
-      
+          NotificationConfig.dailyEveningHour,
+          NotificationConfig.dailyEveningMinute);
+
       print('📅 Scheduling evening reminder for: ${scheduledTime.toString()}');
-      
+
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         dailyEveningReminderId,
         'Evening Check-in! 🌙',
@@ -263,7 +262,7 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
       );
-      
+
       print('✅ Evening reminder scheduled for 8:00 PM daily');
     } catch (e) {
       print('❌ Error scheduling evening reminder: $e');
@@ -271,7 +270,7 @@ class NotificationService {
   }
 
   // ========== WEEKDAY-ONLY MOTIVATION REMINDERS (When NO goals) ==========
-  
+
   static Future<void> scheduleWeekdayMotivationReminders() async {
     try {
       // Get random motivational message
@@ -295,7 +294,7 @@ class NotificationService {
       ];
 
       final random = messages[DateTime.now().millisecond % messages.length];
-      
+
       // Schedule for MONDAY at 11:30 AM
       await _scheduleWeekdayNotification(
         id: motivationMondayId,
@@ -303,7 +302,7 @@ class NotificationService {
         title: random['title']!,
         body: random['body']!,
       );
-      
+
       // Schedule for TUESDAY at 11:30 AM
       await _scheduleWeekdayNotification(
         id: motivationTuesdayId,
@@ -311,7 +310,7 @@ class NotificationService {
         title: random['title']!,
         body: random['body']!,
       );
-      
+
       // Schedule for WEDNESDAY at 11:30 AM
       await _scheduleWeekdayNotification(
         id: motivationWednesdayId,
@@ -319,7 +318,7 @@ class NotificationService {
         title: random['title']!,
         body: random['body']!,
       );
-      
+
       // Schedule for THURSDAY at 11:30 AM
       await _scheduleWeekdayNotification(
         id: motivationThursdayId,
@@ -327,7 +326,7 @@ class NotificationService {
         title: random['title']!,
         body: random['body']!,
       );
-      
+
       // Schedule for FRIDAY at 11:30 AM
       await _scheduleWeekdayNotification(
         id: motivationFridayId,
@@ -335,7 +334,7 @@ class NotificationService {
         title: random['title']!,
         body: random['body']!,
       );
-      
+
       print('✅ Weekday motivation reminders scheduled (Mon-Fri at 11:30 AM)');
     } catch (e) {
       print('❌ Error scheduling weekday motivation reminders: $e');
@@ -355,7 +354,8 @@ class NotificationService {
       minute: NotificationConfig.motivationMinute,
     );
 
-    print('📅 Scheduling weekday notification (ID: $id) for: ${scheduledDate.toString()}');
+    print(
+        '📅 Scheduling weekday notification (ID: $id) for: ${scheduledDate.toString()}');
 
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       id,
@@ -391,7 +391,7 @@ class NotificationService {
   }
 
   // ========== ONGOING NOTIFICATION (Android Only) ==========
-  
+
   /// Show ongoing notification with next pending activity
   /// Only call this when today's activity is created
   static Future<void> showOngoingWithNextActivity({
@@ -410,19 +410,28 @@ class NotificationService {
       final androidDetails = AndroidNotificationDetails(
         'ongoing_progress',
         'Daily Progress',
-        channelDescription: 'Shows your daily progress and next activity',
-        importance: Importance.low,
-        priority: Priority.low,
+        channelDescription: 'Shows your daily progress',
+
+        // ✅ VALID ENUMS
+        importance: Importance.high,
+        priority: Priority.high,
+
+        // ✅ LOCK SCREEN VISIBILITY
+        visibility: NotificationVisibility.public,
+
         ongoing: true,
         autoCancel: false,
         showWhen: false,
+        onlyAlertOnce: true,
+
+        category: AndroidNotificationCategory.progress,
         icon: '@mipmap/ic_launcher',
+
         styleInformation: BigTextStyleInformation(
           '📊 Today: $todayScore% | Overall: $totalScore%\n'
           '✅ Completed: $completedCount/$totalActivities\n'
           '⏭️ Next: $nextActivityName',
-          contentTitle: '$goalTitle - $pendingCount left',
-          summaryText: 'Tap to continue',
+          contentTitle: '$goalTitle • $pendingCount left',
         ),
       );
 
@@ -437,7 +446,8 @@ class NotificationService {
         notificationDetails,
       );
 
-      print('✅ Ongoing notification shown: Next=$nextActivityName, Pending=$pendingCount');
+      print(
+          '✅ Ongoing notification shown: Next=$nextActivityName, Pending=$pendingCount');
     } catch (e) {
       print('❌ Error showing ongoing notification: $e');
     }
@@ -549,16 +559,16 @@ class NotificationService {
   }
 
   // ========== MAIN RESCHEDULE METHOD ==========
-  
+
   static Future<void> rescheduleAll() async {
     try {
       print('🔄 Starting notification reschedule...');
-      
+
       // Cancel everything first to start fresh
       await cancelAll();
-      
+
       final hasActiveGoal = _hasActiveGoal();
-      
+
       if (hasActiveGoal) {
         // HAS ACTIVE GOAL: Schedule daily reminders
         print('📊 Active goal detected - scheduling daily reminders');
@@ -571,7 +581,7 @@ class NotificationService {
         await scheduleWeekdayMotivationReminders();
         print('✅ Rescheduled: Weekday motivation mode (Mon-Fri 11:30 AM)');
       }
-      
+
       // Verify what's scheduled
       await verifyScheduledNotifications();
     } catch (e) {
@@ -582,14 +592,15 @@ class NotificationService {
   // Verify pending notifications (for debugging)
   static Future<void> verifyScheduledNotifications() async {
     try {
-      final pending = await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+      final pending =
+          await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
       final now = tz.TZDateTime.now(tz.local);
-      
+
       print('📋 ========== SCHEDULED NOTIFICATIONS ==========');
       print('📋 Current time: ${now.toString()}');
       print('📋 Timezone: ${now.timeZoneName}');
       print('📋 Total pending: ${pending.length}');
-      
+
       if (pending.isEmpty) {
         print('  ⚠️ No notifications scheduled!');
       } else {
@@ -600,7 +611,7 @@ class NotificationService {
           }
         }
       }
-      
+
       print('📋 ===============================================');
     } catch (e) {
       print('❌ Error verifying notifications: $e');
