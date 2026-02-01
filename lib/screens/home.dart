@@ -592,10 +592,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
 
         await activityBox.put(activityId, activity);
+
+        // ✅ SHOW ONGOING NOTIFICATION WHEN ACTIVITY IS CREATED
+        await _showOngoingNotificationForToday();
+
         if (mounted) {
           setState(() {});
           showToastMessage(context, 'Today Activity created, Update Scores!');
         }
+      } else {
+        // Activity already exists, update notification
+        await _showOngoingNotificationForToday();
       }
     }
   }
@@ -985,24 +992,70 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _updateOngoingNotification();
   }
 
-  Future<void> _updateOngoingNotification() async {
+  Future<void> _showOngoingNotificationForToday() async {
     try {
-      final scoreDetails = getScoreDetails();
       final activeGoal = getActiveGoalForActivities();
+      if (activeGoal == null) return;
 
-      if (activeGoal != null) {
+      final activityId = getTodayActivityId();
+      final todayActivity = activityBox.get(activityId);
+      if (todayActivity == null) return;
+
+      // Count activities and find next pending one
+      int completedCount = 0;
+      int pendingCount = 0;
+      String nextActivityName = '';
+
+      for (var item in todayActivity.activityItems) {
+        if (item.score != null && item.score.isNotEmpty && item.score != '0') {
+          completedCount++;
+        } else if (item.score == null || item.score.isEmpty) {
+          pendingCount++;
+
+          // Get the FIRST pending activity as "next"
+          if (nextActivityName.isEmpty) {
+            // Find activity type by searching through all keys
+            for (var key in activityTypeBox.keys) {
+              final activityType = activityTypeBox.get(key);
+              if (activityType?.activityTypeId == item.activityItemId) {
+                nextActivityName = activityType.activityName;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      final totalActivities = todayActivity.activityItems.length;
+      final scoreDetails = getScoreDetails();
+
+      // Show notification with next activity
+      if (pendingCount > 0 && nextActivityName.isNotEmpty) {
+        await NotificationService.showOngoingWithNextActivity(
+          todayScore: scoreDetails['todayScore']?.toString() ?? '0',
+          totalScore: scoreDetails['totalScore']?.toString() ?? '0',
+          goalTitle: activeGoal.title,
+          nextActivityName: nextActivityName,
+          pendingCount: pendingCount,
+          completedCount: completedCount,
+          totalActivities: totalActivities,
+        );
+      } else if (completedCount == totalActivities) {
+        // All done!
         await NotificationService.showOngoingProgress(
           todayScore: scoreDetails['todayScore']?.toString() ?? '0',
           totalScore: scoreDetails['totalScore']?.toString() ?? '0',
           goalTitle: activeGoal.title,
         );
-      } else {
-        // No active goal - hide the notification
-        await NotificationService.hideOngoingProgress();
       }
     } catch (e) {
-      print('Error updating ongoing notification: $e');
+      print('❌ Error showing ongoing notification: $e');
     }
+  }
+
+  Future<void> _updateOngoingNotification() async {
+    // Just call the same helper method
+    await _showOngoingNotificationForToday();
   }
 
   @override
