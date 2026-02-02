@@ -12,6 +12,7 @@ import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/models/hive/activity_item.dart';
+import 'package:pingy/models/hive/settings_model.dart';
 import 'package:pingy/services/notification.dart';
 
 // App.
@@ -42,6 +43,7 @@ void main() async {
   await Hive.openBox('activity_type');
   await Hive.openBox('rewards');
   await Hive.openBox('activity');
+  await Hive.openBox<SettingsModel>('settings');
 
   if (!kIsWeb) {
     try {
