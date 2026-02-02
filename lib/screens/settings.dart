@@ -65,8 +65,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.lightBlueAccent),
               child: const Text('Yes'),
             ),
           ],
@@ -125,19 +125,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildActionButton(
-      {required String text,
-      required Color color,
-      required VoidCallback onPressed}) {
+  Widget _buildActionButton({
+    required String text,
+    required VoidCallback onPressed,
+    bool destructive = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: color,
+          backgroundColor: destructive
+              ? Colors.red.shade700
+              : Theme.of(context).primaryColor,
+          foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         onPressed: onPressed,
-        child: Text(text, style: const TextStyle(fontSize: 16)),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
       ),
     );
   }
@@ -188,21 +198,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 await settingsBox.put(
                   'enable_ongoing_notification',
                   SettingsModel(
-                    settingKey: 'enable_ongoing_notification', // ← required
-                    value: value, // ← required
-                  ),
+                      settingKey: 'enable_ongoing_notification', value: value),
                 );
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      value
-                          ? "Ongoing notifications enabled ✅"
-                          : "Ongoing notifications disabled ❌",
+                // Use ScaffoldMessenger after setState
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        value
+                            ? "Ongoing notifications enabled ✅"
+                            : "Ongoing notifications disabled ❌",
+                      ),
+                      duration: const Duration(seconds: 2),
                     ),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
+                  );
+                }
               },
             ),
 
@@ -212,7 +223,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSectionTitle("Data Management"),
             _buildActionButton(
               text: "Clear all Activity Scores",
-              color: Colors.redAccent,
               onPressed: () async {
                 final confirmed = await _showConfirmDialog(
                   context: context,
@@ -227,7 +237,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             _buildActionButton(
               text: "Clear all Activities",
-              color: Colors.redAccent,
               onPressed: () async {
                 final confirmed = await _showConfirmDialog(
                   context: context,
@@ -242,7 +251,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             _buildActionButton(
               text: "Clear All Data",
-              color: Colors.redAccent,
               onPressed: () async {
                 final confirmed = await _showConfirmDialog(
                   context: context,
