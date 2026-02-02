@@ -7,6 +7,7 @@ import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
+import 'package:pingy/models/hive/settings_model.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -17,6 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final Box rewardBox;
   late final Box activityBox;
   late final Box activityTypeBox;
+  late final Box<SettingsModel> settingsBox;
 
   String rewardExist = 'No';
   String activityCount = '0';
@@ -27,19 +29,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _canCheckBiometric = false;
   late List<BiometricType> _availableBiometric;
 
+  // Hive-backed setting
+  bool enableOngoingNotification = false;
+
   Future<void> _authenticate() async {
     bool authenticated = false;
-
     if (!kIsWeb) {
       try {
         authenticated = await auth.authenticate(
             localizedReason: "Scan your finger to authenticate");
-      } on PlatformException catch (e) {
-        // print('platform exception');
-        // print(e);
-      }
+      } on PlatformException catch (e) {}
     }
-
     setState(() {
       authorized =
           authenticated ? "Authorized success" : "Failed to authenticate";
@@ -53,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) async {
     final result = await showDialog<bool>(
       context: context,
-      barrierDismissible: false, // user must choose Yes / No
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           title: Text(title),
@@ -65,69 +65,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
               child: const Text('Yes'),
             ),
           ],
         );
       },
     );
-
     return result ?? false;
   }
 
   Future<void> _checkBiometric() async {
-    bool canCheckBiometric = false;
-
     if (!kIsWeb) {
       try {
-        canCheckBiometric = await auth.canCheckBiometrics;
-      } on PlatformException catch (e) {
-        // print(e);
-      }
-
+        _canCheckBiometric = await auth.canCheckBiometrics;
+      } on PlatformException catch (e) {}
       if (!mounted) return;
-
-      setState(() {
-        _canCheckBiometric = canCheckBiometric;
-      });
+      setState(() {});
     }
   }
 
   Future _getAvailableBiometric() async {
-    List<BiometricType> availableBiometric = [];
-
     try {
-      availableBiometric = await auth.getAvailableBiometrics();
-    } on PlatformException catch (e) {
-      // print(e);
-    }
-
-    setState(() {
-      _availableBiometric = availableBiometric;
-    });
+      _availableBiometric = await auth.getAvailableBiometrics();
+    } on PlatformException catch (e) {}
+    setState(() {});
   }
 
   @override
   void initState() {
+    super.initState();
+
     _checkBiometric();
     _getAvailableBiometric();
-    super.initState();
 
     rewardBox = Hive.box('rewards');
     activityBox = Hive.box('activity');
     activityTypeBox = Hive.box('activity_type');
+    settingsBox = Hive.box<SettingsModel>('settings');
 
-    if (rewardBox.isNotEmpty) {
-      rewardExist = '';
-    }
+    enableOngoingNotification =
+        settingsBox.get('enable_ongoing_notification')?.value as bool? ?? false;
 
-    if (activityBox.isNotEmpty) {
-      activityCount = activityBox.length.toString();
-    }
-
-    if (activityTypeBox.isNotEmpty) {
+    if (rewardBox.isNotEmpty) rewardExist = '';
+    if (activityBox.isNotEmpty) activityCount = activityBox.length.toString();
+    if (activityTypeBox.isNotEmpty)
       activityTypeCount = activityTypeBox.length.toString();
-    }
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+      {required String text,
+      required Color color,
+      required VoidCallback onPressed}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          minimumSize: const Size.fromHeight(50),
+        ),
+        onPressed: onPressed,
+        child: Text(text, style: const TextStyle(fontSize: 16)),
+      ),
+    );
   }
 
   @override
@@ -137,137 +149,121 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Scaffold(
         appBar: customAppBar(
           title: 'Settings',
-          // leading: GestureDetector(
-          //   onTap: () {
-          //     goToHomeScreen(context);
-          //   },
-          //   child: const Icon(
-          //     Icons.home_rounded, // add custom icons also
-          //   ),
-          // ),
           leading: IconButton(
             icon: const Icon(Icons.home_rounded),
-            onPressed: () => goToHomeScreen(context), // ✅
+            onPressed: () => goToHomeScreen(context),
           ),
         ),
-        body: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '$rewardExist Goal exist',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.blue,
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    '$activityCount Activity added!',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    '$activityTypeCount Activity Types added!',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final confirmed = await _showConfirmDialog(
-                        context: context,
-                        title: 'Clear Activity Scores',
-                        message:
-                            'Are you sure you want to delete all activities?',
-                      );
-
-                      if (!confirmed) return;
-
-                      await activityBox.clear();
-
-                      setState(() {
-                        activityCount = '0';
-                      });
-                    },
-                    child: const Text(
-                      'Clear all Activity Scores',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final confirmed = await _showConfirmDialog(
-                        context: context,
-                        title: 'Clear Activity',
-                        message:
-                            'This will remove all activity types. Continue?',
-                      );
-
-                      if (!confirmed) return;
-
-                      await activityTypeBox.clear();
-
-                      setState(() {
-                        activityTypeCount = '0';
-                      });
-                    },
-                    child: const Text(
-                      'Clear all Activities',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final confirmed = await _showConfirmDialog(
-                        context: context,
-                        title: 'Clear Everything',
-                        message:
-                            'This will permanently delete goals, activities, and activity types.\n\nAre you absolutely sure?',
-                      );
-
-                      if (!confirmed) return;
-
-                      await rewardBox.clear();
-                      await activityTypeBox.clear();
-                      await activityBox.clear();
-
-                      setState(() {
-                        rewardExist = 'No';
-                        activityCount = '0';
-                        activityTypeCount = '0';
-                      });
-                    },
-                    child: const Text(
-                      'Clear All',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-                ),
-                // Center(
-                //   child: Text(authorized),
-                // ),
-              ],
+        body: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          children: [
+            // Info section
+            _buildSectionTitle("Current Stats"),
+            ListTile(
+              title: Text("Goals exist"),
+              trailing: Text(rewardExist.isEmpty ? "Yes" : "No"),
             ),
-          ),
+            ListTile(
+              title: Text("Activity added"),
+              trailing: Text(activityCount),
+            ),
+            ListTile(
+              title: Text("Activity Types added"),
+              trailing: Text(activityTypeCount),
+            ),
+            const Divider(),
+
+            // Notifications section
+            _buildSectionTitle("Notifications"),
+            SwitchListTile(
+              title: const Text("Enable ongoing notification"),
+              subtitle: const Text(
+                  "Shows a persistent notification for active goals"),
+              value: enableOngoingNotification,
+              onChanged: (value) async {
+                setState(() {
+                  enableOngoingNotification = value;
+                });
+
+                await settingsBox.put(
+                  'enable_ongoing_notification',
+                  SettingsModel(
+                    settingKey: 'enable_ongoing_notification', // ← required
+                    value: value, // ← required
+                  ),
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      value
+                          ? "Ongoing notifications enabled ✅"
+                          : "Ongoing notifications disabled ❌",
+                    ),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
+
+            const Divider(),
+
+            // Data actions section
+            _buildSectionTitle("Data Management"),
+            _buildActionButton(
+              text: "Clear all Activity Scores",
+              color: Colors.redAccent,
+              onPressed: () async {
+                final confirmed = await _showConfirmDialog(
+                  context: context,
+                  title: "Clear Activity Scores",
+                  message: "Are you sure you want to delete all activities?",
+                );
+                if (!confirmed) return;
+
+                await activityBox.clear();
+                setState(() => activityCount = '0');
+              },
+            ),
+            _buildActionButton(
+              text: "Clear all Activities",
+              color: Colors.redAccent,
+              onPressed: () async {
+                final confirmed = await _showConfirmDialog(
+                  context: context,
+                  title: "Clear Activities",
+                  message: "This will remove all activity types. Continue?",
+                );
+                if (!confirmed) return;
+
+                await activityTypeBox.clear();
+                setState(() => activityTypeCount = '0');
+              },
+            ),
+            _buildActionButton(
+              text: "Clear All Data",
+              color: Colors.redAccent,
+              onPressed: () async {
+                final confirmed = await _showConfirmDialog(
+                  context: context,
+                  title: "Clear Everything",
+                  message:
+                      "This will permanently delete goals, activities, and activity types. Are you sure?",
+                );
+                if (!confirmed) return;
+
+                await rewardBox.clear();
+                await activityBox.clear();
+                await activityTypeBox.clear();
+                setState(() {
+                  rewardExist = 'No';
+                  activityCount = '0';
+                  activityTypeCount = '0';
+                });
+              },
+            ),
+            const SizedBox(height: 24),
+          ],
         ),
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
