@@ -56,18 +56,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: Text(title),
-          content: Text(message),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(fontSize: 16),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('No'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey.shade700,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlueAccent),
-              child: const Text('Yes'),
+                backgroundColor: Colors.red.shade600,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Confirm',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         );
@@ -93,6 +124,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {});
   }
 
+  void _showSnackBar(String message, {bool isSuccess = true}) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isSuccess ? Icons.check_circle : Icons.info,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isSuccess ? Colors.green.shade600 : Colors.blue.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
+        elevation: 4,
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -116,11 +184,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
       child: Text(
-        title,
-        style: const TextStyle(
-            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
+        title.toUpperCase(),
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: Colors.grey.shade600,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -128,25 +256,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildActionButton({
     required String text,
     required VoidCallback onPressed,
+    required IconData icon,
     bool destructive = false,
   }) {
+    final color = destructive ? Colors.red.shade600 : Colors.blue.shade600;
+    
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: destructive
-              ? Colors.red.shade700
-              : Theme.of(context).primaryColor,
-          foregroundColor: Colors.white,
-          minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: destructive 
+                  ? Colors.red.shade50 
+                  : Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: color.withOpacity(0.3),
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: color.withOpacity(0.5),
+                ),
+              ],
+            ),
           ),
-        ),
-        onPressed: onPressed,
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -157,6 +319,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return PopScope(
       canPop: true,
       child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
         appBar: customAppBar(
           title: 'Settings',
           leading: IconButton(
@@ -165,64 +328,108 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         body: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.only(bottom: 24),
           children: [
-            // Info section
-            _buildSectionTitle("Current Stats"),
-            ListTile(
-              title: Text("Goals exist"),
-              trailing: Text(rewardExist.isEmpty ? "Yes" : "No"),
+            // Stats section
+            _buildSectionTitle("Overview"),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  _buildStatCard(
+                    label: "Goals Status",
+                    value: rewardExist.isEmpty ? "Active" : "None",
+                    icon: Icons.emoji_events_rounded,
+                    color: rewardExist.isEmpty
+                        ? Colors.amber.shade700
+                        : Colors.grey.shade600,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildStatCard(
+                    label: "Activities Logged",
+                    value: activityCount,
+                    icon: Icons.timeline_rounded,
+                    color: Colors.green.shade600,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildStatCard(
+                    label: "Activity Types",
+                    value: activityTypeCount,
+                    icon: Icons.category_rounded,
+                    color: Colors.purple.shade600,
+                  ),
+                ],
+              ),
             ),
-            ListTile(
-              title: Text("Activity added"),
-              trailing: Text(activityCount),
-            ),
-            ListTile(
-              title: Text("Activity Types added"),
-              trailing: Text(activityTypeCount),
-            ),
-            const Divider(),
 
             // Notifications section
             _buildSectionTitle("Notifications"),
-            SwitchListTile(
-              title: const Text("Enable ongoing notification"),
-              subtitle: const Text(
-                  "Shows a persistent notification for active goals"),
-              value: enableOngoingNotification,
-              onChanged: (value) async {
-                setState(() {
-                  enableOngoingNotification = value;
-                });
-
-                await settingsBox.put(
-                  'enable_ongoing_notification',
-                  SettingsModel(
-                      settingKey: 'enable_ongoing_notification', value: value),
-                );
-
-                // Use ScaffoldMessenger after setState
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        value
-                            ? "Ongoing notifications enabled ✅"
-                            : "Ongoing notifications disabled ❌",
-                      ),
-                      duration: const Duration(seconds: 2),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
-                  );
-                }
-              },
-            ),
+                  ],
+                ),
+                child: SwitchListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  title: const Text(
+                    "Ongoing Notifications",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    "Show persistent notification for active goals",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  value: enableOngoingNotification,
+                  activeColor: Colors.blue.shade600,
+                  onChanged: (value) async {
+                    setState(() {
+                      enableOngoingNotification = value;
+                    });
 
-            const Divider(),
+                    await settingsBox.put(
+                      'enable_ongoing_notification',
+                      SettingsModel(
+                        settingKey: 'enable_ongoing_notification',
+                        value: value,
+                      ),
+                    );
+
+                    _showSnackBar(
+                      value
+                          ? "Ongoing notifications enabled"
+                          : "Ongoing notifications disabled",
+                    );
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ),
 
             // Data actions section
             _buildSectionTitle("Data Management"),
             _buildActionButton(
-              text: "Clear all Activity Scores",
+              text: "Clear Activity Scores",
+              icon: Icons.delete_sweep_rounded,
               onPressed: () async {
                 final confirmed = await _showConfirmDialog(
                   context: context,
@@ -233,24 +440,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 await activityBox.clear();
                 setState(() => activityCount = '0');
+                _showSnackBar("Activity scores cleared");
               },
             ),
             _buildActionButton(
-              text: "Clear all Activities",
+              text: "Clear Activity Types",
+              icon: Icons.layers_clear_rounded,
               onPressed: () async {
                 final confirmed = await _showConfirmDialog(
                   context: context,
-                  title: "Clear Activities",
+                  title: "Clear Activity Types",
                   message: "This will remove all activity types. Continue?",
                 );
                 if (!confirmed) return;
 
                 await activityTypeBox.clear();
                 setState(() => activityTypeCount = '0');
+                _showSnackBar("Activity types cleared");
               },
             ),
             _buildActionButton(
               text: "Clear All Data",
+              icon: Icons.warning_rounded,
+              destructive: true,
               onPressed: () async {
                 final confirmed = await _showConfirmDialog(
                   context: context,
@@ -268,9 +480,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   activityCount = '0';
                   activityTypeCount = '0';
                 });
+                _showSnackBar("All data cleared");
               },
             ),
-            const SizedBox(height: 24),
           ],
         ),
         bottomNavigationBar: settingsBottomNavigationBar(context),
