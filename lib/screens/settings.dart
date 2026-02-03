@@ -127,7 +127,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showSnackBar(String message, {bool isSuccess = true}) {
     if (!mounted) return;
     
+    // CRITICAL: Clear any existing snackbars first
     ScaffoldMessenger.of(context).clearSnackBars();
+    
+    // Show the snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -155,7 +158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
         elevation: 4,
       ),
     );
@@ -400,23 +403,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   value: enableOngoingNotification,
                   activeColor: Colors.blue.shade600,
                   onChanged: (value) async {
+                    print('🔔 Toggle changed to: $value');
+                    
+                    // Update UI immediately
                     setState(() {
                       enableOngoingNotification = value;
                     });
 
-                    await settingsBox.put(
-                      'enable_ongoing_notification',
-                      SettingsModel(
-                        settingKey: 'enable_ongoing_notification',
-                        value: value,
-                      ),
-                    );
+                    // Save to Hive
+                    try {
+                      await settingsBox.put(
+                        'enable_ongoing_notification',
+                        SettingsModel(
+                          settingKey: 'enable_ongoing_notification',
+                          value: value,
+                        ),
+                      );
+                      print('✅ Setting saved to Hive');
+                    } catch (e) {
+                      print('❌ Error saving to Hive: $e');
+                    }
 
+                    // Show toast AFTER saving
                     _showSnackBar(
                       value
                           ? "Ongoing notifications enabled"
                           : "Ongoing notifications disabled",
                     );
+                    
+                    print('✅ Toast shown');
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
