@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:pingy/services/notification.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 import 'package:pingy/models/hive/settings_model.dart';
-import 'package:pingy/models/hive/rewards.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -129,131 +127,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showSnackBar(String message, {bool isSuccess = true}) {
     if (!mounted) return;
     
-    // CRITICAL: Clear any existing snackbars first
+    // Clear any existing snackbars first
     ScaffoldMessenger.of(context).clearSnackBars();
     
-    // Show the snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isSuccess ? Icons.check_circle : Icons.info,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
+    // Small delay to ensure the context is ready
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                isSuccess ? Icons.check_circle : Icons.info,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
+          backgroundColor: isSuccess ? Colors.green.shade600 : Colors.blue.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+          elevation: 4,
         ),
-        backgroundColor: isSuccess ? Colors.green.shade600 : Colors.blue.shade600,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
-        elevation: 4,
-      ),
-    );
-  }
-
-  // Helper to check if there's an active goal and show ongoing notification
-  Future<void> _handleOngoingNotificationToggle(bool enabled) async {
-    if (!enabled) {
-      // When disabled, hide the notification
-      await NotificationService.hideOngoingProgress();
-      _showSnackBar("Ongoing notifications disabled");
-      return;
-    }
-
-    // When enabled, check if we have an active goal to show notification
-    try {
-      final hasActiveGoal = _hasActiveGoal();
-      
-      if (hasActiveGoal) {
-        // Try to show the ongoing notification with current data
-        final goal = _getActiveGoal();
-        if (goal != null) {
-          // Calculate dummy progress for demonstration
-          // In production, you'd get real data from your activity tracking
-          await NotificationService.showOngoingProgress(
-            todayScore: "0",
-            totalScore: "0",
-            goalTitle: goal.title,
-          );
-          _showSnackBar("Ongoing notifications enabled - Notification shown!");
-        } else {
-          _showSnackBar("Ongoing notifications enabled");
-        }
-      } else {
-        _showSnackBar(
-          "Ongoing notifications enabled (will show when you have an active goal)",
-          isSuccess: false,
-        );
-      }
-    } catch (e) {
-      print('❌ Error handling ongoing notification: $e');
-      _showSnackBar("Ongoing notifications enabled");
-    }
-  }
-
-  bool _hasActiveGoal() {
-    try {
-      if (rewardBox.isEmpty) return false;
-
-      final today = DateTime.now();
-      final normalizedToday = DateTime(today.year, today.month, today.day);
-
-      for (final goal in rewardBox.values.cast<RewardsModel>()) {
-        final start = _parseDate(goal.startPeriod);
-        final end = _parseDate(goal.endPeriod);
-
-        if (!normalizedToday.isBefore(start) && !normalizedToday.isAfter(end)) {
-          return true;
-        }
-      }
-      return false;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  RewardsModel? _getActiveGoal() {
-    try {
-      if (rewardBox.isEmpty) return null;
-
-      final today = DateTime.now();
-      final normalizedToday = DateTime(today.year, today.month, today.day);
-
-      for (final goal in rewardBox.values.cast<RewardsModel>()) {
-        final start = _parseDate(goal.startPeriod);
-        final end = _parseDate(goal.endPeriod);
-
-        if (!normalizedToday.isBefore(start) && !normalizedToday.isAfter(end)) {
-          return goal;
-        }
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  DateTime _parseDate(String date) {
-    final parts = date.split('/');
-    final day = int.parse(parts[0]);
-    final month = int.parse(parts[1]);
-    final year = int.parse(parts[2]);
-    return DateTime(year, month, day);
+      );
+    });
   }
 
   @override
@@ -273,9 +185,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (rewardBox.isNotEmpty) rewardExist = '';
     if (activityBox.isNotEmpty) activityCount = activityBox.length.toString();
-    if (activityTypeBox.isNotEmpty) {
+    if (activityTypeBox.isNotEmpty)
       activityTypeCount = activityTypeBox.length.toString();
-    }
   }
 
   Widget _buildSectionTitle(String title) {
@@ -496,29 +407,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   value: enableOngoingNotification,
                   activeColor: Colors.blue.shade600,
                   onChanged: (value) async {
-                    print('🔔 Toggle changed to: $value');
-                    
-                    // Update UI immediately
+                    // Update UI state first
                     setState(() {
                       enableOngoingNotification = value;
                     });
 
                     // Save to Hive
-                    try {
-                      await settingsBox.put(
-                        'enable_ongoing_notification',
-                        SettingsModel(
-                          settingKey: 'enable_ongoing_notification',
-                          value: value,
-                        ),
-                      );
-                      print('✅ Setting saved to Hive');
-                    } catch (e) {
-                      print('❌ Error saving to Hive: $e');
-                    }
+                    await settingsBox.put(
+                      'enable_ongoing_notification',
+                      SettingsModel(
+                        settingKey: 'enable_ongoing_notification',
+                        value: value,
+                      ),
+                    );
 
-                    // Handle the ongoing notification display
-                    await _handleOngoingNotificationToggle(value);
+                    // Show toast message
+                    _showSnackBar(
+                      value
+                          ? "Ongoing notifications enabled - will show during activity tracking"
+                          : "Ongoing notifications disabled",
+                    );
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -526,6 +434,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
+
+            // Info card explaining when notification shows
+            if (enableOngoingNotification)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.blue.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.blue.shade700,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "The ongoing notification will appear when you start tracking activities for an active goal.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.blue.shade900,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
             // Data actions section
             _buildSectionTitle("Data Management"),
@@ -583,11 +529,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   activityTypeCount = '0';
                 });
                 _showSnackBar("All data cleared");
-                
-                // Hide ongoing notification if it was showing
-                if (enableOngoingNotification) {
-                  await NotificationService.hideOngoingProgress();
-                }
               },
             ),
           ],
