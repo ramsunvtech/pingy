@@ -7,6 +7,7 @@ import 'package:pingy/config/notification_config.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
 import 'package:pingy/models/hive/rewards.dart';
+import 'package:pingy/models/hive/settings_model.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
@@ -150,6 +151,23 @@ class NotificationService {
       }
     }
     return true;
+  }
+
+  // ========== CHECK SETTINGS ==========
+  
+  /// Check if ongoing notifications are enabled in settings
+  static bool _isOngoingNotificationEnabled() {
+    try {
+      final settingsBox = Hive.box<SettingsModel>('settings');
+      final setting = settingsBox.get('enable_ongoing_notification');
+      final isEnabled = setting?.value as bool? ?? false;
+      
+      print('⚙️ Ongoing notification setting: $isEnabled');
+      return isEnabled;
+    } catch (e) {
+      print('❌ Error checking ongoing notification setting: $e');
+      return false; // Default to disabled if error
+    }
   }
 
   // ========== CHECK IF ACTIVE GOAL EXISTS ==========
@@ -393,7 +411,7 @@ class NotificationService {
   // ========== ONGOING NOTIFICATION (Android Only) ==========
   
   /// Show ongoing notification with next pending activity
-  /// Only call this when today's activity is created
+  /// ONLY shows if setting is enabled
   static Future<void> showOngoingWithNextActivity({
     required String todayScore,
     required String totalScore,
@@ -403,7 +421,16 @@ class NotificationService {
     required int completedCount,
     required int totalActivities,
   }) async {
-    if (!Platform.isAndroid) return;
+    if (!Platform.isAndroid) {
+      print('⚠️ Ongoing notifications only work on Android');
+      return;
+    }
+
+    // CHECK SETTING FIRST
+    if (!_isOngoingNotificationEnabled()) {
+      print('⚙️ Ongoing notification disabled in settings - skipping');
+      return;
+    }
 
     try {
       // Build notification with next activity info
@@ -444,12 +471,22 @@ class NotificationService {
   }
 
   /// Show simple ongoing notification (when all activities are done)
+  /// ONLY shows if setting is enabled
   static Future<void> showOngoingProgress({
     required String todayScore,
     required String totalScore,
     required String goalTitle,
   }) async {
-    if (!Platform.isAndroid) return;
+    if (!Platform.isAndroid) {
+      print('⚠️ Ongoing notifications only work on Android');
+      return;
+    }
+
+    // CHECK SETTING FIRST
+    if (!_isOngoingNotificationEnabled()) {
+      print('⚙️ Ongoing notification disabled in settings - skipping');
+      return;
+    }
 
     try {
       final androidDetails = AndroidNotificationDetails(
@@ -487,11 +524,13 @@ class NotificationService {
   }
 
   /// Update the ongoing notification with new scores
+  /// ONLY shows if setting is enabled
   static Future<void> updateOngoingProgress({
     required String todayScore,
     required String totalScore,
     required String goalTitle,
   }) async {
+    // The showOngoingProgress method will check settings internally
     await showOngoingProgress(
       todayScore: todayScore,
       totalScore: totalScore,
