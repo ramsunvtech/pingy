@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:pingy/services/notification.dart';
 import 'package:pingy/utils/navigators.dart';
 
 import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
 import 'package:pingy/models/hive/settings_model.dart';
+import 'package:pingy/models/hive/rewards.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -164,6 +166,96 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // Helper to check if there's an active goal and show ongoing notification
+  Future<void> _handleOngoingNotificationToggle(bool enabled) async {
+    if (!enabled) {
+      // When disabled, hide the notification
+      await NotificationService.hideOngoingProgress();
+      _showSnackBar("Ongoing notifications disabled");
+      return;
+    }
+
+    // When enabled, check if we have an active goal to show notification
+    try {
+      final hasActiveGoal = _hasActiveGoal();
+      
+      if (hasActiveGoal) {
+        // Try to show the ongoing notification with current data
+        final goal = _getActiveGoal();
+        if (goal != null) {
+          // Calculate dummy progress for demonstration
+          // In production, you'd get real data from your activity tracking
+          await NotificationService.showOngoingProgress(
+            todayScore: "0",
+            totalScore: "0",
+            goalTitle: goal.title,
+          );
+          _showSnackBar("Ongoing notifications enabled - Notification shown!");
+        } else {
+          _showSnackBar("Ongoing notifications enabled");
+        }
+      } else {
+        _showSnackBar(
+          "Ongoing notifications enabled (will show when you have an active goal)",
+          isSuccess: false,
+        );
+      }
+    } catch (e) {
+      print('❌ Error handling ongoing notification: $e');
+      _showSnackBar("Ongoing notifications enabled");
+    }
+  }
+
+  bool _hasActiveGoal() {
+    try {
+      if (rewardBox.isEmpty) return false;
+
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+
+      for (final goal in rewardBox.values.cast<RewardsModel>()) {
+        final start = _parseDate(goal.startPeriod);
+        final end = _parseDate(goal.endPeriod);
+
+        if (!normalizedToday.isBefore(start) && !normalizedToday.isAfter(end)) {
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  RewardsModel? _getActiveGoal() {
+    try {
+      if (rewardBox.isEmpty) return null;
+
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+
+      for (final goal in rewardBox.values.cast<RewardsModel>()) {
+        final start = _parseDate(goal.startPeriod);
+        final end = _parseDate(goal.endPeriod);
+
+        if (!normalizedToday.isBefore(start) && !normalizedToday.isAfter(end)) {
+          return goal;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  DateTime _parseDate(String date) {
+    final parts = date.split('/');
+    final day = int.parse(parts[0]);
+    final month = int.parse(parts[1]);
+    final year = int.parse(parts[2]);
+    return DateTime(year, month, day);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -181,8 +273,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (rewardBox.isNotEmpty) rewardExist = '';
     if (activityBox.isNotEmpty) activityCount = activityBox.length.toString();
-    if (activityTypeBox.isNotEmpty)
+    if (activityTypeBox.isNotEmpty) {
       activityTypeCount = activityTypeBox.length.toString();
+    }
   }
 
   Widget _buildSectionTitle(String title) {
@@ -424,14 +517,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       print('❌ Error saving to Hive: $e');
                     }
 
-                    // Show toast AFTER saving
-                    _showSnackBar(
-                      value
-                          ? "Ongoing notifications enabled"
-                          : "Ongoing notifications disabled",
-                    );
-                    
-                    print('✅ Toast shown');
+                    // Handle the ongoing notification display
+                    await _handleOngoingNotificationToggle(value);
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -496,6 +583,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   activityTypeCount = '0';
                 });
                 _showSnackBar("All data cleared");
+                
+                // Hide ongoing notification if it was showing
+                if (enableOngoingNotification) {
+                  await NotificationService.hideOngoingProgress();
+                }
               },
             ),
           ],
