@@ -8,9 +8,6 @@ import 'package:pingy/widgets/CustomAppBar.dart';
 import 'package:pingy/models/hive/activity.dart';
 import 'package:pingy/models/hive/rewards.dart';
 
-// Services
-import 'package:pingy/services/activity.dart';
-
 // Utils
 import 'package:pingy/utils/navigators.dart';
 
@@ -48,15 +45,19 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   }
 
   void _loadData() {
-    rewardBox = Hive.box('rewards');
-    activityBox = Hive.box('activity');
-    activityTypeBox = Hive.box('activity_type');
+    try {
+      rewardBox = Hive.box('rewards');
+      activityBox = Hive.box('activity');
+      activityTypeBox = Hive.box('activity_type');
 
-    activeGoal = _getActiveGoal();
-    if (activeGoal == null) return;
+      activeGoal = _getActiveGoal();
+      if (activeGoal == null) return;
 
-    _calculateStats();
-    _analyzeActivities();
+      _calculateStats();
+      _analyzeActivities();
+    } catch (e) {
+      print('Error loading data: $e');
+    }
   }
 
   RewardsModel? _getActiveGoal() {
@@ -76,16 +77,21 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     final normalizedToday = DateTime(today.year, today.month, today.day);
 
     for (final goal in rewardBox.values.cast<RewardsModel>()) {
-      final start = _parseDate(goal.startPeriod);
-      final end = _parseDate(goal.endPeriod);
+      try {
+        final start = _parseDate(goal.startPeriod);
+        final end = _parseDate(goal.endPeriod);
 
-      if (!normalizedToday.isBefore(start) && !normalizedToday.isAfter(end)) {
-        return goal;
+        if (!normalizedToday.isBefore(start) && !normalizedToday.isAfter(end)) {
+          return goal;
+        }
+      } catch (e) {
+        print('Error parsing dates for goal: $e');
+        continue;
       }
     }
 
     // Return last goal if no active goal
-    return rewardBox.values.last as RewardsModel;
+    return rewardBox.values.last as RewardsModel?;
   }
 
   DateTime _parseDate(String date) {
@@ -99,108 +105,111 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   void _calculateStats() {
     if (activeGoal == null) return;
 
-    final start = _parseDate(activeGoal!.startPeriod);
-    final end = _parseDate(activeGoal!.endPeriod);
-    final today = DateTime.now();
-    final normalizedToday = DateTime(today.year, today.month, today.day);
+    try {
+      final start = _parseDate(activeGoal!.startPeriod);
+      final end = _parseDate(activeGoal!.endPeriod);
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
 
-    // Check if goal has started and ended
-    isGoalStarted = !normalizedToday.isBefore(start);
-    isGoalEnded = normalizedToday.isAfter(end);
+      // Check if goal has started and ended
+      isGoalStarted = !normalizedToday.isBefore(start);
+      isGoalEnded = normalizedToday.isAfter(end);
 
-    totalDays = end.difference(start).inDays + 1;
-    
-    if (!isGoalStarted) {
-      // Goal hasn't started yet
-      daysCompleted = 0;
-      daysRemaining = totalDays;
-    } else if (isGoalEnded) {
-      // Goal has ended
-      daysCompleted = totalDays;
-      daysRemaining = 0;
-    } else {
-      // Goal is active
-      daysCompleted = normalizedToday.difference(start).inDays + 1;
-      daysRemaining = end.difference(normalizedToday).inDays;
-      if (daysCompleted > totalDays) daysCompleted = totalDays;
-      if (daysRemaining < 0) daysRemaining = 0;
-    }
-
-    // Get activities for this goal
-    final activities = activityBox.values
-        .cast<Activity>()
-        .where((a) => a.goalId == activeGoal!.rewardId)
-        .toList();
-
-    // FIX: Calculate daily progress correctly
-    dailyProgress.clear();
-    int totalScoreSum = 0;
-    int validDaysCount = 0;
-
-    for (var activity in activities) {
-      int dayScore = _calculateDayScore(activity);
-      if (dayScore > 0) {
-        totalScoreSum += dayScore;
-        validDaysCount++;
-      }
-
-      dailyProgress.add(DailyProgress(
-        date: activity.activityDate ?? DateTime.now(),
-        score: dayScore,
-        cumulativeScore: totalScoreSum,
-      ));
-    }
-
-    // FIX: Total score is the cumulative sum, average is per day
-    totalScore = totalScoreSum;
-    
-    // FIX: Average should be based on days with activities, not all days
-    averageScore = validDaysCount > 0 ? totalScoreSum / validDaysCount : 0;
-
-    // Determine current and projected prize
-    if (isGoalEnded) {
-      // Goal ended - show final result
-      currentPrize = _getPrizeForScore(averageScore.round());
-      projectedPrize = ''; // No projection for ended goals
-    } else if (!isGoalStarted) {
-      // Goal hasn't started
-      currentPrize = '';
-      projectedPrize = 'Goal starts on ${activeGoal!.startPeriod}';
-    } else {
-      // Goal in progress
-      currentPrize = _getPrizeForScore(averageScore.round());
+      totalDays = end.difference(start).inDays + 1;
       
-      // FIX: Project based on current average, not adding more
-      if (daysRemaining > 0 && averageScore > 0) {
-        // Assume same performance continues
-        projectedPrize = _getPrizeForScore(averageScore.round());
+      if (!isGoalStarted) {
+        daysCompleted = 0;
+        daysRemaining = totalDays;
+      } else if (isGoalEnded) {
+        daysCompleted = totalDays;
+        daysRemaining = 0;
       } else {
-        projectedPrize = currentPrize;
+        daysCompleted = normalizedToday.difference(start).inDays + 1;
+        daysRemaining = end.difference(normalizedToday).inDays;
+        if (daysCompleted > totalDays) daysCompleted = totalDays;
+        if (daysRemaining < 0) daysRemaining = 0;
       }
+
+      // Get activities for this goal
+      final activities = activityBox.values
+          .cast<Activity>()
+          .where((a) => a.goalId == activeGoal!.rewardId)
+          .toList();
+
+      dailyProgress.clear();
+      int totalScoreSum = 0;
+      int validDaysCount = 0;
+
+      for (var activity in activities) {
+        int dayScore = _calculateDayScore(activity);
+        if (dayScore > 0) {
+          totalScoreSum += dayScore;
+          validDaysCount++;
+        }
+
+        dailyProgress.add(DailyProgress(
+          date: activity.activityDate ?? DateTime.now(),
+          score: dayScore,
+          cumulativeScore: totalScoreSum,
+        ));
+      }
+
+      totalScore = totalScoreSum;
+      averageScore = validDaysCount > 0 ? totalScoreSum / validDaysCount : 0;
+
+      // Determine current and projected prize
+      if (isGoalEnded) {
+        currentPrize = _getPrizeForScore(averageScore.round());
+        projectedPrize = '';
+      } else if (!isGoalStarted) {
+        currentPrize = '';
+        projectedPrize = 'Goal starts on ${activeGoal!.startPeriod}';
+      } else {
+        currentPrize = _getPrizeForScore(averageScore.round());
+        
+        if (daysRemaining > 0 && averageScore > 0) {
+          projectedPrize = _getPrizeForScore(averageScore.round());
+        } else {
+          projectedPrize = currentPrize;
+        }
+      }
+    } catch (e) {
+      print('Error calculating stats: $e');
     }
   }
 
   int _calculateDayScore(Activity activity) {
-    int maxScore = getActivitiesTotalMaximumScore();
-    if (maxScore == 0) return 0;
+    try {
+      // Calculate max score from activity type box
+      int maxScore = 0;
+      activityTypeBox.toMap().forEach((key, value) {
+        final scoreStr = value?.fullScore;
+        if (scoreStr != null) {
+          maxScore += int.tryParse(scoreStr) ?? 0;
+        }
+      });
+      
+      if (maxScore == 0) return 0;
 
-    int score = 0;
-    for (var item in activity.activityItems) {
-      score += int.tryParse(item.score ?? '0') ?? 0;
+      int score = 0;
+      for (var item in activity.activityItems) {
+        score += int.tryParse(item.score ?? '0') ?? 0;
+      }
+
+      return ((score / maxScore) * 100).round();
+    } catch (e) {
+      print('Error calculating day score: $e');
+      return 0;
     }
-
-    return ((score / maxScore) * 100).round();
   }
 
   String _getPrizeForScore(int avgScore) {
     if (activeGoal == null) return 'No Goal';
 
-    // FIX: avgScore is already the average, no need to divide again
-    if (avgScore >= 90) return activeGoal!.firstPrice;
-    if (avgScore >= 70) return activeGoal!.secondPrice;
-    if (avgScore >= 50) return activeGoal!.thirdPrice;
+    if (avgScore >= 95) return activeGoal!.firstPrice;
+    if (avgScore >= 85) return activeGoal!.secondPrice;
+    if (avgScore >= 75) return activeGoal!.thirdPrice;
     
-    // FIX: If goal is in progress, show what they're on track for
     if (!isGoalEnded && avgScore > 0) {
       return 'Below target - Push harder!';
     }
@@ -212,25 +221,25 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     if (activeGoal == null) return Icons.emoji_events;
     
     if (prize == activeGoal!.firstPrice) {
-      return Icons.emoji_events; // Gold trophy
+      return Icons.emoji_events;
     } else if (prize == activeGoal!.secondPrice) {
-      return Icons.workspace_premium; // Silver medal
+      return Icons.workspace_premium;
     } else if (prize == activeGoal!.thirdPrice) {
-      return Icons.military_tech; // Bronze medal
+      return Icons.military_tech;
     }
     
-    return Icons.flag; // Default flag for others
+    return Icons.flag;
   }
 
   Color _getPrizeColor(String prize) {
     if (activeGoal == null) return Colors.grey;
     
     if (prize == activeGoal!.firstPrice) {
-      return Colors.amber; // Gold
+      return Colors.amber;
     } else if (prize == activeGoal!.secondPrice) {
-      return Colors.blueGrey; // Silver
+      return Colors.blueGrey;
     } else if (prize == activeGoal!.thirdPrice) {
-      return Colors.brown; // Bronze
+      return Colors.brown;
     }
     
     return Colors.grey;
@@ -239,42 +248,46 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   void _analyzeActivities() {
     if (activeGoal == null) return;
 
-    activityStats.clear();
+    try {
+      activityStats.clear();
 
-    final activities = activityBox.values
-        .cast<Activity>()
-        .where((a) => a.goalId == activeGoal!.rewardId)
-        .toList();
+      final activities = activityBox.values
+          .cast<Activity>()
+          .where((a) => a.goalId == activeGoal!.rewardId)
+          .toList();
 
-    // Analyze each activity type
-    for (var typeKey in activityTypeBox.keys) {
-      final activityType = activityTypeBox.get(typeKey);
-      int totalPoints = 0;
-      int daysTracked = 0;
-      int maxPossible = int.tryParse(activityType?.fullScore ?? '0') ?? 0;
+      // Analyze each activity type
+      for (var typeKey in activityTypeBox.keys) {
+        final activityType = activityTypeBox.get(typeKey);
+        int totalPoints = 0;
+        int daysTracked = 0;
+        int maxPossible = int.tryParse(activityType?.fullScore ?? '0') ?? 0;
 
-      for (var activity in activities) {
-        for (var item in activity.activityItems) {
-          if (item.activityItemId == typeKey) {
-            int points = int.tryParse(item.score ?? '0') ?? 0;
-            totalPoints += points;
-            if (points >= 0) { // Count all days, not just >0
-              daysTracked++;
+        for (var activity in activities) {
+          for (var item in activity.activityItems) {
+            if (item.activityItemId == typeKey) {
+              int points = int.tryParse(item.score ?? '0') ?? 0;
+              totalPoints += points;
+              if (points >= 0) {
+                daysTracked++;
+              }
             }
           }
         }
+
+        double avgScore = daysTracked > 0 ? totalPoints / daysTracked : 0;
+        double percentage = maxPossible > 0 ? (avgScore / maxPossible) * 100 : 0;
+
+        activityStats[typeKey] = ActivityTypeStats(
+          name: activityType?.activityName ?? 'Unknown',
+          averageScore: avgScore,
+          percentage: percentage,
+          daysTracked: daysTracked,
+          maxPossible: maxPossible,
+        );
       }
-
-      double avgScore = daysTracked > 0 ? totalPoints / daysTracked : 0;
-      double percentage = maxPossible > 0 ? (avgScore / maxPossible) * 100 : 0;
-
-      activityStats[typeKey] = ActivityTypeStats(
-        name: activityType?.activityName ?? 'Unknown',
-        averageScore: avgScore,
-        percentage: percentage,
-        daysTracked: daysTracked,
-        maxPossible: maxPossible,
-      );
+    } catch (e) {
+      print('Error analyzing activities: $e');
     }
   }
 
@@ -300,7 +313,6 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   }
 
   Widget _buildOverviewCard() {
-    // FIX: Determine the status message
     String statusMessage = '';
     Color statusColor = Colors.grey;
     IconData statusIcon = Icons.info;
@@ -321,7 +333,11 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
 
     return Card(
       margin: const EdgeInsets.all(16),
-      elevation: 4,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey[200]!, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -333,28 +349,28 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                   child: Text(
                     activeGoal?.title ?? 'No Active Goal',
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: statusColor),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(statusIcon, size: 16, color: statusColor),
+                      Icon(statusIcon, size: 14, color: statusColor),
                       const SizedBox(width: 4),
                       Text(
                         statusMessage,
                         style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
                           color: statusColor,
                         ),
                       ),
@@ -379,7 +395,6 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
             
             const SizedBox(height: 16),
             
-            // FIX: Show different sections based on goal status
             if (isGoalEnded)
               _buildFinalPrizeSection()
             else if (isGoalStarted)
@@ -392,7 +407,6 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     );
   }
 
-  // FIX: Final prize for completed goals
   Widget _buildFinalPrizeSection() {
     Color prizeColor = _getPrizeColor(currentPrize);
     IconData prizeIcon = _getPrizeIcon(currentPrize);
@@ -422,7 +436,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                 Text(
                   currentPrize,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: prizeColor,
                   ),
@@ -435,14 +449,12 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     );
   }
 
-  // FIX: Projected prize for goals in progress
   Widget _buildProjectedPrizeSection() {
     Color currentPrizeColor = _getPrizeColor(currentPrize);
     IconData currentPrizeIcon = _getPrizeIcon(currentPrize);
 
     return Column(
       children: [
-        // Current standing
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -468,7 +480,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                     Text(
                       currentPrize,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: currentPrizeColor,
                       ),
@@ -482,7 +494,6 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
         
         const SizedBox(height: 12),
         
-        // Projection message
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -513,7 +524,6 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
     );
   }
 
-  // FIX: Not started message
   Widget _buildNotStartedSection() {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -561,13 +571,16 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 16),
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[700],
+            ),
           ),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -586,7 +599,11 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
 
     return Card(
       margin: const EdgeInsets.all(16),
-      elevation: 4,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey[200]!, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -595,7 +612,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
             const Text(
               'Activity Breakdown',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -624,7 +641,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                 child: Text(
                   stats.name,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -632,7 +649,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
               Text(
                 '${stats.percentage.toStringAsFixed(1)}%',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: statusColor,
                 ),
@@ -644,7 +661,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: stats.percentage / 100,
-              minHeight: 20,
+              minHeight: 18,
               backgroundColor: Colors.grey[200],
               valueColor: AlwaysStoppedAnimation<Color>(statusColor),
             ),
@@ -652,12 +669,12 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(statusIcon, size: 16, color: statusColor),
+              Icon(statusIcon, size: 14, color: statusColor),
               const SizedBox(width: 4),
               Text(
                 statusText,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   color: statusColor,
                   fontWeight: FontWeight.w500,
                 ),
@@ -666,193 +683,11 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
               Text(
                 'Avg: ${stats.averageScore.toStringAsFixed(1)}/${stats.maxPossible} • ${stats.daysTracked} days',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   color: Colors.grey[600],
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInsights() {
-    if (activityStats.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    List<MapEntry<String, ActivityTypeStats>> sortedStats =
-        activityStats.entries.toList()
-          ..sort((a, b) => b.value.percentage.compareTo(a.value.percentage));
-
-    List<ActivityTypeStats> excellent = sortedStats
-        .where((e) => e.value.percentage >= 80)
-        .map((e) => e.value)
-        .toList();
-    List<ActivityTypeStats> needsAttention = sortedStats
-        .where((e) => e.value.percentage >= 40 && e.value.percentage < 80)
-        .map((e) => e.value)
-        .toList();
-    List<ActivityTypeStats> critical = sortedStats
-        .where((e) => e.value.percentage < 40)
-        .map((e) => e.value)
-        .toList();
-
-    return Card(
-      margin: const EdgeInsets.all(16),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Insights & Recommendations',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (excellent.isNotEmpty)
-              _buildInsightSection(
-                '🌟 Excellent Progress',
-                excellent.map((e) => e.name).toList(),
-                Colors.green,
-                'You\'re doing amazing in these areas! Keep up the great work!',
-              ),
-            if (needsAttention.isNotEmpty)
-              _buildInsightSection(
-                '⚠️ Needs Attention',
-                needsAttention.map((e) => e.name).toList(),
-                Colors.orange,
-                'These areas could use more focus. Try to improve consistency.',
-              ),
-            if (critical.isNotEmpty)
-              _buildInsightSection(
-                '🚨 Critical Areas',
-                critical.map((e) => e.name).toList(),
-                Colors.red,
-                'Priority focus needed here! Small improvements will make a big difference.',
-              ),
-            const SizedBox(height: 16),
-            _buildMotivationalMessage(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInsightSection(
-    String title,
-    List<String> activities,
-    Color color,
-    String message,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ...activities.map((name) => Padding(
-                padding: const EdgeInsets.only(left: 8, top: 4),
-                child: Row(
-                  children: [
-                    Icon(Icons.circle, size: 6, color: color),
-                    const SizedBox(width: 8),
-                    Text(name, style: const TextStyle(fontSize: 14)),
-                  ],
-                ),
-              )),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
-              color: Colors.grey[700],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMotivationalMessage() {
-    String message = '';
-    IconData icon = Icons.lightbulb;
-    
-    if (!isGoalStarted) {
-      message = '🎯 Get ready! Your goal starts soon. Prepare yourself mentally!';
-      icon = Icons.schedule;
-    } else if (isGoalEnded) {
-      if (averageScore >= 90) {
-        message = '🎉 Phenomenal! You crushed this goal! Enjoy your reward!';
-        icon = Icons.celebration;
-      } else if (averageScore >= 70) {
-        message = '👏 Great job! You completed the goal successfully!';
-        icon = Icons.thumb_up;
-      } else if (averageScore >= 50) {
-        message = '💪 Good effort! You finished the goal. Next time aim higher!';
-        icon = Icons.verified;
-      } else {
-        message = '🌱 You completed it! Learn from this and do better next time!';
-        icon = Icons.emoji_events;
-      }
-    } else {
-      // In progress
-      if (averageScore >= 90) {
-        message = '🎉 Outstanding! You\'re on track for your top prize! Keep this up!';
-        icon = Icons.rocket_launch;
-      } else if (averageScore >= 70) {
-        message = '💪 Great effort! Push a bit more to reach the top prize!';
-        icon = Icons.trending_up;
-      } else if (averageScore >= 50) {
-        message = '🎯 Good start! Focus on consistency to improve your standing!';
-        icon = Icons.flag;
-      } else {
-        message = '🌱 Don\'t give up! Every day is a new chance to improve!';
-        icon = Icons.eco;
-      }
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.blue[300]!, Colors.purple[300]!],
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
           ),
         ],
       ),
@@ -869,6 +704,7 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
         return;
       },
       child: Scaffold(
+        backgroundColor: Colors.grey[50],
         appBar: customAppBar(
           title: 'Goal Status',
           actions: [],
@@ -880,10 +716,25 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
           ),
         ),
         body: activeGoal == null
-            ? const Center(
-                child: Text(
-                  'No active goal found',
-                  style: TextStyle(fontSize: 18),
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.flag_outlined,
+                      size: 80,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No goal found',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
                 ),
               )
             : RefreshIndicator(
@@ -896,7 +747,6 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                   children: [
                     _buildOverviewCard(),
                     _buildActivityAnalysis(),
-                    _buildInsights(),
                     const SizedBox(height: 20),
                   ],
                 ),
