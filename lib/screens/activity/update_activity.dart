@@ -27,9 +27,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
     with WidgetsBindingObserver {
   int defaultActivityTabIndex = 1;
 
-  Iterable<ActivityItem> missedActivities = [];
-  Iterable<ActivityItem> todoActivities = [];
-  Iterable<ActivityItem> completedActivities = [];
+  List<ActivityItem> missedActivities = [];
+  List<ActivityItem> todoActivities = [];
+  List<ActivityItem> completedActivities = [];
 
   final TextEditingController _fullScoreController = TextEditingController();
 
@@ -54,16 +54,44 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
     return null;
   }
 
+  /// Helper method to sort activities by rank
+  List<ActivityItem> sortActivitiesByRank(Iterable<ActivityItem> activities) {
+    final sortedList = activities.toList();
+    
+    sortedList.sort((a, b) {
+      final activityTypeA = getActivityTypeById(a.activityItemId);
+      final activityTypeB = getActivityTypeById(b.activityItemId);
+      
+      // Handle null cases - put items without activity type at the end
+      if (activityTypeA == null && activityTypeB == null) return 0;
+      if (activityTypeA == null) return 1;
+      if (activityTypeB == null) return -1;
+      
+      // Parse rank values, default to a high number if rank is null or invalid
+      final rankA = int.tryParse(activityTypeA.rank ?? '') ?? 999999;
+      final rankB = int.tryParse(activityTypeB.rank ?? '') ?? 999999;
+      
+      return rankA.compareTo(rankB);
+    });
+    
+    return sortedList;
+  }
+
   void splitActivitiesForTabs() {
     dynamic todayActivity = activityBox.get(getActivityId());
     if (todayActivity != null && todayActivity.isInBox) {
       if (todayActivity.activityItems.isNotEmpty) {
-        missedActivities = todayActivity.activityItems
+        final missed = todayActivity.activityItems
             .where((element) => element.score == "0");
-        todoActivities =
+        final todo =
             todayActivity.activityItems.where((element) => element.score == "");
-        completedActivities = todayActivity.activityItems
+        final completed = todayActivity.activityItems
             .where((element) => element.score != "" && element.score != "0");
+        
+        // Sort all lists by rank
+        missedActivities = sortActivitiesByRank(missed);
+        todoActivities = sortActivitiesByRank(todo);
+        completedActivities = sortActivitiesByRank(completed);
       }
     }
   }
@@ -369,14 +397,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
               dividerColor: purpleColor,
               indicatorColor: purpleColor,
               tabs: [
-                const Tab(
-                  text: 'Missed',
+                Tab(
+                  text: 'Missed (${missedActivities.length})',
                 ),
                 Tab(
                   text: getTodoTabTitle(),
                 ),
-                const Tab(
-                  text: 'Done',
+                Tab(
+                  text: 'Done (${completedActivities.length})',
                 ),
               ],
             ),
@@ -398,7 +426,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                   : ListView.builder(
                       itemCount: missedActivities.length,
                       itemBuilder: (BuildContext context, int index) {
-                        var missedActivity = missedActivities.elementAt(index);
+                        var missedActivity = missedActivities[index];
                         // FIX: Use safe getter
                         ActivityTypeModel? missedActivityItemDetail =
                             getActivityTypeById(missedActivity.activityItemId);
@@ -431,7 +459,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                   : ListView.builder(
                       itemCount: todoActivities.length,
                       itemBuilder: (BuildContext context, int index) {
-                        var todoActivity = todoActivities.elementAt(index);
+                        var todoActivity = todoActivities[index];
                         // FIX: Use safe getter
                         ActivityTypeModel? todayActivityItemDetail =
                             getActivityTypeById(todoActivity.activityItemId);
@@ -546,7 +574,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                       itemCount: completedActivities.length,
                       itemBuilder: (BuildContext context, int index) {
                         var completedActivity =
-                            completedActivities.elementAt(index);
+                            completedActivities[index];
                         // FIX: Use safe getter
                         ActivityTypeModel? completedActivityItemDetail =
                             getActivityTypeById(completedActivity.activityItemId);
