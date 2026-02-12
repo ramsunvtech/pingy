@@ -1,709 +1,690 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:pingy/models/hive/rewards.dart';
+import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
+import 'package:pingy/models/hive/activity.dart';
+import 'package:pingy/models/hive/activity_item.dart';
+import 'package:pingy/models/hive/activity_type.dart';
 import 'package:pingy/utils/navigators.dart';
+import 'package:pingy/services/notification.dart';
+import 'package:pingy/services/activity.dart';
 
-import 'package:pingy/widgets/icons/settings.dart';
-import 'package:pingy/widgets/SettingsBottomNavigation.dart';
+import 'package:pingy/widgets/FutureWidgets.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
+import 'package:pingy/widgets/ProgressSelector.dart';
 
-class GoalListScreen extends StatefulWidget {
+import 'package:pingy/utils/color.dart';
+
+class UpdateTaskScreen extends StatefulWidget {
+  final String? activityId;
+
+  const UpdateTaskScreen({this.activityId = ""});
+
   @override
-  _GoalListScreenState createState() => _GoalListScreenState();
+  _UpdateTaskScreenState createState() => _UpdateTaskScreenState();
 }
 
-class _GoalListScreenState extends State<GoalListScreen> {
-  late final Box rewardsBox;
+class _UpdateTaskScreenState extends State<UpdateTaskScreen>
+    with WidgetsBindingObserver {
+  int defaultActivityTabIndex = 1;
+
+  List<ActivityItem> missedActivities = [];
+  List<ActivityItem> todoActivities = [];
+  List<ActivityItem> completedActivities = [];
+
+  final TextEditingController _fullScoreController = TextEditingController();
+
+  final _activateFormKey = GlobalKey<FormState>();
+
+  late final Box activityBox;
+  late final Box activityTypeBox;
+
+  /// FIX: Safe method to get ActivityType by activityTypeId
+  /// Searches by activityTypeId field instead of relying on Hive key
+  ActivityTypeModel? getActivityTypeById(String activityTypeId) {
+    if (activityTypeBox.isEmpty) return null;
+    
+    // Search through all values to find matching activityTypeId
+    for (var key in activityTypeBox.keys) {
+      final activityType = activityTypeBox.get(key) as ActivityTypeModel?;
+      if (activityType?.activityTypeId == activityTypeId) {
+        return activityType;
+      }
+    }
+    
+    return null;
+  }
+
+  /// Helper method to sort activities by rank
+  List<ActivityItem> sortActivitiesByRank(Iterable<ActivityItem> activities) {
+    final sortedList = activities.toList();
+    
+    sortedList.sort((a, b) {
+      final activityTypeA = getActivityTypeById(a.activityItemId);
+      final activityTypeB = getActivityTypeById(b.activityItemId);
+      
+      // Handle null cases - put items without activity type at the end
+      if (activityTypeA == null && activityTypeB == null) return 0;
+      if (activityTypeA == null) return 1;
+      if (activityTypeB == null) return -1;
+      
+      // Parse rank values, default to a high number if rank is null or invalid
+      final rankA = int.tryParse(activityTypeA.rank ?? '') ?? 999999;
+      final rankB = int.tryParse(activityTypeB.rank ?? '') ?? 999999;
+      
+      return rankA.compareTo(rankB);
+    });
+    
+    return sortedList;
+  }
+
+  void splitActivitiesForTabs() {
+    dynamic todayActivity = activityBox.get(getActivityId());
+    if (todayActivity != null && todayActivity.isInBox) {
+      if (todayActivity.activityItems.isNotEmpty) {
+        final missed = todayActivity.activityItems
+            .where((element) => element.score == "0");
+        final todo =
+            todayActivity.activityItems.where((element) => element.score == "");
+        final completed = todayActivity.activityItems
+            .where((element) => element.score != "" && element.score != "0");
+        
+        // Sort all lists by rank
+        missedActivities = sortActivitiesByRank(missed);
+        todoActivities = sortActivitiesByRank(todo);
+        completedActivities = sortActivitiesByRank(completed);
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    rewardsBox = Hive.box('rewards');
+    WidgetsBinding.instance.addObserver(this);
+    // Get reference to an already opened box
+    activityBox = Hive.box('activity');
+    activityTypeBox = Hive.box('activity_type');
+    splitActivitiesForTabs();
   }
 
-  Widget getFloatingButton(BuildContext context) {
-    if (rewardsBox.isEmpty) {
-      return Container();
-    } else if (rewardsBox.isNotEmpty) {
-      RewardsModel latestGoal = rewardsBox.values.last;
-      List endPeriod = latestGoal.endPeriod.split('/').toList();
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
-      DateTime today = DateTime.now();
-      DateTime endDate =
-          DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
-      Duration diff = endDate.difference(today);
-
-      if (diff.inDays > 0) {
-        return Container();
-      }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Force rebuild when app comes back from background
+      setState(() {
+        splitActivitiesForTabs();
+      });
     }
+  }
 
-    return FloatingActionButton.extended(
-      onPressed: () {
-        goToGoalsForm(context);
+  Widget getUpdateActivityForm(BuildContext content, dynamic todoActivity) {
+    Activity todayActivity = getActivityDetails();
+    // ✅ RESET / PREFILL ACTIVITY SCORE
+    _fullScoreController.text = todoActivity.score ?? '';
+    
+    // FIX: Use safe getter instead of direct .get()
+    ActivityTypeModel? todayActivityItemDetail =
+        getActivityTypeById(todoActivity.activityItemId);
+    
+    // Handle case where activity type is not found
+    if (todayActivityItemDetail == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Activity type not found. Please contact support.',
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+    }
+    
+    final int fullScore = int.parse(todayActivityItemDetail.fullScore);
+    final int currentScore = int.tryParse(todoActivity.score ?? '') ?? 0;
+    final double? initialPercentage =
+        currentScore > 0 ? currentScore / fullScore : null;
+
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setModalState) {
+        return Form(
+          key: _activateFormKey,
+          child: SizedBox(
+            height:
+                MediaQuery.of(context).size.height * 0.85, // ⬅️ sheet height
+            child: Column(
+              children: [
+                // ───────── SCROLLABLE CONTENT ─────────
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        // ─── HANDLE BAR ───
+                        Container(
+                          height: 3,
+                          width: 70,
+                          margin: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        const Text(
+                          'How did you do?',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        Text(
+                          todayActivityItemDetail.activityName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ─── SCORE PREVIEW ───
+                        if (_fullScoreController.text.isNotEmpty)
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.green.shade200),
+                            ),
+                            child: Text(
+                              'Score: ${_fullScoreController.text}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+
+                        const SizedBox(height: 16),
+
+                        // ─── PROGRESS SELECTOR ───
+                        SizedBox(
+                          height: 420,
+                          child: ProgressSelectorContent(
+                            initialPercentage: initialPercentage,
+                            showConfirmButton: false,
+                            onSelected: (percentage, label) {
+                              final calculatedScore =
+                                  (percentage * fullScore).round();
+                              setModalState(() {
+                                _fullScoreController.text =
+                                    calculatedScore.toString();
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ───────── FIXED BOTTOM BUTTONS ─────────
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    child: Row(
+                      children: [
+                        // CANCEL
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              _fullScoreController.clear();
+                              Navigator.pop(context);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // UPDATE
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green.withOpacity(0.12),
+                              foregroundColor: Colors.green,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: BorderSide(
+                                color: Colors.green.withOpacity(0.6),
+                                width: 1,
+                              ),
+                            ),
+                            onPressed: _fullScoreController.text.isEmpty
+                                ? null
+                                : () async {
+                                    var updatedActivity = ActivityItem(
+                                      todoActivity.activityItemId,
+                                      _fullScoreController.text,
+                                    );
+
+                                    var index =
+                                        todayActivity.activityItems.indexWhere(
+                                      (e) =>
+                                          e.activityItemId ==
+                                          todoActivity.activityItemId,
+                                    );
+
+                                    if (todayActivity.isInBox) {
+                                      todayActivity.activityItems
+                                          .setAll(index, [updatedActivity]);
+                                      await todayActivity.save();
+                                    }
+
+                                    // ✅ UPDATE ONGOING NOTIFICATION
+                                    await _updateOngoingNotification();
+
+                                    _fullScoreController.clear();
+                                    
+                                    // Close the bottom sheet first
+                                    Navigator.pop(context, true);
+                                    
+                                    // ✅ REFRESH ACTIVITY LISTS AND SWITCH TAB
+                                    setState(() {
+                                      splitActivitiesForTabs();
+                                      defaultActivityTabIndex = 2;
+                                    });
+                                    
+                                    // ✅ ANIMATE TO DONE TAB
+                                    DefaultTabController.of(context).animateTo(2);
+                                  },
+                            child: const Text(
+                              'Update',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
       },
-      backgroundColor: Theme.of(context).primaryColor,
-      elevation: 2,
-      icon: const Icon(Icons.add_rounded),
-      label: const Text(
-        'New Goal',
-        style: TextStyle(fontWeight: FontWeight.w600),
-      ),
     );
   }
 
-  String getPrize(String prize) {
-    return (prize == '') ? 'Not set' : prize;
-  }
+  String getAppBarTitle() {
+    if (widget.activityId != '') {
+      Activity activityDetails = getActivityDetails();
+      if (activityDetails!.activityDate != null) {
+        DateFormat dateFormat = DateFormat("dd/MM/yyyy");
+        String formattedDate =
+            '(${dateFormat.format(activityDetails!.activityDate as DateTime)})';
+        return 'Edit Activity $formattedDate';
+      }
 
-  String getGoalResult(RewardsModel rewardDetails) {
-    if (rewardDetails.won != null && rewardDetails.won != '') {
-      return rewardDetails.won!;
+      return 'Edit Activity';
     }
-    return '';
+    return 'Activities Today';
   }
 
-  bool isGoalActive(RewardsModel goal) {
+  // TODO: fix this optional value.
+  String? getActivityId() {
+    if (widget.activityId != '') {
+      return widget.activityId;
+    }
+
+    var today = DateTime.now();
+    var activityId = 'activity_${today.year}${today.month}${today.day}';
+    return activityId;
+  }
+
+  Activity getActivityDetails() {
+    Activity todayActivity = activityBox.get(getActivityId());
+    return todayActivity;
+  }
+
+  /// Helper method to update ongoing notification after activity is logged
+  Future<void> _updateOngoingNotification() async {
     try {
-      final today = DateTime.now();
-      final normalizedToday = DateTime(today.year, today.month, today.day);
-
-      final start = _parseDate(goal.startPeriod);
-      final end = _parseDate(goal.endPeriod);
-
-      return !normalizedToday.isBefore(start) && !normalizedToday.isAfter(end);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  bool isGoalEnded(RewardsModel goal) {
-    try {
-      final today = DateTime.now();
-      final normalizedToday = DateTime(today.year, today.month, today.day);
-      final end = _parseDate(goal.endPeriod);
-      return normalizedToday.isAfter(end);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  DateTime _parseDate(String date) {
-    final parts = date.split('/');
-    final day = int.parse(parts[0]);
-    final month = int.parse(parts[1]);
-    final year = int.parse(parts[2]);
-    return DateTime(year, month, day);
-  }
-
-  String getGoalStatusText(RewardsModel goal) {
-    if (isGoalActive(goal)) {
-      return 'Active';
-    } else if (isGoalEnded(goal)) {
-      return 'Completed';
-    } else {
-      return 'Upcoming';
-    }
-  }
-
-  IconData getGoalStatusIcon(RewardsModel goal) {
-    if (isGoalActive(goal)) {
-      return Icons.radio_button_checked_rounded;
-    } else if (isGoalEnded(goal)) {
-      return Icons.check_circle_rounded;
-    } else {
-      return Icons.schedule_rounded;
-    }
-  }
-
-  Color getGoalStatusColor(RewardsModel goal) {
-    if (isGoalActive(goal)) {
-      return const Color(0xFF34C759); // iOS green
-    } else if (isGoalEnded(goal)) {
-      return const Color(0xFF007AFF); // iOS blue
-    } else {
-      return const Color(0xFFFF9500); // iOS orange
-    }
-  }
-
-  String _formatDateRange(RewardsModel goal) {
-    try {
-      final start = _parseDate(goal.startPeriod);
-      final end = _parseDate(goal.endPeriod);
+      final scoreDetails = getScoreDetails();
+      final activeGoal = getActiveGoalForActivities();
       
-      final startMonth = _getMonthAbbr(start.month);
-      final endMonth = _getMonthAbbr(end.month);
-      
-      if (start.year == end.year) {
-        if (start.month == end.month) {
-          return '$startMonth ${start.day}-${end.day}, ${end.year}';
-        }
-        return '$startMonth ${start.day} - $endMonth ${end.day}, ${end.year}';
+      if (activeGoal != null) {
+        await NotificationService.showOngoingProgress(
+          todayScore: scoreDetails['todayScore']?.toString() ?? '0',
+          totalScore: scoreDetails['totalScore']?.toString() ?? '0',
+          goalTitle: activeGoal.title,
+        );
+        print('✅ Ongoing notification updated');
       }
-      return '$startMonth ${start.day}, ${start.year} - $endMonth ${end.day}, ${end.year}';
     } catch (e) {
-      return '${goal.startPeriod} - ${goal.endPeriod}';
+      print('❌ Error updating ongoing notification: $e');
     }
-  }
-
-  String _getMonthAbbr(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months[month - 1];
-  }
-
-  int _getRemainingDays(RewardsModel goal) {
-    try {
-      final today = DateTime.now();
-      final normalizedToday = DateTime(today.year, today.month, today.day);
-      final end = _parseDate(goal.endPeriod);
-      return end.difference(normalizedToday).inDays;
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  String _getProgressText(RewardsModel goal) {
-    if (isGoalEnded(goal)) {
-      if (goal.won != null && goal.won != '') {
-        return goal.won!;
-      }
-      return 'Goal period ended';
-    }
-    
-    if (isGoalActive(goal)) {
-      final remaining = _getRemainingDays(goal);
-      if (remaining == 0) {
-        return 'Last day!';
-      } else if (remaining == 1) {
-        return '1 day left';
-      } else {
-        return '$remaining days left';
-      }
-    }
-    
-    // Upcoming
-    final start = _parseDate(goal.startPeriod);
-    final today = DateTime.now();
-    final daysUntilStart = start.difference(DateTime(today.year, today.month, today.day)).inDays;
-    
-    if (daysUntilStart == 0) {
-      return 'Starts today';
-    } else if (daysUntilStart == 1) {
-      return 'Starts tomorrow';
-    } else {
-      return 'Starts in $daysUntilStart days';
-    }
-  }
-
-  Widget _buildPrizeChip(String label, String prize, Color color) {
-    if (prize == '' || prize == 'Not set') return const SizedBox.shrink();
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.emoji_events_rounded,
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              prize,
-              style: TextStyle(
-                fontSize: 11,
-                color: color.withOpacity(0.9),
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    Activity todayActivity = getActivityDetails();
+
+    String getTodoTabTitle() {
+      return 'To do (${todoActivities.length.toString()})';
+    }
+
     return PopScope(
       canPop: true,
-      child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: customAppBar(
-          title: 'Goals',
-          actions: [
-            settingsLinkIconButton(context),
-          ],
-        ),
-        body: ValueListenableBuilder(
-          valueListenable: rewardsBox.listenable(),
-          builder: (context, Box box, widget) {
-            if (box.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.flag_rounded,
-                        size: 60,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'No goals yet',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Set your first goal to start tracking',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        goToGoalsForm(context);
-                      },
-                      icon: const Icon(Icons.add_rounded),
-                      label: const Text('Create Goal'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                    ),
-                  ],
+      child: DefaultTabController(
+        length: 3,
+        initialIndex: defaultActivityTabIndex,
+        child: Scaffold(
+          appBar: customAppBar(
+            bottom: TabBar(
+              unselectedLabelColor: greyColor,
+              labelColor: purpleColor,
+              dividerColor: purpleColor,
+              indicatorColor: purpleColor,
+              tabs: [
+                Tab(
+                  text: 'Missed (${missedActivities.length})',
                 ),
-              );
-            } else {
-              return ListView.builder(
-                itemCount: rewardsBox.length,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  var currentBox = rewardsBox;
-                  RewardsModel rewardsData = currentBox.getAt(index)!;
-                  String statusText = getGoalStatusText(rewardsData);
-                  Color statusColor = getGoalStatusColor(rewardsData);
-                  IconData statusIcon = getGoalStatusIcon(rewardsData);
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Material(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      elevation: 0,
-                      shadowColor: Colors.black12,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: () {
-                          goToGoalStatusScreenWithId(
-                            context,
-                            rewardsData.rewardId ?? '',
+                Tab(
+                  text: getTodoTabTitle(),
+                ),
+                Tab(
+                  text: 'Done (${completedActivities.length})',
+                ),
+              ],
+            ),
+            title: getAppBarTitle(),
+            leading: IconButton(
+              onPressed: () {
+                goToHomeScreen(context);
+              },
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
+          body: TabBarView(
+            children: [
+              (missedActivities.isEmpty)
+                  ? const Center(
+                      child:
+                          Text('No missed Activities are available. its Empty'),
+                    )
+                  : ListView.builder(
+                      itemCount: missedActivities.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var missedActivity = missedActivities[index];
+                        // FIX: Use safe getter
+                        ActivityTypeModel? missedActivityItemDetail =
+                            getActivityTypeById(missedActivity.activityItemId);
+                        
+                        if (missedActivityItemDetail == null) {
+                          return ListTile(
+                            title: Text('Unknown Activity'),
+                            subtitle: Text('Activity type not found'),
                           );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.grey[200]!,
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Goal Image (if exists)
-                              if (rewardsData.rewardPicture != null && 
-                                  rewardsData.rewardPicture != '') ...[
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(16),
-                                    topRight: Radius.circular(16),
-                                  ),
-                                  child: Image.network(
-                                    rewardsData.rewardPicture!,
-                                    width: double.infinity,
-                                    height: 180,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        width: double.infinity,
-                                        height: 180,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              statusColor.withOpacity(0.1),
-                                              statusColor.withOpacity(0.05),
-                                            ],
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.image_not_supported_rounded,
-                                          size: 48,
-                                          color: Colors.grey[400],
-                                        ),
-                                      );
-                                    },
-                                    loadingBuilder: (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Container(
-                                        width: double.infinity,
-                                        height: 180,
-                                        color: Colors.grey[100],
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress.expectedTotalBytes != null
-                                                ? loadingProgress.cumulativeBytesLoaded /
-                                                    loadingProgress.expectedTotalBytes!
-                                                : null,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                              
-                              // Header with status badge
-                              Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Icon container
-                                    Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        color: statusColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(
-                                        statusIcon,
-                                        color: statusColor,
-                                        size: 24,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    // Title and status
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            rewardsData.title,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 17,
-                                              color: Colors.black87,
-                                              height: 1.3,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 8,
-                                                  vertical: 3,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: statusColor.withOpacity(0.12),
-                                                  borderRadius: BorderRadius.circular(6),
-                                                ),
-                                                child: Text(
-                                                  statusText,
-                                                  style: TextStyle(
-                                                    color: statusColor,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // Chevron
-                                    Icon(
-                                      Icons.chevron_right_rounded,
-                                      color: Colors.grey[400],
-                                      size: 24,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              
-                              // Divider
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: Colors.grey[100],
-                              ),
-                              
-                              // Content section
-                              Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Date range
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.calendar_today_rounded,
-                                          size: 16,
-                                          color: Colors.grey[600],
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          _formatDateRange(rewardsData),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[700],
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    
-                                    // Progress or Result
-                                    if (isGoalActive(rewardsData)) ...[
-                                      // Active goal - show progress
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: statusColor.withOpacity(0.08),
-                                          borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(
-                                            color: statusColor.withOpacity(0.2),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(6),
-                                              decoration: BoxDecoration(
-                                                color: statusColor.withOpacity(0.15),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                Icons.trending_up_rounded,
-                                                size: 16,
-                                                color: statusColor,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Goal in Progress',
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: statusColor,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  Text(
-                                                    _getProgressText(rewardsData),
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.grey[700],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ] else if (isGoalEnded(rewardsData) && 
-                                               getGoalResult(rewardsData).isNotEmpty) ...[
-                                      // Completed goal with result
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              Colors.amber.withOpacity(0.1),
-                                              Colors.orange.withOpacity(0.05),
-                                            ],
-                                          ),
-                                          borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(
-                                            color: Colors.amber.withOpacity(0.3),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(6),
-                                              decoration: BoxDecoration(
-                                                color: Colors.amber.withOpacity(0.2),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                Icons.emoji_events_rounded,
-                                                size: 20,
-                                                color: Colors.amber[800],
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Achievement Unlocked!',
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Colors.amber[900],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  Text(
-                                                    getGoalResult(rewardsData),
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Colors.amber[800],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Icon(
-                                              Icons.celebration_rounded,
-                                              color: Colors.amber[700],
-                                              size: 24,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ] else ...[
-                                      // Upcoming or ended without result
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            isGoalEnded(rewardsData) 
-                                              ? Icons.check_circle_outline_rounded
-                                              : Icons.timer_outlined,
-                                            size: 16,
-                                            color: Colors.grey[600],
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            _getProgressText(rewardsData),
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey[700],
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                    
-                                    const SizedBox(height: 16),
-                                    
-                                    // Prizes section
-                                    Text(
-                                      'Prizes',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.grey[800],
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: [
-                                        _buildPrizeChip(
-                                          '🥇 95%',
-                                          getPrize(rewardsData.firstPrice),
-                                          const Color(0xFFFFD700),
-                                        ),
-                                        _buildPrizeChip(
-                                          '🥈 85%',
-                                          getPrize(rewardsData.secondPrice),
-                                          const Color(0xFFC0C0C0),
-                                        ),
-                                        _buildPrizeChip(
-                                          '🥉 75%',
-                                          getPrize(rewardsData.thirdPrice),
-                                          const Color(0xFFCD7F32),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                        }
+
+                        return taskItem(
+                          'missed',
+                          missedActivityItemDetail.activityName,
+                          missedActivity.score ?? '0',
+                          missedActivity,
+                          false,
+                          index,
+                        );
+                      },
                     ),
-                  );
-                },
-              );
-            }
-          },
+              (todoActivities.isEmpty)
+                  ? Center(
+                      child: Text((todoActivities.isEmpty &&
+                              completedActivities.length ==
+                                  todayActivity.activityItems.length)
+                          ? 'Cool, You are done for the day!'
+                          : 'No Activities are available. its Empty'),
+                    )
+                  : ListView.builder(
+                      itemCount: todoActivities.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var todoActivity = todoActivities[index];
+                        // FIX: Use safe getter
+                        ActivityTypeModel? todayActivityItemDetail =
+                            getActivityTypeById(todoActivity.activityItemId);
+                        
+                        if (todayActivityItemDetail == null) {
+                          return ListTile(
+                            title: Text('Unknown Activity'),
+                            subtitle: Text('Activity type not found'),
+                          );
+                        }
+
+                        return Dismissible(
+                            key: UniqueKey(),
+                            child: taskItem(
+                                'todo',
+                                todayActivityItemDetail.activityName,
+                                'Swipe left to skip / right to update score',
+                                todoActivity,
+                                false,
+                                index),
+                            confirmDismiss: (direction) async {
+                              if (direction == DismissDirection.startToEnd) {
+                                // Update Box with 0 as score.
+                                // return true;
+                                return await showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(25),
+                                      topRight: Radius.circular(25),
+                                    ),
+                                  ),
+                                  builder: (context) =>
+                                      DraggableScrollableSheet(
+                                          initialChildSize: 0.90,
+                                          maxChildSize: 0.97,
+                                          minChildSize: 0.85,
+                                          expand: false,
+                                          builder: (context, scrollController) {
+                                            return SingleChildScrollView(
+                                              controller: scrollController,
+                                              child: Padding(
+                                                padding: MediaQuery.of(context)
+                                                    .viewInsets,
+                                                child: getUpdateActivityForm(
+                                                    context, todoActivity),
+                                              ),
+                                            );
+                                          }),
+                                );
+                              } else if (direction ==
+                                  DismissDirection.endToStart) {
+                                var updatedMissedActivity = ActivityItem(
+                                    todoActivity.activityItemId, '0');
+                                var activityItemIndex = todayActivity
+                                    .activityItems
+                                    .indexWhere((element) =>
+                                        element.activityItemId ==
+                                        todoActivity.activityItemId);
+
+                                if (todayActivity.isInBox) {
+                                  todayActivity.activityItems.setAll(
+                                      activityItemIndex,
+                                      [updatedMissedActivity]);
+                                  await todayActivity.save();
+                                }
+
+                                // ✅ UPDATE ONGOING NOTIFICATION
+                                await _updateOngoingNotification();
+
+                                // Update Box with score.
+                                splitActivitiesForTabs();
+                                setState(() {});
+                                return true;
+                              }
+                            },
+                            onDismissed: (direction) {
+                              var textMessage = 'not set';
+
+                              switch (direction) {
+                                case DismissDirection.startToEnd:
+                                  textMessage = 'right';
+                                  break;
+                                case DismissDirection.endToStart:
+                                  textMessage = 'left';
+                                  break;
+                                default:
+                                  textMessage = 'default';
+                                  break;
+                              }
+                              if (textMessage != '') {
+                                String toastMessage = '';
+                                if (textMessage == 'right') {
+                                  toastMessage =
+                                      'Activity completed successfully with specified Score.';
+                                } else {
+                                  toastMessage =
+                                      'Activity marked as missed successfully.';
+                                }
+                                showToastMessage(context, toastMessage);
+                              }
+                            });
+                      },
+                    ),
+              (completedActivities.isEmpty)
+                  ? const Center(
+                      child: Text(
+                          'No Completed Activities are available. its Empty'),
+                    )
+                  : ListView.builder(
+                      itemCount: completedActivities.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var completedActivity =
+                            completedActivities[index];
+                        // FIX: Use safe getter
+                        ActivityTypeModel? completedActivityItemDetail =
+                            getActivityTypeById(completedActivity.activityItemId);
+                        
+                        if (completedActivityItemDetail == null) {
+                          return ListTile(
+                            title: Text('Unknown Activity'),
+                            subtitle: Text('Activity type not found'),
+                          );
+                        }
+
+                        return taskItem(
+                          'completed',
+                          completedActivityItemDetail.activityName,
+                          completedActivity.score,
+                          completedActivity,
+                          false,
+                          index,
+                        );
+                      },
+                    )
+            ],
+          ),
         ),
-        floatingActionButton: getFloatingButton(context),
-        bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
       onPopInvokedWithResult: (bool didPop, dynamic result) {
-        if (didPop) return;
-        Navigator.pop(context);
+        goToHomeScreen(context);
         return;
+      },
+    );
+  }
+
+  Widget taskItem(String taskType, String taskName, String? mark,
+      ActivityItem selectActivity, bool isSelected, int index) {
+    var enabled = true;
+    IconData taskIcon = Icons.content_paste;
+    dynamic taskScore = '';
+
+    if (taskType == 'missed') {
+      taskIcon = Icons.content_paste_off;
+      taskScore = 'You missed this task';
+    } else if (taskType == 'todo') {
+      taskScore = mark;
+    } else if (taskType == 'completed') {
+      taskIcon = Icons.assignment_turned_in_outlined;
+      String activityItemId = selectActivity.activityItemId;
+      if (mark != '' && activityItemId.isNotEmpty) {
+        // FIX: Use safe getter
+        ActivityTypeModel? activityTypeDetails =
+            getActivityTypeById(activityItemId);
+        if (activityTypeDetails != null) {
+          taskScore = 'You scored $mark out of ${activityTypeDetails.fullScore}';
+        } else {
+          taskScore = 'Score: $mark';
+        }
+      }
+    }
+
+    Widget subtitle = Text(taskScore);
+
+    return ListTile(
+      enabled: enabled,
+      leading: CircleAvatar(
+        backgroundColor: lightGreenColor,
+        child: Icon(
+          taskIcon,
+          color: iconColor,
+        ),
+      ),
+      title: Text(
+        taskName,
+        style: const TextStyle(
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: subtitle,
+      onTap: () async {
+        return await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(30),
+            ),
+          ),
+          builder: (context) => DraggableScrollableSheet(
+              initialChildSize: 0.85,
+              maxChildSize: 0.95,
+              minChildSize: 0.80,
+              expand: false,
+              builder: (context, scrollController) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: MediaQuery.of(context).viewInsets,
+                    child: getUpdateActivityForm(context, selectActivity),
+                  ),
+                );
+              }),
+        );
       },
     );
   }
