@@ -305,8 +305,18 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen>
                                     await _updateOngoingNotification();
 
                                     _fullScoreController.clear();
-                                    setState(() => defaultActivityTabIndex = 2);
+                                    
+                                    // Close the bottom sheet first
                                     Navigator.pop(context, true);
+                                    
+                                    // ✅ REFRESH ACTIVITY LISTS AND SWITCH TAB
+                                    setState(() {
+                                      splitActivitiesForTabs();
+                                      defaultActivityTabIndex = 2;
+                                    });
+                                    
+                                    // ✅ ANIMATE TO DONE TAB
+                                    DefaultTabController.of(context).animateTo(2);
                                   },
                             child: const Text(
                               'Update',
