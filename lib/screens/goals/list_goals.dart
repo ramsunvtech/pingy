@@ -1,690 +1,522 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
-import 'package:pingy/models/hive/activity.dart';
-import 'package:pingy/models/hive/activity_item.dart';
-import 'package:pingy/models/hive/activity_type.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pingy/models/hive/rewards.dart';
 import 'package:pingy/utils/navigators.dart';
-import 'package:pingy/services/notification.dart';
-import 'package:pingy/services/activity.dart';
 
-import 'package:pingy/widgets/FutureWidgets.dart';
+import 'package:pingy/widgets/icons/settings.dart';
+import 'package:pingy/widgets/SettingsBottomNavigation.dart';
 import 'package:pingy/widgets/CustomAppBar.dart';
-import 'package:pingy/widgets/ProgressSelector.dart';
 
-import 'package:pingy/utils/color.dart';
-
-class UpdateTaskScreen extends StatefulWidget {
-  final String? activityId;
-
-  const UpdateTaskScreen({this.activityId = ""});
-
+class GoalListScreen extends StatefulWidget {
   @override
-  _UpdateTaskScreenState createState() => _UpdateTaskScreenState();
+  _GoalListScreenState createState() => _GoalListScreenState();
 }
 
-class _UpdateTaskScreenState extends State<UpdateTaskScreen>
-    with WidgetsBindingObserver {
-  int defaultActivityTabIndex = 1;
-
-  List<ActivityItem> missedActivities = [];
-  List<ActivityItem> todoActivities = [];
-  List<ActivityItem> completedActivities = [];
-
-  final TextEditingController _fullScoreController = TextEditingController();
-
-  final _activateFormKey = GlobalKey<FormState>();
-
-  late final Box activityBox;
-  late final Box activityTypeBox;
-
-  /// FIX: Safe method to get ActivityType by activityTypeId
-  /// Searches by activityTypeId field instead of relying on Hive key
-  ActivityTypeModel? getActivityTypeById(String activityTypeId) {
-    if (activityTypeBox.isEmpty) return null;
-    
-    // Search through all values to find matching activityTypeId
-    for (var key in activityTypeBox.keys) {
-      final activityType = activityTypeBox.get(key) as ActivityTypeModel?;
-      if (activityType?.activityTypeId == activityTypeId) {
-        return activityType;
-      }
-    }
-    
-    return null;
-  }
-
-  /// Helper method to sort activities by rank
-  List<ActivityItem> sortActivitiesByRank(Iterable<ActivityItem> activities) {
-    final sortedList = activities.toList();
-    
-    sortedList.sort((a, b) {
-      final activityTypeA = getActivityTypeById(a.activityItemId);
-      final activityTypeB = getActivityTypeById(b.activityItemId);
-      
-      // Handle null cases - put items without activity type at the end
-      if (activityTypeA == null && activityTypeB == null) return 0;
-      if (activityTypeA == null) return 1;
-      if (activityTypeB == null) return -1;
-      
-      // Parse rank values, default to a high number if rank is null or invalid
-      final rankA = int.tryParse(activityTypeA.rank ?? '') ?? 999999;
-      final rankB = int.tryParse(activityTypeB.rank ?? '') ?? 999999;
-      
-      return rankA.compareTo(rankB);
-    });
-    
-    return sortedList;
-  }
-
-  void splitActivitiesForTabs() {
-    dynamic todayActivity = activityBox.get(getActivityId());
-    if (todayActivity != null && todayActivity.isInBox) {
-      if (todayActivity.activityItems.isNotEmpty) {
-        final missed = todayActivity.activityItems
-            .where((element) => element.score == "0");
-        final todo =
-            todayActivity.activityItems.where((element) => element.score == "");
-        final completed = todayActivity.activityItems
-            .where((element) => element.score != "" && element.score != "0");
-        
-        // Sort all lists by rank
-        missedActivities = sortActivitiesByRank(missed);
-        todoActivities = sortActivitiesByRank(todo);
-        completedActivities = sortActivitiesByRank(completed);
-      }
-    }
-  }
+class _GoalListScreenState extends State<GoalListScreen> {
+  late final Box rewardsBox;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     // Get reference to an already opened box
-    activityBox = Hive.box('activity');
-    activityTypeBox = Hive.box('activity_type');
-    splitActivitiesForTabs();
+    rewardsBox = Hive.box('rewards');
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // Force rebuild when app comes back from background
-      setState(() {
-        splitActivitiesForTabs();
-      });
-    }
-  }
-
-  Widget getUpdateActivityForm(BuildContext content, dynamic todoActivity) {
-    Activity todayActivity = getActivityDetails();
-    // ✅ RESET / PREFILL ACTIVITY SCORE
-    _fullScoreController.text = todoActivity.score ?? '';
-    
-    // FIX: Use safe getter instead of direct .get()
-    ActivityTypeModel? todayActivityItemDetail =
-        getActivityTypeById(todoActivity.activityItemId);
-    
-    // Handle case where activity type is not found
-    if (todayActivityItemDetail == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Activity type not found. Please contact support.',
-            style: TextStyle(color: Colors.red),
-          ),
-        ),
+  Widget getFloatingButton(BuildContext context) {
+    if (rewardsBox.isEmpty) {
+      return FloatingActionButton(
+        onPressed: () {
+          goToGoalsForm(context);
+        },
+        backgroundColor: Colors.lightGreen,
+        child: const Icon(Icons.add),
       );
+    } else if (rewardsBox.isNotEmpty) {
+      RewardsModel latestGoal = rewardsBox.values.last;
+      List endPeriod = latestGoal.endPeriod.split('/').toList();
+
+      DateTime today = DateTime.now();
+      DateTime endDate =
+          DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
+      Duration diff = endDate.difference(today);
+
+      if (diff.inDays > 0) {
+        return Container();
+      }
     }
-    
-    final int fullScore = int.parse(todayActivityItemDetail.fullScore);
-    final int currentScore = int.tryParse(todoActivity.score ?? '') ?? 0;
-    final double? initialPercentage =
-        currentScore > 0 ? currentScore / fullScore : null;
 
-    return StatefulBuilder(
-      builder: (BuildContext context, StateSetter setModalState) {
-        return Form(
-          key: _activateFormKey,
-          child: SizedBox(
-            height:
-                MediaQuery.of(context).size.height * 0.85, // ⬅️ sheet height
-            child: Column(
-              children: [
-                // ───────── SCROLLABLE CONTENT ─────────
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      children: [
-                        // ─── HANDLE BAR ───
-                        Container(
-                          height: 3,
-                          width: 70,
-                          margin: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        const Text(
-                          'How did you do?',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-
-                        const SizedBox(height: 4),
-
-                        Text(
-                          todayActivityItemDetail.activityName,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // ─── SCORE PREVIEW ───
-                        if (_fullScoreController.text.isNotEmpty)
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.green.shade200),
-                            ),
-                            child: Text(
-                              'Score: ${_fullScoreController.text}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ),
-
-                        const SizedBox(height: 16),
-
-                        // ─── PROGRESS SELECTOR ───
-                        SizedBox(
-                          height: 420,
-                          child: ProgressSelectorContent(
-                            initialPercentage: initialPercentage,
-                            showConfirmButton: false,
-                            onSelected: (percentage, label) {
-                              final calculatedScore =
-                                  (percentage * fullScore).round();
-                              setModalState(() {
-                                _fullScoreController.text =
-                                    calculatedScore.toString();
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // ───────── FIXED BOTTOM BUTTONS ─────────
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    child: Row(
-                      children: [
-                        // CANCEL
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              _fullScoreController.clear();
-                              Navigator.pop(context);
-                            },
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text('Cancel'),
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        // UPDATE
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green.withOpacity(0.12),
-                              foregroundColor: Colors.green,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              side: BorderSide(
-                                color: Colors.green.withOpacity(0.6),
-                                width: 1,
-                              ),
-                            ),
-                            onPressed: _fullScoreController.text.isEmpty
-                                ? null
-                                : () async {
-                                    var updatedActivity = ActivityItem(
-                                      todoActivity.activityItemId,
-                                      _fullScoreController.text,
-                                    );
-
-                                    var index =
-                                        todayActivity.activityItems.indexWhere(
-                                      (e) =>
-                                          e.activityItemId ==
-                                          todoActivity.activityItemId,
-                                    );
-
-                                    if (todayActivity.isInBox) {
-                                      todayActivity.activityItems
-                                          .setAll(index, [updatedActivity]);
-                                      await todayActivity.save();
-                                    }
-
-                                    // ✅ UPDATE ONGOING NOTIFICATION
-                                    await _updateOngoingNotification();
-
-                                    _fullScoreController.clear();
-                                    
-                                    // Close the bottom sheet first
-                                    Navigator.pop(context, true);
-                                    
-                                    // ✅ REFRESH ACTIVITY LISTS AND SWITCH TAB
-                                    setState(() {
-                                      splitActivitiesForTabs();
-                                      defaultActivityTabIndex = 2;
-                                    });
-                                    
-                                    // ✅ ANIMATE TO DONE TAB
-                                    DefaultTabController.of(context).animateTo(2);
-                                  },
-                            child: const Text(
-                              'Update',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+    return FloatingActionButton(
+      onPressed: () {
+        goToGoalsForm(context);
       },
+      backgroundColor: Colors.lightGreen,
+      child: const Icon(Icons.add),
     );
   }
 
-  String getAppBarTitle() {
-    if (widget.activityId != '') {
-      Activity activityDetails = getActivityDetails();
-      if (activityDetails!.activityDate != null) {
-        DateFormat dateFormat = DateFormat("dd/MM/yyyy");
-        String formattedDate =
-            '(${dateFormat.format(activityDetails!.activityDate as DateTime)})';
-        return 'Edit Activity $formattedDate';
-      }
+  String getPrize(String? prize) {
+    if (prize == null || prize.isEmpty) return 'Not set';
+    return prize;
+  }
 
-      return 'Edit Activity';
+  String getGoalResult(RewardsModel rewardDetails) {
+    if (rewardDetails.won != null && rewardDetails.won!.isNotEmpty) {
+      return rewardDetails.won!;
     }
-    return 'Activities Today';
+    return '';
   }
 
-  // TODO: fix this optional value.
-  String? getActivityId() {
-    if (widget.activityId != '') {
-      return widget.activityId;
-    }
-
-    var today = DateTime.now();
-    var activityId = 'activity_${today.year}${today.month}${today.day}';
-    return activityId;
+  bool hasImage(RewardsModel rewardDetails) {
+    return rewardDetails.rewardPicture != null && 
+           rewardDetails.rewardPicture!.isNotEmpty;
   }
 
-  Activity getActivityDetails() {
-    Activity todayActivity = activityBox.get(getActivityId());
-    return todayActivity;
-  }
-
-  /// Helper method to update ongoing notification after activity is logged
-  Future<void> _updateOngoingNotification() async {
+  bool isGoalActive(RewardsModel goal) {
     try {
-      final scoreDetails = getScoreDetails();
-      final activeGoal = getActiveGoalForActivities();
-      
-      if (activeGoal != null) {
-        await NotificationService.showOngoingProgress(
-          todayScore: scoreDetails['todayScore']?.toString() ?? '0',
-          totalScore: scoreDetails['totalScore']?.toString() ?? '0',
-          goalTitle: activeGoal.title,
-        );
-        print('✅ Ongoing notification updated');
-      }
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+
+      final start = _parseDate(goal.startPeriod);
+      final end = _parseDate(goal.endPeriod);
+
+      return !normalizedToday.isBefore(start) && !normalizedToday.isAfter(end);
     } catch (e) {
-      print('❌ Error updating ongoing notification: $e');
+      return false;
     }
+  }
+
+  bool isGoalEnded(RewardsModel goal) {
+    try {
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+      final end = _parseDate(goal.endPeriod);
+      return normalizedToday.isAfter(end);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  DateTime _parseDate(String date) {
+    final parts = date.split('/');
+    final day = int.parse(parts[0]);
+    final month = int.parse(parts[1]);
+    final year = int.parse(parts[2]);
+    return DateTime(year, month, day);
+  }
+
+  String getGoalStatusText(RewardsModel goal) {
+    if (isGoalActive(goal)) {
+      return 'Active';
+    } else if (isGoalEnded(goal)) {
+      return 'Completed';
+    } else {
+      return 'Upcoming';
+    }
+  }
+
+  IconData getGoalStatusIcon(RewardsModel goal) {
+    if (isGoalActive(goal)) {
+      return Icons.timer;
+    } else if (isGoalEnded(goal)) {
+      return Icons.check_circle;
+    } else {
+      return Icons.schedule;
+    }
+  }
+
+  Color getGoalStatusColor(RewardsModel goal) {
+    if (isGoalActive(goal)) {
+      return Colors.green;
+    } else if (isGoalEnded(goal)) {
+      return Colors.blue;
+    } else {
+      return Colors.orange;
+    }
+  }
+
+  int _getRemainingDays(RewardsModel goal) {
+    try {
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+      final end = _parseDate(goal.endPeriod);
+      return end.difference(normalizedToday).inDays;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  String _getProgressText(RewardsModel goal) {
+    if (isGoalEnded(goal)) {
+      final result = getGoalResult(goal);
+      if (result.isNotEmpty) {
+        return result;
+      }
+      return 'Goal ended';
+    }
+    
+    if (isGoalActive(goal)) {
+      final remaining = _getRemainingDays(goal);
+      if (remaining == 0) {
+        return 'Last day!';
+      } else if (remaining == 1) {
+        return '1 day left';
+      } else {
+        return '$remaining days left';
+      }
+    }
+    
+    // Upcoming
+    final start = _parseDate(goal.startPeriod);
+    final today = DateTime.now();
+    final daysUntilStart = start.difference(DateTime(today.year, today.month, today.day)).inDays;
+    
+    if (daysUntilStart == 0) {
+      return 'Starts today';
+    } else if (daysUntilStart == 1) {
+      return 'Starts tomorrow';
+    } else {
+      return 'Starts in $daysUntilStart days';
+    }
+  }
+
+  Widget _buildGoalImage(RewardsModel goal, Color statusColor) {
+    if (!hasImage(goal)) {
+      return Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: statusColor.withOpacity(0.15),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          getGoalStatusIcon(goal),
+          color: statusColor,
+          size: 28,
+        ),
+      );
+    }
+
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: statusColor.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: ClipOval(
+        child: Image.network(
+          goal.rewardPicture!,
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: statusColor.withOpacity(0.15),
+              child: Icon(
+                getGoalStatusIcon(goal),
+                color: statusColor,
+                size: 28,
+              ),
+            );
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Container(
+              color: Colors.grey[100],
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    Activity todayActivity = getActivityDetails();
-
-    String getTodoTabTitle() {
-      return 'To do (${todoActivities.length.toString()})';
-    }
-
     return PopScope(
       canPop: true,
-      child: DefaultTabController(
-        length: 3,
-        initialIndex: defaultActivityTabIndex,
-        child: Scaffold(
-          appBar: customAppBar(
-            bottom: TabBar(
-              unselectedLabelColor: greyColor,
-              labelColor: purpleColor,
-              dividerColor: purpleColor,
-              indicatorColor: purpleColor,
-              tabs: [
-                Tab(
-                  text: 'Missed (${missedActivities.length})',
-                ),
-                Tab(
-                  text: getTodoTabTitle(),
-                ),
-                Tab(
-                  text: 'Done (${completedActivities.length})',
-                ),
-              ],
-            ),
-            title: getAppBarTitle(),
-            leading: IconButton(
-              onPressed: () {
-                goToHomeScreen(context);
-              },
-              icon: const Icon(Icons.arrow_back),
-            ),
-          ),
-          body: TabBarView(
-            children: [
-              (missedActivities.isEmpty)
-                  ? const Center(
-                      child:
-                          Text('No missed Activities are available. its Empty'),
-                    )
-                  : ListView.builder(
-                      itemCount: missedActivities.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        var missedActivity = missedActivities[index];
-                        // FIX: Use safe getter
-                        ActivityTypeModel? missedActivityItemDetail =
-                            getActivityTypeById(missedActivity.activityItemId);
-                        
-                        if (missedActivityItemDetail == null) {
-                          return ListTile(
-                            title: Text('Unknown Activity'),
-                            subtitle: Text('Activity type not found'),
-                          );
-                        }
-
-                        return taskItem(
-                          'missed',
-                          missedActivityItemDetail.activityName,
-                          missedActivity.score ?? '0',
-                          missedActivity,
-                          false,
-                          index,
-                        );
-                      },
-                    ),
-              (todoActivities.isEmpty)
-                  ? Center(
-                      child: Text((todoActivities.isEmpty &&
-                              completedActivities.length ==
-                                  todayActivity.activityItems.length)
-                          ? 'Cool, You are done for the day!'
-                          : 'No Activities are available. its Empty'),
-                    )
-                  : ListView.builder(
-                      itemCount: todoActivities.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        var todoActivity = todoActivities[index];
-                        // FIX: Use safe getter
-                        ActivityTypeModel? todayActivityItemDetail =
-                            getActivityTypeById(todoActivity.activityItemId);
-                        
-                        if (todayActivityItemDetail == null) {
-                          return ListTile(
-                            title: Text('Unknown Activity'),
-                            subtitle: Text('Activity type not found'),
-                          );
-                        }
-
-                        return Dismissible(
-                            key: UniqueKey(),
-                            child: taskItem(
-                                'todo',
-                                todayActivityItemDetail.activityName,
-                                'Swipe left to skip / right to update score',
-                                todoActivity,
-                                false,
-                                index),
-                            confirmDismiss: (direction) async {
-                              if (direction == DismissDirection.startToEnd) {
-                                // Update Box with 0 as score.
-                                // return true;
-                                return await showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(25),
-                                      topRight: Radius.circular(25),
-                                    ),
-                                  ),
-                                  builder: (context) =>
-                                      DraggableScrollableSheet(
-                                          initialChildSize: 0.90,
-                                          maxChildSize: 0.97,
-                                          minChildSize: 0.85,
-                                          expand: false,
-                                          builder: (context, scrollController) {
-                                            return SingleChildScrollView(
-                                              controller: scrollController,
-                                              child: Padding(
-                                                padding: MediaQuery.of(context)
-                                                    .viewInsets,
-                                                child: getUpdateActivityForm(
-                                                    context, todoActivity),
-                                              ),
-                                            );
-                                          }),
-                                );
-                              } else if (direction ==
-                                  DismissDirection.endToStart) {
-                                var updatedMissedActivity = ActivityItem(
-                                    todoActivity.activityItemId, '0');
-                                var activityItemIndex = todayActivity
-                                    .activityItems
-                                    .indexWhere((element) =>
-                                        element.activityItemId ==
-                                        todoActivity.activityItemId);
-
-                                if (todayActivity.isInBox) {
-                                  todayActivity.activityItems.setAll(
-                                      activityItemIndex,
-                                      [updatedMissedActivity]);
-                                  await todayActivity.save();
-                                }
-
-                                // ✅ UPDATE ONGOING NOTIFICATION
-                                await _updateOngoingNotification();
-
-                                // Update Box with score.
-                                splitActivitiesForTabs();
-                                setState(() {});
-                                return true;
-                              }
-                            },
-                            onDismissed: (direction) {
-                              var textMessage = 'not set';
-
-                              switch (direction) {
-                                case DismissDirection.startToEnd:
-                                  textMessage = 'right';
-                                  break;
-                                case DismissDirection.endToStart:
-                                  textMessage = 'left';
-                                  break;
-                                default:
-                                  textMessage = 'default';
-                                  break;
-                              }
-                              if (textMessage != '') {
-                                String toastMessage = '';
-                                if (textMessage == 'right') {
-                                  toastMessage =
-                                      'Activity completed successfully with specified Score.';
-                                } else {
-                                  toastMessage =
-                                      'Activity marked as missed successfully.';
-                                }
-                                showToastMessage(context, toastMessage);
-                              }
-                            });
-                      },
-                    ),
-              (completedActivities.isEmpty)
-                  ? const Center(
-                      child: Text(
-                          'No Completed Activities are available. its Empty'),
-                    )
-                  : ListView.builder(
-                      itemCount: completedActivities.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        var completedActivity =
-                            completedActivities[index];
-                        // FIX: Use safe getter
-                        ActivityTypeModel? completedActivityItemDetail =
-                            getActivityTypeById(completedActivity.activityItemId);
-                        
-                        if (completedActivityItemDetail == null) {
-                          return ListTile(
-                            title: Text('Unknown Activity'),
-                            subtitle: Text('Activity type not found'),
-                          );
-                        }
-
-                        return taskItem(
-                          'completed',
-                          completedActivityItemDetail.activityName,
-                          completedActivity.score,
-                          completedActivity,
-                          false,
-                          index,
-                        );
-                      },
-                    )
-            ],
-          ),
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: customAppBar(
+          title: 'Goals',
+          actions: [
+            settingsLinkIconButton(context),
+          ],
         ),
+        body: ValueListenableBuilder(
+          valueListenable: rewardsBox.listenable(),
+          builder: (context, Box box, widget) {
+            if (box.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.flag_outlined,
+                      size: 80,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No goals yet',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Create your first goal to get started',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return ListView.builder(
+                itemCount: rewardsBox.length,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  var currentBox = rewardsBox;
+                  RewardsModel rewardsData = currentBox.getAt(index)!;
+                  String statusText = getGoalStatusText(rewardsData);
+                  Color statusColor = getGoalStatusColor(rewardsData);
+                  String progressText = _getProgressText(rewardsData);
+                  bool hasWon = getGoalResult(rewardsData).isNotEmpty;
+
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 6,
+                    ),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: Colors.grey[200]!,
+                        width: 1,
+                      ),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        goToGoalStatusScreenWithId(
+                          context,
+                          rewardsData.rewardId ?? '',
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            // Goal Image/Icon
+                            _buildGoalImage(rewardsData, statusColor),
+                            
+                            const SizedBox(width: 12),
+                            
+                            // Content
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Title and Status
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          rewardsData.title,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: statusColor.withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: statusColor.withOpacity(0.4),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          statusText,
+                                          style: TextStyle(
+                                            color: statusColor,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  
+                                  const SizedBox(height: 6),
+                                  
+                                  // Date Range
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today,
+                                        size: 13,
+                                        color: Colors.grey[600],
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${rewardsData.startPeriod} - ${rewardsData.endPeriod}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  
+                                  const SizedBox(height: 4),
+                                  
+                                  // Progress/Result
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        hasWon 
+                                          ? Icons.emoji_events 
+                                          : (isGoalActive(rewardsData) 
+                                              ? Icons.trending_up 
+                                              : Icons.schedule),
+                                        size: 13,
+                                        color: hasWon 
+                                          ? Colors.amber[700]
+                                          : Colors.grey[600],
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          progressText,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: hasWon 
+                                              ? Colors.amber[800]
+                                              : Colors.grey[600],
+                                            fontWeight: hasWon 
+                                              ? FontWeight.w600 
+                                              : FontWeight.normal,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  
+                                  const SizedBox(height: 6),
+                                  
+                                  // Prizes
+                                  Row(
+                                    children: [
+                                      if (rewardsData.firstPrice.isNotEmpty) ...[
+                                        const Text(
+                                          '🥇',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Flexible(
+                                          child: Text(
+                                            getPrize(rewardsData.firstPrice),
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[700],
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                      if (rewardsData.firstPrice.isNotEmpty && 
+                                          rewardsData.secondPrice.isNotEmpty) ...[
+                                        Text(
+                                          ' • ',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey[400],
+                                          ),
+                                        ),
+                                      ],
+                                      if (rewardsData.secondPrice.isNotEmpty) ...[
+                                        const Text(
+                                          '🥈',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Flexible(
+                                          child: Text(
+                                            getPrize(rewardsData.secondPrice),
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[700],
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            
+                            // Arrow
+                            Icon(
+                              Icons.chevron_right,
+                              color: Colors.grey[400],
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        ),
+        floatingActionButton: getFloatingButton(context),
+        bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
       onPopInvokedWithResult: (bool didPop, dynamic result) {
-        goToHomeScreen(context);
+        // If the system already handled the pop, do nothing
+        if (didPop) return;
+        Navigator.pop(context);
         return;
-      },
-    );
-  }
-
-  Widget taskItem(String taskType, String taskName, String? mark,
-      ActivityItem selectActivity, bool isSelected, int index) {
-    var enabled = true;
-    IconData taskIcon = Icons.content_paste;
-    dynamic taskScore = '';
-
-    if (taskType == 'missed') {
-      taskIcon = Icons.content_paste_off;
-      taskScore = 'You missed this task';
-    } else if (taskType == 'todo') {
-      taskScore = mark;
-    } else if (taskType == 'completed') {
-      taskIcon = Icons.assignment_turned_in_outlined;
-      String activityItemId = selectActivity.activityItemId;
-      if (mark != '' && activityItemId.isNotEmpty) {
-        // FIX: Use safe getter
-        ActivityTypeModel? activityTypeDetails =
-            getActivityTypeById(activityItemId);
-        if (activityTypeDetails != null) {
-          taskScore = 'You scored $mark out of ${activityTypeDetails.fullScore}';
-        } else {
-          taskScore = 'Score: $mark';
-        }
-      }
-    }
-
-    Widget subtitle = Text(taskScore);
-
-    return ListTile(
-      enabled: enabled,
-      leading: CircleAvatar(
-        backgroundColor: lightGreenColor,
-        child: Icon(
-          taskIcon,
-          color: iconColor,
-        ),
-      ),
-      title: Text(
-        taskName,
-        style: const TextStyle(
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      subtitle: subtitle,
-      onTap: () async {
-        return await showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(30),
-            ),
-          ),
-          builder: (context) => DraggableScrollableSheet(
-              initialChildSize: 0.85,
-              maxChildSize: 0.95,
-              minChildSize: 0.80,
-              expand: false,
-              builder: (context, scrollController) {
-                return SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: MediaQuery.of(context).viewInsets,
-                    child: getUpdateActivityForm(context, selectActivity),
-                  ),
-                );
-              }),
-        );
       },
     );
   }
