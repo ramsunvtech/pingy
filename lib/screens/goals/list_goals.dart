@@ -57,8 +57,8 @@ class _GoalListScreenState extends State<GoalListScreen> {
   }
 
   String getGoalResult(RewardsModel rewardDetails) {
-    if (rewardDetails.won != '') {
-      return rewardDetails.won;
+    if (rewardDetails.won != null && rewardDetails.won != '') {
+      return rewardDetails.won!;
     }
     return '';
   }
@@ -165,8 +165,8 @@ class _GoalListScreenState extends State<GoalListScreen> {
 
   String _getProgressText(RewardsModel goal) {
     if (isGoalEnded(goal)) {
-      if (goal.won != '') {
-        return goal.won;
+      if (goal.won != null && goal.won != '') {
+        return goal.won!;
       }
       return 'Goal period ended';
     }
@@ -348,6 +348,60 @@ class _GoalListScreenState extends State<GoalListScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Goal Image (if exists)
+                              if (rewardsData.rewardPicture != null && 
+                                  rewardsData.rewardPicture != '') ...[
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    topRight: Radius.circular(16),
+                                  ),
+                                  child: Image.network(
+                                    rewardsData.rewardPicture!,
+                                    width: double.infinity,
+                                    height: 180,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: double.infinity,
+                                        height: 180,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              statusColor.withOpacity(0.1),
+                                              statusColor.withOpacity(0.05),
+                                            ],
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.image_not_supported_rounded,
+                                          size: 48,
+                                          color: Colors.grey[400],
+                                        ),
+                                      );
+                                    },
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        width: double.infinity,
+                                        height: 180,
+                                        color: Colors.grey[100],
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded /
+                                                    loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                              
                               // Header with status badge
                               Padding(
                                 padding: const EdgeInsets.all(16),
@@ -453,27 +507,146 @@ class _GoalListScreenState extends State<GoalListScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     
-                                    // Progress text
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          isGoalEnded(rewardsData) 
-                                            ? Icons.check_circle_outline_rounded
-                                            : Icons.timer_outlined,
-                                          size: 16,
-                                          color: Colors.grey[600],
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          _getProgressText(rewardsData),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[700],
-                                            fontWeight: FontWeight.w500,
+                                    // Progress or Result
+                                    if (isGoalActive(rewardsData)) ...[
+                                      // Active goal - show progress
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: statusColor.withOpacity(0.08),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: statusColor.withOpacity(0.2),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(6),
+                                              decoration: BoxDecoration(
+                                                color: statusColor.withOpacity(0.15),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.trending_up_rounded,
+                                                size: 16,
+                                                color: statusColor,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Goal in Progress',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: statusColor,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    _getProgressText(rewardsData),
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey[700],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ] else if (isGoalEnded(rewardsData) && 
+                                               getGoalResult(rewardsData).isNotEmpty) ...[
+                                      // Completed goal with result
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Colors.amber.withOpacity(0.1),
+                                              Colors.orange.withOpacity(0.05),
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: Colors.amber.withOpacity(0.3),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(6),
+                                              decoration: BoxDecoration(
+                                                color: Colors.amber.withOpacity(0.2),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.emoji_events_rounded,
+                                                size: 20,
+                                                color: Colors.amber[800],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Achievement Unlocked!',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.amber[900],
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    getGoalResult(rewardsData),
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.amber[800],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Icon(
+                                              Icons.celebration_rounded,
+                                              color: Colors.amber[700],
+                                              size: 24,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ] else ...[
+                                      // Upcoming or ended without result
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            isGoalEnded(rewardsData) 
+                                              ? Icons.check_circle_outline_rounded
+                                              : Icons.timer_outlined,
+                                            size: 16,
+                                            color: Colors.grey[600],
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            _getProgressText(rewardsData),
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[700],
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                     
                                     const SizedBox(height: 16),
                                     
@@ -510,42 +683,6 @@ class _GoalListScreenState extends State<GoalListScreen> {
                                         ),
                                       ],
                                     ),
-                                    
-                                    // Goal result if exists
-                                    if (getGoalResult(rewardsData).isNotEmpty) ...[
-                                      const SizedBox(height: 16),
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green.withOpacity(0.08),
-                                          borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(
-                                            color: Colors.green.withOpacity(0.2),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.celebration_rounded,
-                                              size: 18,
-                                              color: Colors.green[700],
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                getGoalResult(rewardsData),
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.green[800],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
                                   ],
                                 ),
                               ),
