@@ -41,7 +41,14 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    try {
+      _loadData();
+    } catch (e, stackTrace) {
+      debugPrint('=== CRASH IN GoalStatusScreen ===');
+      debugPrint('Error: $e');
+      debugPrint('Stack: $stackTrace');
+      rethrow;
+    }
   }
 
   void _loadData() {
@@ -272,7 +279,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
         }
 
         double avgScore = daysTracked > 0 ? totalPoints / daysTracked : 0;
-        double percentage = maxPossible > 0 ? (avgScore / maxPossible) * 100 : 0;
+        double percentage =
+            maxPossible > 0 ? (avgScore / maxPossible) * 100 : 0;
 
         activityStats[typeKey.toString()] = ActivityTypeStats(
           name: activityType.activityName ?? 'Unknown',
@@ -351,7 +359,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -383,7 +392,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
             const Divider(height: 24),
             _buildStatRow('Days Completed', '$daysCompleted / $totalDays'),
             _buildStatRow('Days Remaining', '$daysRemaining'),
-            _buildStatRow('Average Score', '${averageScore.toStringAsFixed(1)}%'),
+            _buildStatRow(
+                'Average Score', '${averageScore.toStringAsFixed(1)}%'),
             _buildStatRow('Cumulative Score', '$totalScore'),
             const SizedBox(height: 16),
             if (isGoalEnded)
@@ -460,7 +470,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                   children: [
                     const Text(
                       'Current Standing',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                     ),
                     Text(
                       currentPrize,
@@ -606,7 +617,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
               Expanded(
                 child: Text(
                   stats.name,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
               Text(
@@ -623,7 +635,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
-              value: (stats.percentage / 100).clamp(0.0, 1.0), // FIX 9: clamp to prevent assertion error
+              value: (stats.percentage / 100)
+                  .clamp(0.0, 1.0), // FIX 9: clamp to prevent assertion error
               minHeight: 18,
               backgroundColor: Colors.grey[200],
               valueColor: AlwaysStoppedAnimation<Color>(statusColor),
@@ -677,7 +690,8 @@ class _GoalStatusScreenState extends State<GoalStatusScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.flag_outlined, size: 80, color: Colors.grey[400]),
+                    Icon(Icons.flag_outlined,
+                        size: 80, color: Colors.grey[400]),
                     const SizedBox(height: 16),
                     Text(
                       'No goal found',
