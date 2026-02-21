@@ -13,174 +13,154 @@ class GoalListScreen extends StatefulWidget {
 }
 
 class _GoalListScreenState extends State<GoalListScreen> {
-  late final Box rewardsBox;
+  late final Box _rewardsBox;
 
   @override
   void initState() {
     super.initState();
-    // Get reference to an already opened box
-    rewardsBox = Hive.box('rewards');
+    _rewardsBox = Hive.box('rewards');
   }
 
-  Widget getFloatingButton(BuildContext context) {
-    if (rewardsBox.isEmpty) {
-      return FloatingActionButton(
-        onPressed: () {
-          goToGoalsForm(context);
-        },
-        backgroundColor: Colors.lightGreen,
-        child: const Icon(Icons.add),
-      );
-    } else if (rewardsBox.isNotEmpty) {
-      RewardsModel latestGoal = rewardsBox.values.last;
-      List endPeriod = latestGoal.endPeriod.split('/').toList();
+  // ─── Date parsing ────────────────────────────────────────────────────────────
 
-      DateTime today = DateTime.now();
-      DateTime endDate =
-          DateTime.parse('${endPeriod[2]}-${endPeriod[1]}-${endPeriod[0]}');
-      Duration diff = endDate.difference(today);
-
-      if (diff.inDays > 0) {
-        return Container();
-      }
+  /// Parses dd/MM/yyyy. Throws FormatException on bad input.
+  DateTime _parseDate(String date) {
+    final parts = date.split('/');
+    if (parts.length != 3) {
+      throw FormatException('Expected dd/MM/yyyy, got: $date');
     }
+    return DateTime(
+      int.parse(parts[2]), // year
+      int.parse(parts[1]), // month
+      int.parse(parts[0]), // day
+    );
+  }
 
+  // ─── FAB ─────────────────────────────────────────────────────────────────────
+
+  Widget _buildFloatingButton(BuildContext context) {
+    try {
+      if (_rewardsBox.isEmpty) {
+        return _addFab(context);
+      }
+
+      // Safe cast — the box is untyped so we must check
+      final latest = _rewardsBox.values.last;
+      if (latest is! RewardsModel) return _addFab(context);
+
+      final end = _parseDate(latest.endPeriod);
+      final today = DateTime.now();
+
+      // Still within the current goal period — hide FAB
+      if (end.difference(DateTime(today.year, today.month, today.day)).inDays > 0) {
+        return const SizedBox.shrink();
+      }
+
+      return _addFab(context);
+    } catch (e) {
+      debugPrint('[GoalListScreen] _buildFloatingButton error: $e');
+      return _addFab(context);
+    }
+  }
+
+  FloatingActionButton _addFab(BuildContext context) {
     return FloatingActionButton(
-      onPressed: () {
-        goToGoalsForm(context);
-      },
+      onPressed: () => goToGoalsForm(context),
       backgroundColor: Colors.lightGreen,
       child: const Icon(Icons.add),
     );
   }
 
-  String getPrize(String? prize) {
-    if (prize == null || prize.isEmpty) return 'Not set';
-    return prize;
-  }
+  // ─── Goal helpers ─────────────────────────────────────────────────────────────
 
-  String getGoalResult(RewardsModel rewardDetails) {
-    if (rewardDetails.won != null && rewardDetails.won!.isNotEmpty) {
-      return rewardDetails.won!;
-    }
-    return '';
-  }
+  String _getPrize(String? prize) =>
+      (prize == null || prize.isEmpty) ? 'Not set' : prize;
 
-  bool hasImage(RewardsModel rewardDetails) {
-    return rewardDetails.rewardPicture != null && 
-           rewardDetails.rewardPicture!.isNotEmpty;
-  }
+  String _getGoalResult(RewardsModel goal) =>
+      (goal.won != null && goal.won!.isNotEmpty) ? goal.won! : '';
 
-  bool isGoalActive(RewardsModel goal) {
+  bool _hasImage(RewardsModel goal) =>
+      goal.rewardPicture != null && goal.rewardPicture!.isNotEmpty;
+
+  bool _isGoalActive(RewardsModel goal) {
     try {
-      final today = DateTime.now();
-      final normalizedToday = DateTime(today.year, today.month, today.day);
-
-      final start = _parseDate(goal.startPeriod);
-      final end = _parseDate(goal.endPeriod);
-
-      return !normalizedToday.isBefore(start) && !normalizedToday.isAfter(end);
-    } catch (e) {
+      final today =
+          DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      return !today.isBefore(_parseDate(goal.startPeriod)) &&
+          !today.isAfter(_parseDate(goal.endPeriod));
+    } catch (_) {
       return false;
     }
   }
 
-  bool isGoalEnded(RewardsModel goal) {
+  bool _isGoalEnded(RewardsModel goal) {
     try {
-      final today = DateTime.now();
-      final normalizedToday = DateTime(today.year, today.month, today.day);
-      final end = _parseDate(goal.endPeriod);
-      return normalizedToday.isAfter(end);
-    } catch (e) {
+      final today =
+          DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      return today.isAfter(_parseDate(goal.endPeriod));
+    } catch (_) {
       return false;
     }
   }
 
-  DateTime _parseDate(String date) {
-    final parts = date.split('/');
-    final day = int.parse(parts[0]);
-    final month = int.parse(parts[1]);
-    final year = int.parse(parts[2]);
-    return DateTime(year, month, day);
+  String _statusText(RewardsModel goal) {
+    if (_isGoalActive(goal)) return 'Active';
+    if (_isGoalEnded(goal)) return 'Completed';
+    return 'Upcoming';
   }
 
-  String getGoalStatusText(RewardsModel goal) {
-    if (isGoalActive(goal)) {
-      return 'Active';
-    } else if (isGoalEnded(goal)) {
-      return 'Completed';
-    } else {
-      return 'Upcoming';
-    }
+  IconData _statusIcon(RewardsModel goal) {
+    if (_isGoalActive(goal)) return Icons.timer;
+    if (_isGoalEnded(goal)) return Icons.check_circle;
+    return Icons.schedule;
   }
 
-  IconData getGoalStatusIcon(RewardsModel goal) {
-    if (isGoalActive(goal)) {
-      return Icons.timer;
-    } else if (isGoalEnded(goal)) {
-      return Icons.check_circle;
-    } else {
-      return Icons.schedule;
-    }
+  Color _statusColor(RewardsModel goal) {
+    if (_isGoalActive(goal)) return Colors.green;
+    if (_isGoalEnded(goal)) return Colors.blue;
+    return Colors.orange;
   }
 
-  Color getGoalStatusColor(RewardsModel goal) {
-    if (isGoalActive(goal)) {
-      return Colors.green;
-    } else if (isGoalEnded(goal)) {
-      return Colors.blue;
-    } else {
-      return Colors.orange;
-    }
-  }
-
-  int _getRemainingDays(RewardsModel goal) {
+  int _remainingDays(RewardsModel goal) {
     try {
-      final today = DateTime.now();
-      final normalizedToday = DateTime(today.year, today.month, today.day);
-      final end = _parseDate(goal.endPeriod);
-      return end.difference(normalizedToday).inDays;
-    } catch (e) {
+      final today =
+          DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      return _parseDate(goal.endPeriod).difference(today).inDays;
+    } catch (_) {
       return 0;
     }
   }
 
-  String _getProgressText(RewardsModel goal) {
-    if (isGoalEnded(goal)) {
-      final result = getGoalResult(goal);
-      if (result.isNotEmpty) {
-        return result;
-      }
-      return 'Goal ended';
+  String _progressText(RewardsModel goal) {
+    if (_isGoalEnded(goal)) {
+      final result = _getGoalResult(goal);
+      return result.isNotEmpty ? result : 'Goal ended';
     }
-    
-    if (isGoalActive(goal)) {
-      final remaining = _getRemainingDays(goal);
-      if (remaining == 0) {
-        return 'Last day!';
-      } else if (remaining == 1) {
-        return '1 day left';
-      } else {
-        return '$remaining days left';
-      }
+
+    if (_isGoalActive(goal)) {
+      final remaining = _remainingDays(goal);
+      if (remaining == 0) return 'Last day!';
+      if (remaining == 1) return '1 day left';
+      return '$remaining days left';
     }
-    
+
     // Upcoming
-    final start = _parseDate(goal.startPeriod);
-    final today = DateTime.now();
-    final daysUntilStart = start.difference(DateTime(today.year, today.month, today.day)).inDays;
-    
-    if (daysUntilStart == 0) {
-      return 'Starts today';
-    } else if (daysUntilStart == 1) {
-      return 'Starts tomorrow';
-    } else {
-      return 'Starts in $daysUntilStart days';
+    try {
+      final today =
+          DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      final daysUntil = _parseDate(goal.startPeriod).difference(today).inDays;
+      if (daysUntil == 0) return 'Starts today';
+      if (daysUntil == 1) return 'Starts tomorrow';
+      return 'Starts in $daysUntil days';
+    } catch (_) {
+      return 'Upcoming';
     }
   }
 
+  // ─── Widgets ──────────────────────────────────────────────────────────────────
+
   Widget _buildGoalImage(RewardsModel goal, Color statusColor) {
-    if (!hasImage(goal)) {
+    if (!_hasImage(goal)) {
       return Container(
         width: 56,
         height: 56,
@@ -188,11 +168,7 @@ class _GoalListScreenState extends State<GoalListScreen> {
           color: statusColor.withOpacity(0.15),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          getGoalStatusIcon(goal),
-          color: statusColor,
-          size: 28,
-        ),
+        child: Icon(_statusIcon(goal), color: statusColor, size: 28),
       );
     }
 
@@ -201,10 +177,7 @@ class _GoalListScreenState extends State<GoalListScreen> {
       height: 56,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(
-          color: statusColor.withOpacity(0.3),
-          width: 2,
-        ),
+        border: Border.all(color: statusColor.withOpacity(0.3), width: 2),
       ),
       child: ClipOval(
         child: Image.network(
@@ -212,18 +185,12 @@ class _GoalListScreenState extends State<GoalListScreen> {
           width: 56,
           height: 56,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: statusColor.withOpacity(0.15),
-              child: Icon(
-                getGoalStatusIcon(goal),
-                color: statusColor,
-                size: 28,
-              ),
-            );
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
+          errorBuilder: (_, __, ___) => Container(
+            color: statusColor.withOpacity(0.15),
+            child: Icon(_statusIcon(goal), color: statusColor, size: 28),
+          ),
+          loadingBuilder: (_, child, progress) {
+            if (progress == null) return child;
             return Container(
               color: Colors.grey[100],
               child: Center(
@@ -232,9 +199,9 @@ class _GoalListScreenState extends State<GoalListScreen> {
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
+                    value: progress.expectedTotalBytes != null
+                        ? progress.cumulativeBytesLoaded /
+                            progress.expectedTotalBytes!
                         : null,
                   ),
                 ),
@@ -246,278 +213,228 @@ class _GoalListScreenState extends State<GoalListScreen> {
     );
   }
 
+  Widget _buildGoalCard(BuildContext context, RewardsModel goal, Color statusColor) {
+    final hasWon = _getGoalResult(goal).isNotEmpty;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey[200]!, width: 1),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => goToGoalStatusScreenWithId(
+          context,
+          goal.rewardId ?? '',
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              _buildGoalImage(goal, statusColor),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title + status badge
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            goal.title,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 16),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                                color: statusColor.withOpacity(0.4), width: 1),
+                          ),
+                          child: Text(
+                            _statusText(goal),
+                            style: TextStyle(
+                                color: statusColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Date range
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today,
+                            size: 13, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${goal.startPeriod} - ${goal.endPeriod}',
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    // Progress
+                    Row(
+                      children: [
+                        Icon(
+                          hasWon
+                              ? Icons.emoji_events
+                              : (_isGoalActive(goal)
+                                  ? Icons.trending_up
+                                  : Icons.schedule),
+                          size: 13,
+                          color: hasWon
+                              ? Colors.amber[700]
+                              : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            _progressText(goal),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: hasWon
+                                  ? Colors.amber[800]
+                                  : Colors.grey[600],
+                              fontWeight: hasWon
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Prizes
+                    Row(
+                      children: [
+                        if (goal.firstPrice.isNotEmpty) ...[
+                          const Text('🥇',
+                              style: TextStyle(fontSize: 12)),
+                          const SizedBox(width: 2),
+                          Flexible(
+                            child: Text(
+                              _getPrize(goal.firstPrice),
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[700]),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                        if (goal.firstPrice.isNotEmpty &&
+                            goal.secondPrice.isNotEmpty)
+                          Text(' • ',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[400])),
+                        if (goal.secondPrice.isNotEmpty) ...[
+                          const Text('🥈',
+                              style: TextStyle(fontSize: 12)),
+                          const SizedBox(width: 2),
+                          Flexible(
+                            child: Text(
+                              _getPrize(goal.secondPrice),
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[700]),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right,
+                  color: Colors.grey[400], size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Build ───────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: true,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (didPop) return;
+        Navigator.pop(context);
+      },
       child: Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: customAppBar(
           title: 'Goals',
-          actions: [
-            settingsLinkIconButton(context),
-          ],
+          actions: [settingsLinkIconButton(context)],
         ),
         body: ValueListenableBuilder(
-          valueListenable: rewardsBox.listenable(),
-          builder: (context, Box box, widget) {
+          valueListenable: _rewardsBox.listenable(),
+          builder: (context, Box box, _) {
             if (box.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.flag_outlined,
-                      size: 80,
-                      color: Colors.grey[400],
-                    ),
+                    Icon(Icons.flag_outlined,
+                        size: 80, color: Colors.grey[400]),
                     const SizedBox(height: 16),
-                    Text(
-                      'No goals yet',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    ),
+                    Text('No goals yet',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700])),
                     const SizedBox(height: 8),
-                    Text(
-                      'Create your first goal to get started',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[500],
-                      ),
-                    ),
+                    Text('Create your first goal to get started',
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.grey[500])),
                   ],
                 ),
               );
-            } else {
-              return ListView.builder(
-                itemCount: rewardsBox.length,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  var currentBox = rewardsBox;
-                  RewardsModel rewardsData = currentBox.getAt(index)!;
-                  String statusText = getGoalStatusText(rewardsData);
-                  Color statusColor = getGoalStatusColor(rewardsData);
-                  String progressText = _getProgressText(rewardsData);
-                  bool hasWon = getGoalResult(rewardsData).isNotEmpty;
-
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 6,
-                    ),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: Colors.grey[200]!,
-                        width: 1,
-                      ),
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () {
-                        goToGoalStatusScreenWithId(
-                          context,
-                          rewardsData.rewardId ?? '',
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            // Goal Image/Icon
-                            _buildGoalImage(rewardsData, statusColor),
-                            
-                            const SizedBox(width: 12),
-                            
-                            // Content
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Title and Status
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          rewardsData.title,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: statusColor.withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(
-                                            color: statusColor.withOpacity(0.4),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          statusText,
-                                          style: TextStyle(
-                                            color: statusColor,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  
-                                  const SizedBox(height: 6),
-                                  
-                                  // Date Range
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today,
-                                        size: 13,
-                                        color: Colors.grey[600],
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${rewardsData.startPeriod} - ${rewardsData.endPeriod}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  
-                                  const SizedBox(height: 4),
-                                  
-                                  // Progress/Result
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        hasWon 
-                                          ? Icons.emoji_events 
-                                          : (isGoalActive(rewardsData) 
-                                              ? Icons.trending_up 
-                                              : Icons.schedule),
-                                        size: 13,
-                                        color: hasWon 
-                                          ? Colors.amber[700]
-                                          : Colors.grey[600],
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          progressText,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: hasWon 
-                                              ? Colors.amber[800]
-                                              : Colors.grey[600],
-                                            fontWeight: hasWon 
-                                              ? FontWeight.w600 
-                                              : FontWeight.normal,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  
-                                  const SizedBox(height: 6),
-                                  
-                                  // Prizes
-                                  Row(
-                                    children: [
-                                      if (rewardsData.firstPrice.isNotEmpty) ...[
-                                        const Text(
-                                          '🥇',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                        const SizedBox(width: 2),
-                                        Flexible(
-                                          child: Text(
-                                            getPrize(rewardsData.firstPrice),
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.grey[700],
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                      if (rewardsData.firstPrice.isNotEmpty && 
-                                          rewardsData.secondPrice.isNotEmpty) ...[
-                                        Text(
-                                          ' • ',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.grey[400],
-                                          ),
-                                        ),
-                                      ],
-                                      if (rewardsData.secondPrice.isNotEmpty) ...[
-                                        const Text(
-                                          '🥈',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                        const SizedBox(width: 2),
-                                        Flexible(
-                                          child: Text(
-                                            getPrize(rewardsData.secondPrice),
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.grey[700],
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            
-                            // Arrow
-                            Icon(
-                              Icons.chevron_right,
-                              color: Colors.grey[400],
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
             }
+
+            return ListView.builder(
+              itemCount: box.length,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 8),
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                // Safe read — getAt can return null on Hive untyped boxes
+                final raw = box.getAt(index);
+                if (raw == null || raw is! RewardsModel) {
+                  return const SizedBox.shrink();
+                }
+                final goal = raw;
+                final color = _statusColor(goal);
+                return _buildGoalCard(context, goal, color);
+              },
+            );
           },
         ),
-        floatingActionButton: getFloatingButton(context),
+        floatingActionButton: _buildFloatingButton(context),
         bottomNavigationBar: settingsBottomNavigationBar(context),
       ),
-      onPopInvokedWithResult: (bool didPop, dynamic result) {
-        // If the system already handled the pop, do nothing
-        if (didPop) return;
-        Navigator.pop(context);
-        return;
-      },
     );
   }
 }
